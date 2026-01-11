@@ -110,11 +110,10 @@ export default async function LocaleLayout({
       <head>
         {/* Google AdSense */}
         <meta name="google-adsense-account" content="ca-pub-4389631952462736" />
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4389631952462736"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
         {/* Umami Analytics */}
         <Script
