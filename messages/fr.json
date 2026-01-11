@@ -175,7 +175,9 @@
     "projectGenerator": "Generateur de Projet",
     "jsonValidator": "Validateur JSON",
     "copyright": "HytaleDocs. Non affilie a Hypixel Studios.",
-    "contribute": "Contribuer"
+    "contribute": "Contribuer",
+    "privacy": "Confidentialite",
+    "terms": "Conditions"
   },
   "tools": {
     "title": "Outils Developpeur",
@@ -289,5 +291,72 @@
     "title": "Soutenez HytaleDocs",
     "message": "Nous avons remarque que vous utilisez un bloqueur de publicites. Les pubs nous aident a garder cette documentation gratuite et a jour. Pensez a le desactiver pour notre site !",
     "dismiss": "J'ai compris"
+  },
+  "privacy": {
+    "title": "Politique de Confidentialite",
+    "lastUpdated": "Derniere mise a jour",
+    "intro": {
+      "title": "Introduction",
+      "content": "HytaleDocs (\"nous\", \"notre\") s'engage a proteger votre vie privee. Cette politique de confidentialite explique comment nous collectons, utilisons et protegeons vos informations lorsque vous visitez notre site hytale-docs.com."
+    },
+    "dataCollection": {
+      "title": "Informations Collectees",
+      "content": "Nous collectons des informations pour fournir et ameliorer nos services :",
+      "item1": "Donnees d'utilisation (pages visitees, temps passe, type de navigateur)",
+      "item2": "Informations sur l'appareil (adresse IP, systeme d'exploitation)",
+      "item3": "Cookies et technologies de suivi similaires"
+    },
+    "cookies": {
+      "title": "Cookies",
+      "content": "Nous utilisons des cookies et technologies similaires pour ameliorer votre experience :",
+      "essential": "Cookies essentiels",
+      "essentialDesc": "Necessaires au bon fonctionnement du site",
+      "analytics": "Cookies analytiques",
+      "analyticsDesc": "Nous aident a comprendre comment les visiteurs interagissent avec notre site",
+      "advertising": "Cookies publicitaires",
+      "advertisingDesc": "Utilises pour afficher des publicites pertinentes"
+    },
+    "thirdParty": {
+      "title": "Services Tiers",
+      "content": "Nous utilisons les services tiers suivants :",
+      "adsense": "Google AdSense affiche des publicites. Google peut utiliser des cookies pour personnaliser les annonces selon votre historique de navigation.",
+      "analytics": "Analytiques respectueux de la vie privee pour comprendre l'utilisation du site sans suivre les donnees personnelles."
+    },
+    "rights": {
+      "title": "Vos Droits",
+      "content": "Vous avez le droit d'acceder, de corriger ou de supprimer vos donnees personnelles. Vous pouvez gerer les preferences de cookies via les parametres de votre navigateur ou notre banniere de consentement."
+    },
+    "contact": {
+      "title": "Nous Contacter",
+      "content": "Si vous avez des questions concernant cette politique de confidentialite, veuillez nous contacter via notre depot GitHub."
+    }
+  },
+  "terms": {
+    "title": "Conditions d'Utilisation",
+    "lastUpdated": "Derniere mise a jour",
+    "acceptance": {
+      "title": "Acceptation des Conditions",
+      "content": "En accedant et en utilisant HytaleDocs, vous acceptez d'etre lie par ces conditions d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre site."
+    },
+    "use": {
+      "title": "Utilisation du Contenu",
+      "content": "Le contenu de HytaleDocs est fourni a des fins d'information et d'education. Vous pouvez utiliser la documentation pour des projets personnels et commerciaux lies au developpement Hytale."
+    },
+    "content": {
+      "title": "Contributions",
+      "content": "Si vous contribuez du contenu a HytaleDocs, vous nous accordez une licence non exclusive pour utiliser, modifier et distribuer vos contributions dans le cadre de la documentation."
+    },
+    "disclaimer": {
+      "title": "Avertissement",
+      "content": "HytaleDocs est fourni \"tel quel\" sans garantie d'aucune sorte. Nous ne garantissons pas l'exactitude, l'exhaustivite ou l'actualite des informations. Hytale est en Early Access et les specifications peuvent changer."
+    },
+    "affiliation": {
+      "title": "Non-Affiliation",
+      "content": "HytaleDocs est un projet communautaire et n'est pas affilie, approuve ou lie a Hypixel Studios ou Riot Games. Hytale est une marque deposee de Hypixel Studios."
+    },
+    "changes": {
+      "title": "Modifications des Conditions",
+      "content": "Nous nous reservons le droit de modifier ces conditions a tout moment. L'utilisation continue du site apres les modifications constitue l'acceptation des nouvelles conditions."
+    }
   }
 }

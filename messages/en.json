@@ -175,7 +175,9 @@
     "projectGenerator": "Project Generator",
     "jsonValidator": "JSON Validator",
     "copyright": "HytaleDocs. Not affiliated with Hypixel Studios.",
-    "contribute": "Contribute"
+    "contribute": "Contribute",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "tools": {
     "title": "Developer Tools",
@@ -289,5 +291,72 @@
     "title": "Support HytaleDocs",
     "message": "We noticed you're using an ad blocker. Ads help us keep this documentation free and updated. Consider disabling it for our site!",
     "dismiss": "I understand"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "intro": {
+      "title": "Introduction",
+      "content": "HytaleDocs (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website hytale-docs.com."
+    },
+    "dataCollection": {
+      "title": "Information We Collect",
+      "content": "We collect information to provide and improve our services:",
+      "item1": "Usage data (pages visited, time spent, browser type)",
+      "item2": "Device information (IP address, operating system)",
+      "item3": "Cookies and similar tracking technologies"
+    },
+    "cookies": {
+      "title": "Cookies",
+      "content": "We use cookies and similar technologies to enhance your experience:",
+      "essential": "Essential cookies",
+      "essentialDesc": "Required for the website to function properly",
+      "analytics": "Analytics cookies",
+      "analyticsDesc": "Help us understand how visitors interact with our website",
+      "advertising": "Advertising cookies",
+      "advertisingDesc": "Used to display relevant advertisements"
+    },
+    "thirdParty": {
+      "title": "Third-Party Services",
+      "content": "We use the following third-party services:",
+      "adsense": "Google AdSense displays advertisements. Google may use cookies to personalize ads based on your browsing history.",
+      "analytics": "Privacy-focused analytics to understand site usage without tracking personal data."
+    },
+    "rights": {
+      "title": "Your Rights",
+      "content": "You have the right to access, correct, or delete your personal data. You can manage cookie preferences through your browser settings or our cookie consent banner."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "content": "If you have questions about this Privacy Policy, please contact us through our GitHub repository."
+    }
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "lastUpdated": "Last updated",
+    "acceptance": {
+      "title": "Acceptance of Terms",
+      "content": "By accessing and using HytaleDocs, you accept and agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use our website."
+    },
+    "use": {
+      "title": "Use of Content",
+      "content": "The content on HytaleDocs is provided for informational and educational purposes. You may use the documentation for personal and commercial projects related to Hytale development."
+    },
+    "content": {
+      "title": "User Contributions",
+      "content": "If you contribute content to HytaleDocs, you grant us a non-exclusive license to use, modify, and distribute your contributions as part of the documentation."
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "content": "HytaleDocs is provided \"as is\" without warranties of any kind. We do not guarantee the accuracy, completeness, or timeliness of the information. Hytale is in Early Access and specifications may change."
+    },
+    "affiliation": {
+      "title": "No Affiliation",
+      "content": "HytaleDocs is a community project and is not affiliated with, endorsed by, or connected to Hypixel Studios or Riot Games. Hytale is a trademark of Hypixel Studios."
+    },
+    "changes": {
+      "title": "Changes to Terms",
+      "content": "We reserve the right to modify these terms at any time. Continued use of the website after changes constitutes acceptance of the new terms."
+    }
   }
 }

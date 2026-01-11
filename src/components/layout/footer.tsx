@@ -139,19 +139,23 @@ export function Footer() {
             </p>
             <div className="flex gap-6">
               <Link
+                href="/privacy"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t("privacy")}
+              </Link>
+              <Link
+                href="/terms"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t("terms")}
+              </Link>
+              <Link
                 href="/docs/community/contributing"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {t("contribute")}
               </Link>
-              <a
-                href="https://hytale.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                hytale.com
-              </a>
             </div>
           </div>
         </div>
