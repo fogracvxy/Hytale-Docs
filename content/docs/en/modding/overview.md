@@ -142,8 +142,58 @@ Based on the official [Modding Strategy blog post](https://hytale.com/news/2025/
 
 - **Server source code** (1-2 months post-launch) - will be fully open source
 - **Visual scripting system** - node-based logic inspired by Unreal Blueprints
-- **World Generation V2** - visual node editor for biomes ([Source](https://hytale.com/news/2026/1/the-future-of-world-generation))
 - Complete GitBook documentation
+
+## World Generation V2
+
+A major new system in development since 2021:
+
+> "This new approach to world generation will redefine the block-game genre."
+> — Simon Collins-Laflamme, CEO
+
+### Visual Node Editor
+
+- **No-code editing** - Create biomes without programming
+- Similar to Unreal Engine 5 Blueprints
+- Live hot-reload - see changes instantly
+- Connect nodes to define terrain, biomes, features
+
+### V2 APIs for Modders
+
+- **Automatic multithreading** - optimized performance
+- **Full read access** to surrounding world context
+- Mods work automatically with the node editor
+- Seamless integration with vanilla and other mods
+
+### Current Status
+
+| Version | Status |
+|---------|--------|
+| **V1** | Available at launch (Exploration mode) |
+| **V2** | In construction, accessible via Gateways |
+
+V2 will completely replace V1 once complete.
+
+[Read more →](https://hytale.com/news/2026/1/the-future-of-world-generation)
+
+## Monetization for Modders
+
+Hypixel Studios offers generous terms for creators:
+
+| Period | Commission |
+|--------|------------|
+| **First 2 years** | **0%** (no commission) |
+| **After 2 years** | Maximum **20%** |
+
+### What You Can Sell
+
+- Visual mods (furniture, pets, hats, avatar cosmetics)
+- Server-exclusive cosmetics
+- Cosmetic replacements matching your server theme
+
+:::note
+Mod cosmetics are not official content. Players must have the mod installed to see them.
+:::
 
 ### Known Limitations (Early Access)
 
