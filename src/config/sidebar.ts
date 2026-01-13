@@ -10,6 +10,11 @@ export const sidebarConfig: SidebarItem[] = [
     titleKey: "playerGuide",
     items: [
       { titleKey: "overview", href: "/docs/gameplay/overview" },
+      { titleKey: "beginnersGuide", href: "/docs/guides/beginners-guide" },
+      { titleKey: "faq", href: "/docs/getting-started/faq" },
+      { titleKey: "systemRequirements", href: "/docs/getting-started/system-requirements" },
+      { titleKey: "hytaleVsMinecraft", href: "/docs/getting-started/hytale-vs-minecraft" },
+      { titleKey: "knownIssues", href: "/docs/getting-started/known-issues" },
       {
         titleKey: "gettingStarted",
         items: [
@@ -22,6 +27,7 @@ export const sidebarConfig: SidebarItem[] = [
         titleKey: "theWorld",
         items: [
           { titleKey: "overview", href: "/docs/gameplay/world/overview" },
+          { titleKey: "worldZones", href: "/docs/gameplay/world-zones" },
           { titleKey: "regions", href: "/docs/gameplay/world/regions" },
         ],
       },
@@ -40,6 +46,14 @@ export const sidebarConfig: SidebarItem[] = [
           { titleKey: "hostileCreatures", href: "/docs/gameplay/creatures/hostile" },
         ],
       },
+      {
+        titleKey: "crafting",
+        items: [
+          { titleKey: "craftingGuide", href: "/docs/gameplay/crafting-guide" },
+          { titleKey: "itemsDatabase", href: "/docs/gameplay/items-database" },
+        ],
+      },
+      { titleKey: "performanceOptimization", href: "/docs/guides/performance-optimization" },
     ],
   },
   {
@@ -52,6 +66,7 @@ export const sidebarConfig: SidebarItem[] = [
         href: "/docs/getting-started/environment-setup",
       },
       { titleKey: "firstMod", href: "/docs/getting-started/first-mod" },
+      { titleKey: "firstModQuick", href: "/docs/guides/first-mod-quick" },
     ],
   },
   {
@@ -134,6 +149,7 @@ export const sidebarConfig: SidebarItem[] = [
         titleKey: "hosting",
         items: [
           { titleKey: "selfHosting", href: "/docs/servers/hosting/self-hosting" },
+          { titleKey: "budgetHosting", href: "/docs/servers/budget-hosting" },
           { titleKey: "docker", href: "/docs/servers/hosting/docker" },
           { titleKey: "cloudProviders", href: "/docs/servers/hosting/providers" },
         ],
@@ -199,6 +215,11 @@ export const sidebarConfig: SidebarItem[] = [
       { titleKey: "contributing", href: "/docs/community/contributing" },
       { titleKey: "codeOfConduct", href: "/docs/community/code-of-conduct" },
       { titleKey: "resources", href: "/docs/community/resources" },
+      { titleKey: "mods", href: "/docs/community/mods" },
+      { titleKey: "communityServers", href: "/docs/community/servers" },
+      { titleKey: "contentCreators", href: "/docs/community/content-creators" },
+      { titleKey: "buildsGallery", href: "/docs/community/builds-gallery" },
+      { titleKey: "events", href: "/docs/community/events" },
     ],
   },
 ];
