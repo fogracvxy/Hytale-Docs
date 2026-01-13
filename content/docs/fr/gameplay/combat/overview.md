@@ -189,7 +189,6 @@ Les patterns d'ennemis sont **lisibles mais exigeants** :
 
 - [Armes](/docs/gameplay/combat/weapons)
 - [Magie](/docs/gameplay/combat/magic)
-- [Équipement](/docs/gameplay/combat/equipment)
 - [Créatures Hostiles](/docs/gameplay/creatures/hostile)
 
 ---

@@ -145,8 +145,7 @@ Orbis possède :
 ## Voir Aussi
 
 - [Zones](/docs/gameplay/world/regions)
-- [Biomes](/docs/gameplay/world/biomes)
-- [Donjons](/docs/gameplay/world/dungeons)
+- [Créatures](/docs/gameplay/creatures/overview)
 
 ---
 

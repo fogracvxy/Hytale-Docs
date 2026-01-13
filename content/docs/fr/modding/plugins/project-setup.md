@@ -8,7 +8,7 @@ description: Guide complet pour configurer un projet de plugin Java Hytale avec 
 
 # Configuration du Projet de Plugin
 
-Apprenez à créer un projet de plugin Hytale correctement structuré en utilisant Gradle et Java 21.
+Apprenez à créer un projet de plugin Hytale correctement structuré en utilisant Gradle et Java 25.
 
 ## Prérequis
 

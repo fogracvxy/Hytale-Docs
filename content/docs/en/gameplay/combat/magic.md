@@ -193,7 +193,6 @@ Alternative to grimoires, focused on one element:
 
 - [Combat System](/docs/gameplay/combat/overview)
 - [Weapons](/docs/gameplay/combat/weapons)
-- [Equipment](/docs/gameplay/combat/equipment)
 
 ---
 

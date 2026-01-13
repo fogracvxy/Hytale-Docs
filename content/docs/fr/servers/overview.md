@@ -79,7 +79,7 @@ Le chargement et la génération des mondes dépendent fortement de la vitesse d
 
 1. **Téléchargez** les fichiers du serveur depuis [hytale.com](https://hytale.com)
 2. **Configurez** votre fichier `server.properties`
-3. **Ouvrez les ports** (par défaut : 25565)
+3. **Ouvrez les ports** (par défaut : 5520 UDP)
 4. **Démarrez** le serveur
 
 ```bash
@@ -95,7 +95,7 @@ java -Xms4G -Xmx8G -jar hytale-server.jar
 ```properties
 # server.properties
 server-name=Mon Serveur Hytale
-port=25565
+port=5520
 max-players=50
 view-distance=10
 ```
@@ -154,7 +154,7 @@ services:
   hytale:
     image: hytale-server:latest
     ports:
-      - "25565:25565"
+      - "5520:5520/udp"
     volumes:
       - ./data:/server
     environment:

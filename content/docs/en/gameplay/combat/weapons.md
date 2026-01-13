@@ -188,8 +188,6 @@ Add magical effects:
 
 - [Combat System](/docs/gameplay/combat/overview)
 - [Magic](/docs/gameplay/combat/magic)
-- [Equipment](/docs/gameplay/combat/equipment)
-- [Smithing](/docs/gameplay/progression/smithing)
 
 ---
 

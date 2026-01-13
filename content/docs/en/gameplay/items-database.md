@@ -343,7 +343,7 @@ Found an item not listed here? The Hytale community is always discovering new co
 
 ## See Also
 
-- [Crafting Guide](/docs/gameplay/progression/crafting)
+- [Crafting Guide](/docs/gameplay/crafting-guide)
 - [World Regions](/docs/gameplay/world/regions)
 - [Combat Overview](/docs/gameplay/combat/overview)
 

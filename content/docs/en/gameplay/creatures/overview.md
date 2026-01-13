@@ -165,8 +165,6 @@ Some creatures can become companions:
 ## See Also
 
 - [Hostile Creatures](/docs/gameplay/creatures/hostile)
-- [Friendly Creatures](/docs/gameplay/creatures/friendly)
-- [Factions](/docs/gameplay/creatures/factions)
 - [Regions](/docs/gameplay/world/regions)
 
 ---

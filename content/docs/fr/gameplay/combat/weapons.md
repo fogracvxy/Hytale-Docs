@@ -199,8 +199,6 @@ Ajoutez des effets magiques :
 
 - [Système de Combat](/docs/gameplay/combat/overview)
 - [Magie](/docs/gameplay/combat/magic)
-- [Équipement](/docs/gameplay/combat/equipment)
-- [Forge](/docs/gameplay/progression/smithing)
 
 ---
 

@@ -166,7 +166,6 @@ Develop your style:
 
 - [Weapons](/docs/gameplay/combat/weapons)
 - [Magic](/docs/gameplay/combat/magic)
-- [Equipment](/docs/gameplay/combat/equipment)
 - [Hostile Creatures](/docs/gameplay/creatures/hostile)
 
 ---

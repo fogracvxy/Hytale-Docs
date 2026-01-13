@@ -116,8 +116,7 @@ Orbis features:
 ## See Also
 
 - [Regions](/docs/gameplay/world/regions)
-- [Biomes](/docs/gameplay/world/biomes)
-- [Dungeons](/docs/gameplay/world/dungeons)
+- [Creatures](/docs/gameplay/creatures/overview)
 
 ---
 

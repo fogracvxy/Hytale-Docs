@@ -216,9 +216,8 @@ This region is intended for well-equipped players with high-quality gear.
 
 ## See Also
 
-- [Biomes](/docs/gameplay/world/biomes)
+- [World Overview](/docs/gameplay/world/overview)
 - [Creatures](/docs/gameplay/creatures/overview)
-- [Dungeons](/docs/gameplay/world/dungeons)
 
 ---
 

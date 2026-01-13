@@ -244,9 +244,7 @@ Chaque zone est liée à un élément qui influence :
 ## Voir Aussi
 
 - [Aperçu du Monde](/docs/gameplay/world/overview)
-- [Biomes](/docs/gameplay/world/biomes)
 - [Créatures](/docs/gameplay/creatures/overview)
-- [Donjons](/docs/gameplay/world/dungeons)
 
 ---
 

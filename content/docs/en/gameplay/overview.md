@@ -33,8 +33,6 @@ Discover the lands of Orbis:
 
 - [Overview](/docs/gameplay/world/overview) - Introduction to the world of Hytale
 - [Regions](/docs/gameplay/world/regions) - The different zones to explore
-- [Biomes](/docs/gameplay/world/biomes) - Environments and ecosystems
-- [Dungeons](/docs/gameplay/world/dungeons) - Structures and challenges
 
 ### Combat
 
@@ -43,7 +41,6 @@ Master the art of combat:
 - [Combat System](/docs/gameplay/combat/overview) - Fundamental mechanics
 - [Weapons](/docs/gameplay/combat/weapons) - Available arsenal
 - [Magic](/docs/gameplay/combat/magic) - Spells and grimoires
-- [Equipment](/docs/gameplay/combat/equipment) - Armor and accessories
 
 ### Creatures
 
@@ -51,17 +48,13 @@ Meet the inhabitants of Orbis:
 
 - [Overview](/docs/gameplay/creatures/overview) - Introduction to creatures
 - [Hostile Creatures](/docs/gameplay/creatures/hostile) - Enemies and bosses
-- [Friendly Creatures](/docs/gameplay/creatures/friendly) - Allies and animals
-- [Factions](/docs/gameplay/creatures/factions) - The peoples of Orbis
 
 ### Progression
 
 Develop your character:
 
-- [Skills](/docs/gameplay/progression/skills) - Progression system
-- [Crafting](/docs/gameplay/progression/crafting) - Item creation
-- [Cooking](/docs/gameplay/progression/cooking) - Food preparation
-- [Smithing](/docs/gameplay/progression/smithing) - Equipment crafting
+- [Crafting Guide](/docs/gameplay/crafting-guide) - Complete crafting system
+- [Items Database](/docs/gameplay/items-database) - All available items
 
 ## Release Information
 

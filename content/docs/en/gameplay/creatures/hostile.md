@@ -215,7 +215,7 @@ Each major dungeon has a unique boss.
 
 - [Combat System](/docs/gameplay/combat/overview)
 - [Creatures](/docs/gameplay/creatures/overview)
-- [Dungeons](/docs/gameplay/world/dungeons)
+- [Regions](/docs/gameplay/world/regions)
 
 ---
 

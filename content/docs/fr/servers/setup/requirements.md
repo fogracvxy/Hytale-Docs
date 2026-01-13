@@ -11,7 +11,7 @@ Exigences matérielles et logicielles.
 
 ## Logiciels
 
-- Java 21+
+- Java 25+
 - Linux, Windows ou macOS
 
 ## Matériel (minimum)

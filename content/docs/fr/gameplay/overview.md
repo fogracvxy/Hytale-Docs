@@ -68,8 +68,6 @@ Découvrez les terres d'Orbis :
 
 - [Vue d'ensemble](/docs/gameplay/world/overview) - Introduction au monde de Hytale
 - [Régions](/docs/gameplay/world/regions) - Les différentes zones à explorer
-- [Biomes](/docs/gameplay/world/biomes) - Environnements et écosystèmes
-- [Donjons](/docs/gameplay/world/dungeons) - Structures et défis
 
 ### Combat
 
@@ -78,7 +76,6 @@ Maîtrisez l'art du combat :
 - [Système de Combat](/docs/gameplay/combat/overview) - Mécaniques fondamentales
 - [Armes](/docs/gameplay/combat/weapons) - Arsenal disponible
 - [Magie](/docs/gameplay/combat/magic) - Sorts et grimoires
-- [Équipement](/docs/gameplay/combat/equipment) - Armures et accessoires
 
 ### Créatures
 
@@ -86,17 +83,13 @@ Rencontrez les habitants d'Orbis :
 
 - [Vue d'ensemble](/docs/gameplay/creatures/overview) - Introduction aux créatures
 - [Créatures Hostiles](/docs/gameplay/creatures/hostile) - Ennemis et boss
-- [Créatures Amicales](/docs/gameplay/creatures/friendly) - Alliés et animaux
-- [Factions](/docs/gameplay/creatures/factions) - Les peuples d'Orbis
 
 ### Progression
 
 Développez votre personnage :
 
-- [Compétences](/docs/gameplay/progression/skills) - Système de progression
-- [Crafting](/docs/gameplay/progression/crafting) - Création d'objets
-- [Cuisine](/docs/gameplay/progression/cooking) - Préparation de nourriture
-- [Forge](/docs/gameplay/progression/smithing) - Fabrication d'équipement
+- [Guide de Fabrication](/docs/gameplay/crafting-guide) - Système de crafting complet
+- [Base de Données Items](/docs/gameplay/items-database) - Tous les objets disponibles
 
 ## Informations de Sortie
 

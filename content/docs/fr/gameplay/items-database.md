@@ -343,7 +343,7 @@ Vous avez trouve un item non liste ici ? La communaute Hytale decouvre constamme
 
 ## Voir Aussi
 
-- [Guide de Fabrication](/docs/gameplay/progression/crafting)
+- [Guide de Fabrication](/docs/gameplay/crafting-guide)
 - [Regions du Monde](/docs/gameplay/world/regions)
 - [Apercu du Combat](/docs/gameplay/combat/overview)
 

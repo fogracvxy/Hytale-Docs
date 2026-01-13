@@ -13,7 +13,7 @@ Configurez votre serveur.
 
 ```properties
 server-name=Mon Serveur
-port=25565
+port=5520
 max-players=50
 view-distance=10
 ```

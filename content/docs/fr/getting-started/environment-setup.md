@@ -44,7 +44,7 @@ java -Xms2G -Xmx4G -jar hytale-server.jar
 ### IntelliJ IDEA
 
 1. Telechargez [IntelliJ IDEA](https://www.jetbrains.com/idea/)
-2. Installez le SDK Java 21+
+2. Installez le SDK Java 25+
 3. Creez un nouveau projet Gradle
 4. Ajoutez la dependance Hytale API (bientot disponible)
 

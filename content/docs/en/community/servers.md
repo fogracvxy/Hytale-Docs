@@ -91,7 +91,7 @@ Want to host your own Hytale server?
 
 ### Documentation
 
-See our complete server hosting guide: [Server Hosting Documentation](/docs/technical/servers)
+See our complete server hosting guide: [Server Hosting Documentation](/docs/servers/overview)
 
 ### Hosting Options
 

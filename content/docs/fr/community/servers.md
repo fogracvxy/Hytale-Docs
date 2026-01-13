@@ -91,7 +91,7 @@ Vous voulez heberger votre propre serveur Hytale ?
 
 ### Documentation
 
-Consultez notre guide complet d'hebergement : [Documentation Serveurs](/docs/technical/servers)
+Consultez notre guide complet d'hebergement : [Documentation Serveurs](/docs/servers/overview)
 
 ### Options d'Hebergement
 

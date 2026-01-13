@@ -201,7 +201,6 @@ Alternative aux grimoires, focus sur un élément :
 
 - [Système de Combat](/docs/gameplay/combat/overview)
 - [Armes](/docs/gameplay/combat/weapons)
-- [Équipement](/docs/gameplay/combat/equipment)
 
 ---
 

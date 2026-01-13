@@ -17,8 +17,8 @@ Hébergez sur votre propre matériel.
 
 ## Étapes
 
-1. Installer Java 21+
+1. Installer Java 25+
 2. Télécharger les fichiers du serveur
 3. Configurer le pare-feu
-4. Rediriger le port 25565
+4. Rediriger le port 5520 (UDP/QUIC)
 5. Démarrer le serveur

@@ -179,8 +179,6 @@ Chaque créature peut lâcher :
 ## Voir Aussi
 
 - [Créatures Hostiles](/docs/gameplay/creatures/hostile)
-- [Créatures Amicales](/docs/gameplay/creatures/friendly)
-- [Factions](/docs/gameplay/creatures/factions)
 - [Régions](/docs/gameplay/world/regions)
 
 ## Fonctionnalités Non Disponibles au Lancement

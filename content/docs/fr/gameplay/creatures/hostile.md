@@ -266,7 +266,7 @@ Chaque donjon majeur a un boss unique.
 
 - [Système de Combat](/docs/gameplay/combat/overview)
 - [Créatures](/docs/gameplay/creatures/overview)
-- [Donjons](/docs/gameplay/world/dungeons)
+- [Régions](/docs/gameplay/world/regions)
 
 ## Lore des Créatures Hostiles
 
