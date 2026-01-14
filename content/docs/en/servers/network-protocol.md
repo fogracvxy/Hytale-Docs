@@ -1517,3 +1517,460 @@ Effect packets handle visual effects and post-processing.
 - `6` - Memories: Memory/journal interface
 
 **Fixed Size:** 1 byte
+
+---
+
+### Crafting Packets
+
+Crafting packets handle recipe management and crafting operations.
+
+#### CraftItemAction (Window Action)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Request to craft an item using the current crafting interface. Sent as a WindowAction within SendWindowAction packet.
+
+| Field | Type | Size | Description |
+|-------|------|------|-------------|
+| craftCount | int32 LE | 4 | Number of items to craft |
+
+**Fixed Size:** 4 bytes
+
+#### CraftRecipeAction (Window Action)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Request to craft a specific recipe by ID. Used with recipe book functionality.
+
+| Field | Type | Size | Description |
+|-------|------|------|-------------|
+| recipeIdOffset | int32 LE | 4 | Offset to recipe ID string |
+| craftCount | int32 LE | 4 | Number of times to craft |
+| recipeId | VarString | Variable | Recipe identifier string |
+
+**Fixed Size:** 8 bytes (minimum)
+**Max Size:** 16,384,012 bytes
+
+#### CancelCraftingAction (Window Action)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Cancels an in-progress crafting operation.
+
+| Field | Type | Size | Description |
+|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty action |
+
+**Fixed Size:** 0 bytes
+
+#### UpdateRecipes (Asset Packet)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sends the full recipe registry to the client during setup phase.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = recipes present |
+| 1 | recipes | RecipeData[] | Variable | Array of recipe definitions |
+
+**Max Size:** 1,677,721,600 bytes
+
+#### UpdateKnownRecipes (ID 221)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the client's list of unlocked/known recipes.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = recipes present |
+| 1 | recipes | String[] | Variable | Array of known recipe IDs |
+
+**Max Size:** 1,677,721,600 bytes
+
+---
+
+### Mount/NPC Packets
+
+Mount and NPC packets handle riding mechanics and NPC interactions.
+
+#### MountNPC (ID 192)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Request to mount an NPC entity (rideable creature, vehicle).
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | networkId | int32 LE | 4 | Network ID of entity to mount |
+
+**Fixed Size:** 4 bytes
+
+#### DismountNPC (ID 193)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Request to dismount from the currently mounted entity.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty packet |
+
+**Fixed Size:** 0 bytes
+
+#### SyncInteractionChain (ID 290)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Synchronizes an interaction chain state with the server. Used for complex NPC dialogue or multi-step interactions.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Presence flags |
+| 1 | interactionChainId | int32 LE | 4 | Interaction chain identifier |
+| 5 | stringOffset | int32 LE | 4 | Offset to string data |
+| 9+ | (Variable data) | Variable | Variable | Interaction chain data |
+
+**Fixed Size:** 9 bytes (minimum)
+**Max Size:** 16,384,013 bytes
+
+---
+
+### Server Access/Permission Packets
+
+Server access packets control player permissions and server accessibility in singleplayer worlds.
+
+#### UpdateServerAccess (ID 251)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Notifies the client of updated server access settings. Used when the host changes LAN/friend access.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | access | byte | 1 | Access enum value |
+
+**Access Values:**
+- `0` - Private: No external access
+- `1` - LAN: Local network access only
+- `2` - Friend: Friends can join
+- `3` - Open: Anyone can join
+
+**Fixed Size:** 1 byte
+
+#### SetServerAccess (ID 252)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Client request to change server access level (host only).
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | access | byte | 1 | Desired Access enum value |
+
+**Fixed Size:** 1 byte
+
+---
+
+### Asset Loading Packets
+
+Asset packets handle the transfer and synchronization of game assets during connection setup.
+
+#### AssetInitialize (ID 21)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Initiates asset transfer, providing metadata about the assets to be sent.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Presence flags |
+| 1 | totalParts | int32 LE | 4 | Total number of asset parts |
+| 5 | totalSize | int64 LE | 8 | Total size of all assets in bytes |
+| 13 | hashOffset | int32 LE | 4 | Offset to asset hash string |
+| 17+ | hash | VarString | Variable | Asset bundle hash for caching |
+
+**Fixed Size:** 17 bytes (minimum)
+**Max Size:** 16,384,021 bytes
+
+#### AssetPart (ID 22)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Transfers a chunk of asset data. Large assets are split into multiple parts.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = data present |
+| 1 | partIndex | int32 LE | 4 | Index of this part (0-based) |
+| 5 | data | byte[] | Variable | Asset data chunk |
+
+**Max Size:** 1,677,721,600 bytes
+
+#### AssetFinalize (ID 24)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Signals completion of asset transfer, allowing client to finalize loading.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty packet |
+
+**Fixed Size:** 0 bytes
+
+#### RequestAssets (ID 23)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Client requests asset data from the server.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = hash present |
+| 1 | hash | VarString | Variable | Client's cached asset hash (for delta updates) |
+
+**Fixed Size:** 1 byte (minimum)
+**Max Size:** 16,384,006 bytes
+
+---
+
+### World Settings Packets
+
+World settings packets configure world parameters during the setup phase.
+
+#### WorldSettings (ID 20)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sends world configuration including height and required assets.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = requiredAssets present |
+| 1 | worldHeight | int32 LE | 4 | Maximum world height in blocks |
+| 5 | requiredAssets | Asset[] | Variable | Array of required asset definitions |
+
+**Fixed Size:** 5 bytes (minimum)
+**Max Size:** 1,677,721,600 bytes
+
+#### ServerTags (ID 34)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Sends server-defined tags used for gameplay mechanics and filtering.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = tags present |
+| 1 | tags | `Map<String, int32>` | Variable | Dictionary of tag names to IDs |
+
+**Max Size:** 1,677,721,600 bytes
+
+---
+
+### Fluid/World Generation Packets
+
+Fluid and world generation packets handle terrain features like water and lava.
+
+#### SetFluids (ID 136)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sets fluid data for a chunk section.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = data present |
+| 1 | x | int32 LE | 4 | Chunk X coordinate |
+| 5 | y | int32 LE | 4 | Chunk Y coordinate |
+| 9 | z | int32 LE | 4 | Chunk Z coordinate |
+| 13 | data | byte[] | Variable | Compressed fluid level data (max 4,096,000 bytes) |
+
+**Fixed Size:** 13 bytes (minimum)
+**Max Size:** 4,096,018 bytes
+
+---
+
+### Sleep/Time Packets
+
+Sleep packets handle multiplayer sleep mechanics for time progression.
+
+#### UpdateSleepState (ID 157)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the client's sleep state UI and synchronizes sleep progression.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = clock present, bit 1 = multiplayer present |
+| 1 | grayFade | byte | 1 | Boolean: enable gray screen fade |
+| 2 | sleepUi | byte | 1 | Boolean: show sleep UI |
+| 3 | clock | SleepClock | 33 | Sleep clock data (optional) |
+| 36 | multiplayer | SleepMultiplayer | Variable | Multiplayer sleep info (optional) |
+
+**SleepClock Structure (33 bytes):**
+
+| Field | Type | Size | Description |
+|-------|------|------|-------------|
+| startGametime | InstantData | 12 | Game time when sleep started (optional) |
+| targetGametime | InstantData | 12 | Target wake-up game time (optional) |
+| progress | float LE | 4 | Sleep progress (0.0-1.0) |
+| durationSeconds | float LE | 4 | Sleep duration in seconds |
+
+**Fixed Size:** 36 bytes (minimum)
+**Max Size:** 65,536,050 bytes
+
+---
+
+### Custom UI Packets
+
+Custom UI packets allow servers to create dynamic interfaces.
+
+#### CustomHud (ID 217)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Updates the custom HUD overlay with server-defined UI elements.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = commands present |
+| 1 | clear | byte | 1 | Boolean: clear existing HUD elements |
+| 2 | commands | CustomUICommand[] | Variable | Array of UI commands |
+
+**Max Size:** 1,677,721,600 bytes
+
+#### CustomPage (ID 218)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Opens or updates a custom UI page/screen.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Presence flags |
+| 1 | isInitial | byte | 1 | Boolean: initial page load |
+| 2 | clear | byte | 1 | Boolean: clear existing content |
+| 3 | lifetime | byte | 1 | CustomPageLifetime enum |
+| 4 | keyOffset | int32 LE | 4 | Offset to page key string |
+| 8 | commandsOffset | int32 LE | 4 | Offset to commands array |
+| 12 | eventBindingsOffset | int32 LE | 4 | Offset to event bindings |
+| 16+ | (Variable data) | Variable | Variable | Page content |
+
+**CustomPageLifetime Values:**
+- `0` - CantClose: Page cannot be closed by user
+- `1` - CanClose: User can close the page
+- `2` - AutoClose: Page closes automatically
+
+**Fixed Size:** 16 bytes (minimum)
+**Max Size:** 1,677,721,600 bytes
+
+---
+
+### Portal Packets
+
+Portal packets handle dimension/world transitions.
+
+#### UpdatePortal (ID 229)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates portal state and definition for dimension transitions.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = state present, bit 1 = definition present |
+| 1 | state | PortalState | 5 | Current portal state (optional) |
+| 6 | definition | PortalDef | Variable | Portal definition data (optional) |
+
+**Fixed Size:** 6 bytes (minimum)
+**Max Size:** 16,384,020 bytes
+
+---
+
+### Player List Packets
+
+Player list packets manage the server's player list display.
+
+#### UpdateServerPlayerList (ID 226)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the player list shown in the pause/tab menu.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = players present |
+| 1 | players | ServerPlayerListUpdate[] | Variable | Array of player updates |
+
+**ServerPlayerListUpdate Structure (32 bytes each):**
+
+| Field | Type | Size | Description |
+|-------|------|------|-------------|
+| uuid | UUID | 16 | Player UUID |
+| username | VarString | Variable | Player display name |
+| action | byte | 1 | Add, Remove, or Update |
+
+**Max Size:** 131,072,006 bytes
+
+---
+
+### Creative Mode Packets
+
+Creative mode packets handle creative inventory operations.
+
+#### SetCreativeItem (ID 171)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Sets an item in creative mode inventory, allowing spawning any item.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | inventorySectionId | int32 LE | 4 | Target inventory section |
+| 4 | slotId | int32 LE | 4 | Target slot index |
+| 8 | override | byte | 1 | Boolean: override existing item |
+| 9 | item | ItemQuantity | Variable | Item data to set |
+
+**Fixed Size:** 9 bytes (minimum)
+**Max Size:** 16,384,019 bytes
+
+#### SmartMoveItemStack (ID 176)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Smart item movement that automatically finds the best destination slot.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | fromSectionId | int32 LE | 4 | Source section ID |
+| 4 | fromSlotId | int32 LE | 4 | Source slot index |
+| 8 | quantity | int32 LE | 4 | Number of items to move |
+| 12 | moveType | byte | 1 | SmartMoveType enum value |
+
+**SmartMoveType Values:**
+- `0` - EquipOrMergeStack: Equip item or merge with existing stack
+
+**Fixed Size:** 13 bytes
+
+---
+
+### Effect/Status Packets
+
+Effect packets manage entity status effects and buffs/debuffs.
+
+#### UpdateEntityEffects (Asset Packet)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sends the effect definition registry during setup.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = effects present |
+| 1 | effects | EffectData[] | Variable | Array of effect definitions |
+
+**Max Size:** 1,677,721,600 bytes

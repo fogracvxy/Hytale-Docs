@@ -51,6 +51,8 @@
     "collisionSystem": "Collision System",
     "staminaSystem": "Stamina System",
     "prefabSystem": "Prefab System",
+    "entityUI": "Entity UI",
+    "effectsSystem": "Effects System",
     "events": "Events",
     "eventsOverview": "Events Overview",
     "playerEvents": "Player Events",

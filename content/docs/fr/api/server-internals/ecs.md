@@ -2760,3 +2760,1006 @@ if (worldGen != null) {
 - Le `worldGenId` peut etre utilise pour identifier quel generateur a cree l'entite
 - Aide a eviter de re-generer des entites qui ont deja ete apparues
 - Lie au composant `WorldGenId` qui suit l'etat de generation au niveau du chunk
+
+---
+
+### MovementStatesComponent
+
+**Package:** `com.hypixel.hytale.server.core.entity.movement`
+
+Le `MovementStatesComponent` suit l'etat de mouvement actuel d'une entite. Il stocke des indicateurs booleens pour divers etats de mouvement comme sauter, voler, nager, s'accroupir, et plus encore. Ce composant suit egalement ce qui a ete envoye aux clients pour la compression delta.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/entity/movement/MovementStatesComponent.java`
+
+```java
+public class MovementStatesComponent implements Component<EntityStore> {
+   private MovementStates movementStates = new MovementStates();
+   private MovementStates sentMovementStates = new MovementStates();
+
+   public static ComponentType<EntityStore, MovementStatesComponent> getComponentType() {
+      return EntityModule.get().getMovementStatesComponentType();
+   }
+
+   public MovementStates getMovementStates();
+   public void setMovementStates(MovementStates movementStates);
+   public MovementStates getSentMovementStates();
+   public void setSentMovementStates(MovementStates sentMovementStates);
+}
+```
+
+**Proprietes de MovementStates:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `idle` | boolean | L'entite ne bouge pas |
+| `horizontalIdle` | boolean | L'entite ne bouge pas horizontalement |
+| `jumping` | boolean | L'entite saute actuellement |
+| `flying` | boolean | L'entite est en mode vol |
+| `walking` | boolean | L'entite marche |
+| `running` | boolean | L'entite court |
+| `sprinting` | boolean | L'entite sprinte |
+| `crouching` | boolean | L'entite s'accroupit |
+| `forcedCrouching` | boolean | L'entite est forcee de s'accroupir (plafond bas) |
+| `falling` | boolean | L'entite tombe |
+| `climbing` | boolean | L'entite grimpe (echelle/liane) |
+| `inFluid` | boolean | L'entite est dans un fluide (eau/lave) |
+| `swimming` | boolean | L'entite nage |
+| `swimJumping` | boolean | L'entite saute en nageant |
+| `onGround` | boolean | L'entite est au sol |
+| `mantling` | boolean | L'entite escalade un rebord |
+| `sliding` | boolean | L'entite glisse |
+| `mounting` | boolean | L'entite monte/descend |
+| `rolling` | boolean | L'entite effectue une roulade |
+| `sitting` | boolean | L'entite est assise |
+| `gliding` | boolean | L'entite plane |
+| `sleeping` | boolean | L'entite dort |
+
+**Comment utiliser:**
+
+```java
+// Obtenir les etats de mouvement d'une entite
+MovementStatesComponent component = store.getComponent(ref, MovementStatesComponent.getComponentType());
+MovementStates states = component.getMovementStates();
+
+// Verifier si l'entite est au sol
+if (states.onGround) {
+    // L'entite est au sol
+}
+
+// Verifier si l'entite est dans un etat pertinent au combat
+if (states.jumping || states.falling) {
+    // Appliquer les modificateurs de combat aerien
+}
+
+// Modifier l'etat de mouvement
+states.crouching = true;
+
+// Verifier plusieurs etats
+boolean canSprint = states.onGround && !states.crouching && !states.inFluid;
+```
+
+**Notes d'utilisation:**
+- Les etats de mouvement sont synchronises aux clients pour l'animation et la prediction
+- Le champ `sentMovementStates` suit ce qui a ete envoye pour eviter les mises a jour reseau redondantes
+- Les etats sont mis a jour par divers systemes de mouvement bases sur la physique et l'input du joueur
+- Utilise par les systemes d'animation pour determiner quelles animations jouer
+
+---
+
+### MovementConfig (Asset)
+
+**Package:** `com.hypixel.hytale.server.core.entity.entities.player.movement`
+
+Le `MovementConfig` est un asset de donnees (pas un composant) qui definit les parametres de mouvement pour les entites. Il controle les vitesses, forces de saut, controle aerien, escalade, glissade, roulade, et plus encore. Ceci est charge depuis des fichiers d'assets JSON.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/entity/entities/player/movement/MovementConfig.java`
+
+**Proprietes cles:**
+
+| Categorie | Propriete | Type | Defaut | Description |
+|-----------|-----------|------|--------|-------------|
+| **Base** | `baseSpeed` | float | 5.5 | Vitesse de mouvement de base |
+| **Base** | `acceleration` | float | 0.1 | Acceleration du mouvement |
+| **Base** | `velocityResistance` | float | 0.242 | Friction/resistance au sol |
+| **Saut** | `jumpForce` | float | 11.8 | Force du saut |
+| **Saut** | `swimJumpForce` | float | 10.0 | Force du saut en nageant |
+| **Saut** | `jumpBufferDuration` | float | 0.3 | Fenetre de temps pour bufferiser l'input de saut |
+| **Saut** | `variableJumpFallForce` | float | 35.0 | Force appliquee en relachant le saut tot |
+| **Air** | `airSpeedMultiplier` | float | 1.0 | Multiplicateur de vitesse en l'air |
+| **Air** | `airDragMin` / `airDragMax` | float | 0.96 / 0.995 | Plage de resistance de l'air |
+| **Air** | `airFrictionMin` / `airFrictionMax` | float | 0.02 / 0.045 | Plage de friction de l'air |
+| **Vol** | `horizontalFlySpeed` | float | 10.32 | Vitesse de vol horizontale |
+| **Vol** | `verticalFlySpeed` | float | 10.32 | Vitesse de vol verticale |
+| **Escalade** | `climbSpeed` | float | 0.035 | Vitesse d'escalade verticale |
+| **Escalade** | `climbSpeedLateral` | float | 0.035 | Vitesse d'escalade horizontale |
+| **Marche** | `forwardWalkSpeedMultiplier` | float | 0.3 | Multiplicateur de vitesse de marche avant |
+| **Course** | `forwardRunSpeedMultiplier` | float | 1.0 | Multiplicateur de vitesse de course avant |
+| **Sprint** | `forwardSprintSpeedMultiplier` | float | 1.65 | Multiplicateur de vitesse de sprint |
+| **Accroupi** | `forwardCrouchSpeedMultiplier` | float | 0.55 | Multiplicateur de vitesse accroupi avant |
+| **Glissade** | `minSlideEntrySpeed` | float | 8.5 | Vitesse minimale pour commencer a glisser |
+| **Roulade** | `minFallSpeedToEngageRoll` | float | 21.0 | Vitesse de chute minimale pour declencher la roulade |
+| **Roulade** | `rollTimeToComplete` | float | 0.9 | Temps pour completer l'animation de roulade |
+| **AutoSaut** | `autoJumpObstacleSpeedLoss` | float | 0.95 | Perte de vitesse sur auto-saut |
+| **AutoSaut** | `autoJumpDisableJumping` | boolean | true | Desactiver le saut manuel pendant l'auto-saut |
+
+**Comment utiliser:**
+
+```java
+// Obtenir la configuration de mouvement par defaut
+MovementConfig config = MovementConfig.DEFAULT_MOVEMENT;
+
+// Obtenir une configuration personnalisee depuis les assets
+MovementConfig customConfig = MovementConfig.getAssetMap().getAsset("mymod:fast_runner");
+
+// Acceder aux valeurs de mouvement
+float jumpForce = config.getJumpForce();
+float baseSpeed = config.getBaseSpeed();
+float sprintMultiplier = config.getForwardSprintSpeedMultiplier();
+
+// Calculer la vitesse de sprint effective
+float sprintSpeed = baseSpeed * sprintMultiplier;
+```
+
+**Notes d'utilisation:**
+- Les assets MovementConfig peuvent heriter de configurations parentes via le systeme d'assets
+- La configuration est envoyee aux clients via le paquet `MovementSettings` pour la prediction cote client
+- Differents types d'entites peuvent avoir differentes configurations de mouvement
+- Utilise par les systemes de physique de mouvement pour calculer le mouvement des entites
+
+---
+
+### Velocity
+
+**Package:** `com.hypixel.hytale.server.core.modules.physics.component`
+
+Le composant `Velocity` stocke le vecteur de velocite actuel d'une entite et les instructions de velocite en attente. Il supporte plusieurs types de modification de velocite (ajouter, definir, remplacer) et est utilise par les systemes de physique pour deplacer les entites.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/physics/component/Velocity.java`
+
+```java
+public class Velocity implements Component<EntityStore> {
+   @Nonnull
+   public static final BuilderCodec<Velocity> CODEC = BuilderCodec.builder(Velocity.class, Velocity::new)
+      .append(new KeyedCodec<>("Velocity", Vector3d.CODEC), ...)
+      .build();
+
+   protected final List<Velocity.Instruction> instructions = new ObjectArrayList<>();
+   protected final Vector3d velocity = new Vector3d();
+   protected final Vector3d clientVelocity = new Vector3d();
+
+   public static ComponentType<EntityStore, Velocity> getComponentType() {
+      return EntityModule.get().getVelocityComponentType();
+   }
+
+   // Manipulation de velocite
+   public void setZero();
+   public void addForce(@Nonnull Vector3d force);
+   public void addForce(double x, double y, double z);
+   public void set(@Nonnull Vector3d newVelocity);
+   public void set(double x, double y, double z);
+
+   // Acces aux composants
+   public double getX();
+   public double getY();
+   public double getZ();
+   public double getSpeed();
+
+   // File d'instructions
+   public void addInstruction(@Nonnull Vector3d velocity, @Nullable VelocityConfig config, @Nonnull ChangeVelocityType type);
+   @Nonnull public List<Velocity.Instruction> getInstructions();
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `velocity` | `Vector3d` | Velocite actuelle (blocs par seconde) |
+| `clientVelocity` | `Vector3d` | Velocite predite par le client |
+| `instructions` | `List<Instruction>` | Modifications de velocite en attente |
+
+**Enum ChangeVelocityType:**
+
+| Valeur | Description |
+|--------|-------------|
+| `Add` | Ajouter a la velocite actuelle |
+| `Set` | Remplacer la velocite actuelle |
+| `Replace` | Remplacer uniquement les composants specifies |
+
+**Comment utiliser:**
+
+```java
+// Obtenir le composant de velocite
+Velocity velocity = store.getComponent(ref, Velocity.getComponentType());
+
+// Appliquer une force (additive)
+velocity.addForce(0, 10, 0);  // Force vers le haut
+
+// Definir la velocite directement
+velocity.set(5, 0, 3);  // Se deplacer vers le nord-est
+
+// Obtenir la vitesse actuelle
+double speed = velocity.getSpeed();
+
+// Reinitialiser la velocite
+velocity.setZero();
+
+// Ajouter une instruction de velocite (traitee par le systeme de physique)
+velocity.addInstruction(
+    new Vector3d(0, 15, 0),    // Velocite de saut
+    null,                        // Pas de config speciale
+    ChangeVelocityType.Add       // Ajouter a l'actuelle
+);
+```
+
+**Notes d'utilisation:**
+- La velocite est en blocs par seconde
+- Les instructions sont traitees par les systemes de velocite puis effacees
+- La velocite client est utilisee pour la synchronisation de prediction cote client
+- Fonctionne avec le composant `PhysicsValues` pour les calculs de masse et resistance
+
+---
+
+### KnockbackComponent
+
+**Package:** `com.hypixel.hytale.server.core.entity.knockback`
+
+Le `KnockbackComponent` stocke les donnees de recul en attente a appliquer a une entite. Il inclut la velocite a appliquer, le type de changement de velocite, les modificateurs, et le suivi de duree pour les effets de chancellement.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/entity/knockback/KnockbackComponent.java`
+
+```java
+public class KnockbackComponent implements Component<EntityStore> {
+   private Vector3d velocity;
+   private ChangeVelocityType velocityType = ChangeVelocityType.Add;
+   private VelocityConfig velocityConfig;
+   private DoubleList modifiers = new DoubleArrayList();
+   private float duration;
+   private float timer;
+
+   public static ComponentType<EntityStore, KnockbackComponent> getComponentType() {
+      return EntityModule.get().getKnockbackComponentType();
+   }
+
+   // Velocite
+   public Vector3d getVelocity();
+   public void setVelocity(@Nonnull Vector3d velocity);
+   public ChangeVelocityType getVelocityType();
+   public void setVelocityType(ChangeVelocityType velocityType);
+
+   // Modificateurs
+   public void addModifier(double modifier);
+   public void applyModifiers();
+
+   // Duree/Timer
+   public float getDuration();
+   public void setDuration(float duration);
+   public float getTimer();
+   public void incrementTimer(float time);
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Defaut | Description |
+|-----------|------|--------|-------------|
+| `velocity` | `Vector3d` | - | Velocite de recul a appliquer |
+| `velocityType` | `ChangeVelocityType` | Add | Comment appliquer la velocite |
+| `modifiers` | `DoubleList` | vide | Multiplicateurs a appliquer a la velocite |
+| `duration` | float | 0 | Duree totale du recul |
+| `timer` | float | 0 | Temps ecoule actuel |
+
+**Comment utiliser:**
+
+```java
+// Appliquer un recul a une entite
+KnockbackComponent knockback = new KnockbackComponent();
+knockback.setVelocity(new Vector3d(5, 8, 0));  // Horizontal + vertical
+knockback.setVelocityType(ChangeVelocityType.Set);
+knockback.setDuration(0.3f);  // 300ms de chancellement
+commandBuffer.addComponent(ref, KnockbackComponent.getComponentType(), knockback);
+
+// Appliquer un recul avec modificateurs (ex: reduction d'armure)
+knockback.addModifier(0.75);  // Reduction de 25%
+knockback.addModifier(1.2);   // Augmentation de 20% (depuis un debuff)
+knockback.applyModifiers();   // Appliquer tous les modificateurs a la velocite
+```
+
+**Notes d'utilisation:**
+- Le recul est traite par des systemes de recul dedies
+- La duree/timer peut etre utilisee pour les effets de chancellement
+- Les modificateurs sont multiplicatifs et appliques via `applyModifiers()`
+- Le composant est typiquement retire apres traitement
+
+---
+
+### DamageDataComponent
+
+**Package:** `com.hypixel.hytale.server.core.entity.damage`
+
+Le `DamageDataComponent` suit les donnees de timing de combat pour une entite, incluant quand elle a recu des degats pour la derniere fois, quand elle a effectue une action de combat pour la derniere fois, et l'etat d'interaction de maniement actuel.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/entity/damage/DamageDataComponent.java`
+
+```java
+public class DamageDataComponent implements Component<EntityStore> {
+   private Instant lastCombatAction = Instant.MIN;
+   private Instant lastDamageTime = Instant.MIN;
+   private WieldingInteraction currentWielding;
+   private Instant lastChargeTime;
+
+   public static ComponentType<EntityStore, DamageDataComponent> getComponentType() {
+      return EntityModule.get().getDamageDataComponentType();
+   }
+
+   public Instant getLastCombatAction();
+   public void setLastCombatAction(@Nonnull Instant lastCombatAction);
+   public Instant getLastDamageTime();
+   public void setLastDamageTime(@Nonnull Instant lastDamageTime);
+   public WieldingInteraction getCurrentWielding();
+   public void setCurrentWielding(@Nullable WieldingInteraction currentWielding);
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Defaut | Description |
+|-----------|------|--------|-------------|
+| `lastCombatAction` | `Instant` | MIN | Horodatage de la derniere action de combat |
+| `lastDamageTime` | `Instant` | MIN | Horodatage des derniers degats recus |
+| `currentWielding` | `WieldingInteraction` | null | Etat actuel de maniement d'arme/outil |
+| `lastChargeTime` | `Instant` | null | Horodatage du debut de l'attaque chargee |
+
+**Comment utiliser:**
+
+```java
+// Obtenir les donnees de degats pour une entite
+DamageDataComponent damageData = store.getComponent(ref, DamageDataComponent.getComponentType());
+
+// Verifier si l'entite etait recemment en combat
+Instant now = timeResource.getNow();
+Duration timeSinceCombat = Duration.between(damageData.getLastCombatAction(), now);
+boolean recentlyInCombat = timeSinceCombat.getSeconds() < 5;
+
+// Mettre a jour le timing de combat lors d'une attaque
+damageData.setLastCombatAction(now);
+
+// Verifier le cooldown de degats
+Duration timeSinceDamage = Duration.between(damageData.getLastDamageTime(), now);
+boolean canTakeDamage = timeSinceDamage.toMillis() > invulnerabilityFrames;
+```
+
+**Notes d'utilisation:**
+- Utilise pour les cooldowns de combat et les frames d'invulnerabilite
+- `currentWielding` suit l'etat d'interaction de l'arme active
+- Le temps d'action de combat inclut les actions d'attaque et de defense
+- Essentiel pour les systemes de combo et le timing d'attaque
+
+---
+
+### DeathComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.damage`
+
+Le `DeathComponent` est ajoute a une entite quand elle meurt. Il contient des informations de mort incluant la cause, le message, la configuration de perte d'objets, et les parametres de reapparition.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/damage/DeathComponent.java`
+
+```java
+public class DeathComponent implements Component<EntityStore> {
+   private String deathCause;
+   private Message deathMessage;
+   private boolean showDeathMenu = true;
+   private ItemStack[] itemsLostOnDeath;
+   private double itemsAmountLossPercentage;
+   private double itemsDurabilityLossPercentage;
+   private boolean displayDataOnDeathScreen;
+   private Damage deathInfo;
+   private DeathConfig.ItemsLossMode itemsLossMode = DeathConfig.ItemsLossMode.ALL;
+
+   public static ComponentType<EntityStore, DeathComponent> getComponentType() {
+      return DamageModule.get().getDeathComponentType();
+   }
+
+   // Aide statique pour ajouter le composant de mort en securite
+   public static void tryAddComponent(@Nonnull CommandBuffer<EntityStore> commandBuffer,
+                                      @Nonnull Ref<EntityStore> ref,
+                                      @Nonnull Damage damage);
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Defaut | Description |
+|-----------|------|--------|-------------|
+| `deathCause` | String | - | ID de l'asset de cause de degats |
+| `deathMessage` | `Message` | null | Message de mort personnalise a afficher |
+| `showDeathMenu` | boolean | true | Afficher ou non le menu de mort/reapparition |
+| `itemsLostOnDeath` | `ItemStack[]` | null | Objets perdus quand l'entite est morte |
+| `itemsAmountLossPercentage` | double | 0 | Pourcentage des quantites de pile perdues |
+| `itemsDurabilityLossPercentage` | double | 0 | Pourcentage de durabilite perdue |
+| `itemsLossMode` | `ItemsLossMode` | ALL | Comment les objets sont perdus (ALL, RANDOM, NONE) |
+
+**Enum ItemsLossMode:**
+
+| Valeur | Description |
+|--------|-------------|
+| `ALL` | Tous les objets sont perdus a la mort |
+| `RANDOM` | Selection aleatoire d'objets perdus |
+| `NONE` | Aucun objet perdu a la mort |
+
+**Comment utiliser:**
+
+```java
+// La mort est typiquement appliquee via tryAddComponent
+DeathComponent.tryAddComponent(commandBuffer, entityRef, damage);
+
+// Ou manuellement
+DeathComponent death = new DeathComponent(damage);
+death.setShowDeathMenu(true);
+death.setDeathMessage(new Message("Tue par un dragon"));
+death.setItemsLossMode(DeathConfig.ItemsLossMode.RANDOM);
+commandBuffer.addComponent(ref, DeathComponent.getComponentType(), death);
+```
+
+**Notes d'utilisation:**
+- La methode `tryAddComponent` empeche d'ajouter plusieurs composants de mort
+- Les systemes de gestion de mort traitent ce composant pour la logique de reapparition
+- Utilise par l'UI de l'ecran de mort pour afficher des informations aux joueurs
+
+---
+
+### DespawnComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity`
+
+Le `DespawnComponent` marque une entite pour suppression automatique a un moment specifie. Il fournit des methodes factory pour creer des timers de disparition bases sur des secondes ou millisecondes.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/DespawnComponent.java`
+
+```java
+public class DespawnComponent implements Component<EntityStore> {
+   private Instant timeToDespawnAt;
+
+   public static ComponentType<EntityStore, DespawnComponent> getComponentType() {
+      return EntityModule.get().getDespawnComponentType();
+   }
+
+   // Methodes factory
+   @Nonnull public static DespawnComponent despawnInSeconds(@Nonnull TimeResource time, int seconds);
+   @Nonnull public static DespawnComponent despawnInSeconds(@Nonnull TimeResource time, float seconds);
+   @Nonnull public static DespawnComponent despawnInMilliseconds(@Nonnull TimeResource time, long milliseconds);
+
+   // Methodes d'instance
+   public void setDespawn(Instant timeToDespawnAt);
+   public void setDespawnTo(@Nonnull Instant from, float additionalSeconds);
+   @Nullable public Instant getDespawn();
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `timeToDespawnAt` | `Instant` | Le moment exact ou l'entite doit etre supprimee |
+
+**Comment utiliser:**
+
+```java
+// Creer une entite avec une duree de vie de 60 secondes
+TimeResource time = store.getResource(TimeResource.TYPE);
+holder.addComponent(DespawnComponent.getComponentType(),
+    DespawnComponent.despawnInSeconds(time, 60));
+
+// Creer une entite avec une duree de vie de 2.5 secondes
+holder.addComponent(DespawnComponent.getComponentType(),
+    DespawnComponent.despawnInSeconds(time, 2.5f));
+
+// Etendre un timer de disparition existant
+DespawnComponent despawn = store.getComponent(ref, DespawnComponent.getComponentType());
+despawn.setDespawnTo(time.getNow(), 30.0f);  // 30 secondes de plus a partir de maintenant
+
+// Supprimer la disparition (rendre permanent)
+commandBuffer.removeComponent(ref, DespawnComponent.getComponentType());
+```
+
+**Notes d'utilisation:**
+- Couramment utilise pour les objets au sol (defaut 120 secondes), projectiles et effets
+- Le systeme de disparition verifie les entites a chaque tick et supprime celles expirees
+- Passer un lifetime `null` a `trySetDespawn` supprime le composant de disparition
+- Serialise avec l'entite pour la persistance entre les sauvegardes
+
+---
+
+### EffectControllerComponent
+
+**Package:** `com.hypixel.hytale.server.core.entity.effect`
+
+Le `EffectControllerComponent` gere les effets de statut actifs sur une entite. Il gere l'ajout, la suppression, l'extension des effets, le suivi des durees, et la synchronisation des etats d'effets aux clients.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/entity/effect/EffectControllerComponent.java`
+
+```java
+public class EffectControllerComponent implements Component<EntityStore> {
+   protected final Int2ObjectMap<ActiveEntityEffect> activeEffects = new Int2ObjectOpenHashMap<>();
+   protected boolean isNetworkOutdated;
+   protected boolean isInvulnerable;
+
+   public static ComponentType<EntityStore, EffectControllerComponent> getComponentType() {
+      return EntityModule.get().getEffectControllerComponentType();
+   }
+
+   // Ajouter des effets
+   public boolean addEffect(@Nonnull Ref<EntityStore> ownerRef, @Nonnull EntityEffect entityEffect,
+                           @Nonnull ComponentAccessor<EntityStore> componentAccessor);
+   public boolean addEffect(@Nonnull Ref<EntityStore> ownerRef, @Nonnull EntityEffect entityEffect,
+                           float duration, @Nonnull OverlapBehavior overlapBehavior,
+                           @Nonnull ComponentAccessor<EntityStore> componentAccessor);
+   public boolean addInfiniteEffect(@Nonnull Ref<EntityStore> ownerRef, int entityEffectIndex,
+                                   @Nonnull EntityEffect entityEffect,
+                                   @Nonnull ComponentAccessor<EntityStore> componentAccessor);
+
+   // Supprimer des effets
+   public void removeEffect(@Nonnull Ref<EntityStore> ownerRef, int entityEffectIndex,
+                           @Nonnull ComponentAccessor<EntityStore> componentAccessor);
+   public void clearEffects(@Nonnull Ref<EntityStore> ownerRef,
+                           @Nonnull ComponentAccessor<EntityStore> componentAccessor);
+
+   // Requeter les effets
+   @Nonnull public Int2ObjectMap<ActiveEntityEffect> getActiveEffects();
+   public int[] getActiveEffectIndexes();
+   public boolean isInvulnerable();
+}
+```
+
+**Enum OverlapBehavior:**
+
+| Valeur | Description |
+|--------|-------------|
+| `EXTEND` | Ajouter la duree a l'effet existant |
+| `OVERWRITE` | Remplacer l'effet existant |
+| `IGNORE` | Garder l'effet existant inchange |
+
+**Comment utiliser:**
+
+```java
+// Obtenir le controleur d'effets
+EffectControllerComponent effects = store.getComponent(ref, EffectControllerComponent.getComponentType());
+
+// Ajouter un effet chronometre
+EntityEffect poison = EntityEffect.getAssetMap().getAsset("hytale:poison");
+effects.addEffect(ref, poison, 10.0f, OverlapBehavior.EXTEND, componentAccessor);
+
+// Ajouter un effet infini
+EntityEffect fly = EntityEffect.getAssetMap().getAsset("hytale:flight");
+effects.addInfiniteEffect(ref, flyIndex, fly, componentAccessor);
+
+// Verifier les effets actifs
+int[] activeEffectIndexes = effects.getActiveEffectIndexes();
+for (int effectIndex : activeEffectIndexes) {
+    ActiveEntityEffect active = effects.getActiveEffects().get(effectIndex);
+    float remaining = active.getRemainingDuration();
+}
+
+// Supprimer un effet specifique
+effects.removeEffect(ref, poisonIndex, componentAccessor);
+
+// Effacer tous les effets
+effects.clearEffects(ref, componentAccessor);
+```
+
+**Notes d'utilisation:**
+- Les effets peuvent modifier les stats de l'entite via `StatModifiersManager`
+- Certains effets peuvent changer temporairement le modele de l'entite
+- Les changements d'effets sont regroupes et envoyes aux clients via `EntityEffectUpdate`
+- Utilise pour les buffs, debuffs, afflictions de statut et capacites speciales
+
+---
+
+### ProjectileComponent
+
+**Package:** `com.hypixel.hytale.server.core.entity.entities`
+
+Le `ProjectileComponent` represente une entite projectile comme une fleche, un sort ou un objet lance. Il gere la physique des projectiles, la detection de collision, les degats a l'impact, et les effets visuels/audio.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/entity/entities/ProjectileComponent.java`
+
+```java
+public class ProjectileComponent implements Component<EntityStore> {
+   private static final double DEFAULT_DESPAWN_SECONDS = 60.0;
+   private transient SimplePhysicsProvider simplePhysicsProvider;
+   private transient String appearance = "Boy";
+   private transient Projectile projectile;
+   private String projectileAssetName;
+   private float brokenDamageModifier = 1.0F;
+   private double deadTimer = -1.0;
+   private UUID creatorUuid;
+   private boolean haveHit;
+
+   public static ComponentType<EntityStore, ProjectileComponent> getComponentType() {
+      return EntityModule.get().getProjectileComponentType();
+   }
+
+   // Methode factory pour creer des projectiles
+   @Nonnull public static Holder<EntityStore> assembleDefaultProjectile(
+      @Nonnull TimeResource time, @Nonnull String projectileAssetName,
+      @Nonnull Vector3d position, @Nonnull Vector3f rotation
+   );
+
+   // Tir
+   public void shoot(@Nonnull Holder<EntityStore> holder, @Nonnull UUID creatorUuid,
+                    double x, double y, double z, float yaw, float pitch);
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Defaut | Description |
+|-----------|------|--------|-------------|
+| `projectileAssetName` | String | - | ID d'asset pour la configuration du projectile |
+| `brokenDamageModifier` | float | 1.0 | Multiplicateur de degats (reduit pour munition cassee) |
+| `deadTimer` | double | -1.0 | Temps jusqu'a la suppression du projectile apres impact |
+| `creatorUuid` | UUID | - | UUID de l'entite qui a tire ce projectile |
+| `haveHit` | boolean | false | Si le projectile a touche quelque chose |
+
+**Comment utiliser:**
+
+```java
+// Creer un projectile
+TimeResource time = store.getResource(TimeResource.TYPE);
+Holder<EntityStore> projectileHolder = ProjectileComponent.assembleDefaultProjectile(
+    time,
+    "hytale:arrow",
+    position,
+    rotation
+);
+
+// Tirer le projectile
+ProjectileComponent projectile = projectileHolder.getComponent(ProjectileComponent.getComponentType());
+projectile.shoot(projectileHolder, shooterUuid, x, y, z, yaw, pitch);
+
+// Ajouter au monde
+Ref<EntityStore> projectileRef = store.addEntity(projectileHolder, AddReason.SPAWN);
+
+// Appliquer une penalite de degats pour arme cassee
+projectile.applyBrokenPenalty(0.25f);  // Reduction de degats de 25%
+```
+
+**Notes d'utilisation:**
+- Les projectiles incluent automatiquement `TransformComponent`, `Velocity`, `UUIDComponent` et `DespawnComponent`
+- Utilise `SimplePhysicsProvider` pour la trajectoire et la collision
+- Genere des particules et joue des sons au rebond, impact, rate et mort
+- Peut declencher des explosions a la mort via `ExplosionConfig`
+
+---
+
+### CollisionResultComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+Le `CollisionResultComponent` stocke les resultats de la detection de collision pour une entite. Il suit la position de depart de collision, le decalage, et si une verification de collision est en attente.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/CollisionResultComponent.java`
+
+```java
+public class CollisionResultComponent implements Component<EntityStore> {
+   private final CollisionResult collisionResult;
+   private final Vector3d collisionStartPosition;
+   private final Vector3d collisionPositionOffset;
+   private boolean pendingCollisionCheck;
+
+   public static ComponentType<EntityStore, CollisionResultComponent> getComponentType() {
+      return EntityModule.get().getCollisionResultComponentType();
+   }
+
+   public CollisionResult getCollisionResult();
+   public Vector3d getCollisionStartPosition();
+   public Vector3d getCollisionPositionOffset();
+   public boolean isPendingCollisionCheck();
+   public void markPendingCollisionCheck();
+   public void consumePendingCollisionCheck();
+   public void resetLocationChange();
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `collisionResult` | `CollisionResult` | Informations de collision detaillees |
+| `collisionStartPosition` | `Vector3d` | Position ou la verification de collision a commence |
+| `collisionPositionOffset` | `Vector3d` | Decalage de mouvement apres resolution de collision |
+| `pendingCollisionCheck` | boolean | Si une nouvelle verification de collision est necessaire |
+
+**Comment utiliser:**
+
+```java
+// Obtenir le resultat de collision pour une entite
+CollisionResultComponent collision = store.getComponent(ref, CollisionResultComponent.getComponentType());
+
+// Verifier si une collision s'est produite
+CollisionResult result = collision.getCollisionResult();
+if (result.hasCollided()) {
+    // Gerer la collision
+    Vector3d resolvedOffset = collision.getCollisionPositionOffset();
+}
+
+// Marquer pour re-verification apres mouvement
+collision.markPendingCollisionCheck();
+
+// Apres traitement de la collision
+collision.consumePendingCollisionCheck();
+collision.resetLocationChange();
+```
+
+**Notes d'utilisation:**
+- Utilise par les systemes de physique et de mouvement pour la resolution de collision
+- Les vecteurs "copy" sont utilises pour les operations thread-safe
+- Les verifications de collision sont regroupees et traitees par les systemes de collision
+- Fonctionne avec le composant `BoundingBox` pour les limites de l'entite
+
+---
+
+### PositionDataComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+Le `PositionDataComponent` suit les types de blocs dans lesquels une entite se trouve actuellement et sur lesquels elle se tient. Ceci est utilise pour l'audio de mouvement, les effets de statut et la logique de gameplay.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/PositionDataComponent.java`
+
+```java
+public class PositionDataComponent implements Component<EntityStore> {
+   private int insideBlockTypeId = 0;
+   private int standingOnBlockTypeId = 0;
+
+   public static ComponentType<EntityStore, PositionDataComponent> getComponentType() {
+      return EntityModule.get().getPositionDataComponentType();
+   }
+
+   public int getInsideBlockTypeId();
+   public void setInsideBlockTypeId(int insideBlockTypeId);
+   public int getStandingOnBlockTypeId();
+   public void setStandingOnBlockTypeId(int standingOnBlockTypeId);
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Defaut | Description |
+|-----------|------|--------|-------------|
+| `insideBlockTypeId` | int | 0 | ID du type de bloc dans lequel l'entite est (eau, lave, etc.) |
+| `standingOnBlockTypeId` | int | 0 | ID du type de bloc sur lequel l'entite se tient |
+
+**Comment utiliser:**
+
+```java
+// Obtenir les donnees de position
+PositionDataComponent posData = store.getComponent(ref, PositionDataComponent.getComponentType());
+
+// Verifier sur quel bloc l'entite se tient
+int standingBlockId = posData.getStandingOnBlockTypeId();
+BlockType blockType = BlockType.getAssetMap().getAsset(standingBlockId);
+if (blockType != null && blockType.getId().equals("hytale:ice")) {
+    // Appliquer la physique de glissement sur glace
+}
+
+// Verifier si l'entite est dans l'eau
+int insideBlockId = posData.getInsideBlockTypeId();
+BlockType insideBlock = BlockType.getAssetMap().getAsset(insideBlockId);
+if (insideBlock != null && insideBlock.isFluid()) {
+    // Appliquer la physique de nage
+}
+```
+
+**Notes d'utilisation:**
+- Mis a jour par les systemes de mouvement/position a chaque tick
+- Un ID de bloc de 0 signifie typiquement l'air (pas de bloc)
+- Utilise pour les sons de pas, les modificateurs de vitesse de mouvement et les effets de statut
+- Fonctionne avec `MovementAudioComponent` pour les sons de mouvement
+
+---
+
+### NewSpawnComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+Le `NewSpawnComponent` fournit une periode de grace apres l'apparition de l'entite. Pendant cette fenetre, certains systemes peuvent traiter l'entite differemment (ex: sauter le traitement initial).
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/NewSpawnComponent.java`
+
+```java
+public class NewSpawnComponent implements Component<EntityStore> {
+   private float newSpawnWindow;
+
+   public static ComponentType<EntityStore, NewSpawnComponent> getComponentType() {
+      return EntityModule.get().getNewSpawnComponentType();
+   }
+
+   public NewSpawnComponent(float newSpawnWindow);
+   public boolean newSpawnWindowPassed(float dt);
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `newSpawnWindow` | float | Temps restant dans la periode de grace d'apparition (secondes) |
+
+**Comment utiliser:**
+
+```java
+// Creer une entite avec protection d'apparition
+holder.addComponent(NewSpawnComponent.getComponentType(), new NewSpawnComponent(1.0f));  // 1 seconde
+
+// Verifier si la fenetre d'apparition est passee (dans un systeme)
+NewSpawnComponent spawn = chunk.getComponent(index, NewSpawnComponent.getComponentType());
+if (spawn != null && spawn.newSpawnWindowPassed(dt)) {
+    // Fenetre d'apparition expiree, supprimer le composant
+    commandBuffer.removeComponent(ref, NewSpawnComponent.getComponentType());
+}
+```
+
+**Notes d'utilisation:**
+- Retourne true et decremente le timer quand appele avec le delta time
+- Typiquement retire par un systeme une fois la fenetre expiree
+- Utilise pour empecher l'aggro immediate des NPC ou autres interactions non desirees
+- Composant de courte duree qui existe uniquement pendant la periode de grace d'apparition
+
+---
+
+### PropComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+Le `PropComponent` est un composant marqueur (tag) qui identifie une entite comme un accessoire. Les accessoires sont typiquement des objets decoratifs statiques ou du mobilier. Utilise le pattern singleton.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/PropComponent.java`
+
+```java
+public class PropComponent implements Component<EntityStore> {
+   public static final BuilderCodec<PropComponent> CODEC =
+       BuilderCodec.builder(PropComponent.class, PropComponent::new).build();
+   private static final PropComponent INSTANCE = new PropComponent();
+
+   public static ComponentType<EntityStore, PropComponent> getComponentType() {
+      return EntityModule.get().getPropComponentType();
+   }
+
+   public static PropComponent get() {
+      return INSTANCE;
+   }
+}
+```
+
+**Proprietes:**
+- Aucune (composant marqueur)
+
+**Comment ajouter/supprimer:**
+
+```java
+// Marquer une entite comme accessoire
+holder.addComponent(PropComponent.getComponentType(), PropComponent.get());
+
+// Verifier si une entite est un accessoire
+Archetype<EntityStore> archetype = store.getArchetype(ref);
+boolean isProp = archetype.contains(PropComponent.getComponentType());
+```
+
+**Notes d'utilisation:**
+- Utilise pour le mobilier, les decorations et les objets statiques
+- Les accessoires peuvent avoir une serialisation ou une gestion d'interaction speciale
+- Different des entites vivantes - les accessoires ne bougent typiquement pas et n'ont pas d'IA
+
+---
+
+### AudioComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+Le `AudioComponent` stocke les evenements sonores en attente a jouer a la position d'une entite. Les sons sont mis en file d'attente puis joues par le systeme audio.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/AudioComponent.java`
+
+```java
+public class AudioComponent implements Component<EntityStore> {
+   private IntList soundEventIds = new IntArrayList();
+   private boolean isNetworkOutdated = true;
+
+   public static ComponentType<EntityStore, AudioComponent> getComponentType() {
+      return EntityModule.get().getAudioComponentType();
+   }
+
+   public int[] getSoundEventIds();
+   public void addSound(int soundIndex);
+   public boolean consumeNetworkOutdated();
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `soundEventIds` | `IntList` | Liste des IDs d'evenements sonores a jouer |
+| `isNetworkOutdated` | boolean | Indicateur pour la synchronisation reseau |
+
+**Comment utiliser:**
+
+```java
+// Obtenir le composant audio
+AudioComponent audio = store.getComponent(ref, AudioComponent.getComponentType());
+
+// Mettre un son en file d'attente
+int soundIndex = SoundEvent.getAssetMap().getIndex("hytale:entity.hurt");
+audio.addSound(soundIndex);
+
+// Obtenir tous les sons en attente
+int[] sounds = audio.getSoundEventIds();
+
+// Verifier et consommer le flag reseau
+if (audio.consumeNetworkOutdated()) {
+    // Envoyer les sons aux clients
+}
+```
+
+**Notes d'utilisation:**
+- Les sons sont mis en file d'attente et joues a la position de l'entite
+- La synchronisation reseau assure que les clients entendent les sons d'entite
+- Utilise pour les sons specifiques aux entites (blesse, mort, attaque, etc.)
+- Fonctionne avec les systemes audio pour l'audio positionne en 3D
+
+---
+
+### PlayerSkinComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.player`
+
+Le `PlayerSkinComponent` stocke les donnees d'apparence/skin du joueur. Cela inclut la texture du skin, la personnalisation du modele et d'autres proprietes visuelles.
+
+**Fichier source:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/player/PlayerSkinComponent.java`
+
+```java
+public class PlayerSkinComponent implements Component<EntityStore> {
+   private final PlayerSkin playerSkin;
+   private boolean isNetworkOutdated = true;
+
+   public static ComponentType<EntityStore, PlayerSkinComponent> getComponentType() {
+      return EntityModule.get().getPlayerSkinComponentType();
+   }
+
+   public PlayerSkinComponent(@Nonnull PlayerSkin playerSkin);
+   public boolean consumeNetworkOutdated();
+   @Nonnull public PlayerSkin getPlayerSkin();
+   public void setNetworkOutdated();
+}
+```
+
+**Proprietes:**
+
+| Propriete | Type | Description |
+|-----------|------|-------------|
+| `playerSkin` | `PlayerSkin` | Donnees d'apparence/skin du joueur |
+| `isNetworkOutdated` | boolean | Indicateur pour la synchronisation reseau |
+
+**Comment utiliser:**
+
+```java
+// Obtenir le skin du joueur
+PlayerSkinComponent skinComp = store.getComponent(playerRef, PlayerSkinComponent.getComponentType());
+PlayerSkin skin = skinComp.getPlayerSkin();
+
+// Forcer la mise a jour du skin vers les clients
+skinComp.setNetworkOutdated();
+
+// Verifier si le skin a besoin d'etre synchronise
+if (skinComp.consumeNetworkOutdated()) {
+    // Envoyer les donnees du skin aux clients
+}
+```
+
+**Notes d'utilisation:**
+- Les donnees du skin sont typiquement recues du client a la connexion
+- Les changements de skin declenchent une synchronisation reseau vers les autres joueurs
+- Utilise par les systemes de modele/effet lors de l'application de changements visuels
+- Peut etre temporairement remplace par des effets (ex: deguisement)

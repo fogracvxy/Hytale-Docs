@@ -120,6 +120,8 @@ export const sidebarConfig: SidebarItem[] = [
           { titleKey: "collisionSystem", href: "/docs/modding/plugins/collision-system" },
           { titleKey: "staminaSystem", href: "/docs/modding/plugins/stamina-system" },
           { titleKey: "prefabSystem", href: "/docs/modding/plugins/prefab-system" },
+          { titleKey: "entityUI", href: "/docs/modding/plugins/entity-ui" },
+          { titleKey: "effectsSystem", href: "/docs/modding/plugins/effects-system" },
           {
             titleKey: "events",
             items: [

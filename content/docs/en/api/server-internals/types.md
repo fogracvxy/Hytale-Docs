@@ -740,4 +740,418 @@ com.hypixel.hytale.registry - Registry system
 
 ---
 
+## Extended Data Types
+
+This section provides additional data types discovered in the decompiled server code, including enums, configuration classes, and data structures for gameplay, permissions, combat, and world management.
+
+---
+
+### Movement and Animation Types
+
+#### MovementType
+
+`com.hypixel.hytale.protocol.MovementType`
+
+Defines the type of movement an entity is currently performing. Used by the animation and physics systems.
+
+| Value | ID | Description |
+|-------|-----|-------------|
+| `None` | 0 | No movement |
+| `Idle` | 1 | Entity is stationary but active |
+| `Crouching` | 2 | Entity is crouching/sneaking |
+| `Walking` | 3 | Walking at normal speed |
+| `Running` | 4 | Running at increased speed |
+| `Sprinting` | 5 | Sprinting at maximum speed |
+| `Climbing` | 6 | Climbing a ladder or surface |
+| `Swimming` | 7 | Swimming in water |
+| `Flying` | 8 | Flying (creative mode or glider) |
+| `Sliding` | 9 | Sliding on a surface |
+| `Rolling` | 10 | Rolling dodge movement |
+| `Mounting` | 11 | Riding a mount at normal speed |
+| `SprintMounting` | 12 | Riding a mount while sprinting |
+
+**Source:** `com/hypixel/hytale/protocol/MovementType.java`
+
+**Usage Example:**
+```java
+MovementType currentMovement = entity.getMovementType();
+if (currentMovement == MovementType.Sprinting) {
+    // Apply stamina drain
+}
+```
+
+---
+
+#### AnimationSlot
+
+`com.hypixel.hytale.protocol.AnimationSlot`
+
+Defines the animation layer slots used by the entity animation system. Multiple animations can play simultaneously on different slots.
+
+| Value | ID | Description |
+|-------|-----|-------------|
+| `Movement` | 0 | Base movement animations (walk, run, idle) |
+| `Status` | 1 | Status effect animations (stunned, poisoned) |
+| `Action` | 2 | Action animations (attack, use item) |
+| `Face` | 3 | Facial expressions and head movements |
+| `Emote` | 4 | Emote/gesture animations |
+
+**Source:** `com/hypixel/hytale/protocol/AnimationSlot.java`
+
+**Usage Context:** The animation system uses slots to blend multiple animations. For example, a character can walk (Movement slot) while showing a poisoned expression (Status slot) and waving (Emote slot) simultaneously.
+
+---
+
+### Connection Types
+
+#### DisconnectType
+
+`com.hypixel.hytale.protocol.packets.connection.DisconnectType`
+
+Specifies the reason for a client disconnection from the server.
+
+| Value | ID | Description |
+|-------|-----|-------------|
+| `Disconnect` | 0 | Normal disconnection (player quit, kicked, etc.) |
+| `Crash` | 1 | Disconnection due to a crash or error |
+
+**Source:** `com/hypixel/hytale/protocol/packets/connection/DisconnectType.java`
+
+---
+
+### Visual and Rendering Types
+
+#### ShadingMode
+
+`com.hypixel.hytale.protocol.ShadingMode`
+
+Defines the shading mode for block rendering.
+
+| Value | ID | Description |
+|-------|-----|-------------|
+| `Standard` | 0 | Standard lighting and shadows |
+| `Flat` | 1 | Flat shading without gradients |
+| `Fullbright` | 2 | No shadows, full brightness |
+| `Reflective` | 3 | Reflective surface shading |
+
+**Source:** `com/hypixel/hytale/protocol/ShadingMode.java`
+
+---
+
+### Permission System
+
+The permission system controls access to commands, features, and editor functionality.
+
+#### HytalePermissions
+
+`com.hypixel.hytale.server.core.permissions.HytalePermissions`
+
+Defines the built-in permission strings used by the Hytale server.
+
+| Permission | Description |
+|------------|-------------|
+| `hytale.command` | Base permission for commands |
+| `hytale.editor.asset` | Asset editor access |
+| `hytale.editor.packs.create` | Create asset packs |
+| `hytale.editor.packs.edit` | Edit asset packs |
+| `hytale.editor.packs.delete` | Delete asset packs |
+| `hytale.editor.builderTools` | Builder tools editor access |
+| `hytale.editor.brush.use` | Use brushes |
+| `hytale.editor.brush.config` | Configure brushes |
+| `hytale.editor.prefab.use` | Use prefabs |
+| `hytale.editor.prefab.manage` | Manage prefabs |
+| `hytale.editor.selection.use` | Use selection tools |
+| `hytale.editor.selection.clipboard` | Use clipboard operations |
+| `hytale.editor.selection.modify` | Modify selections |
+| `hytale.editor.history` | Access edit history (undo/redo) |
+| `hytale.camera.flycam` | Use fly camera mode |
+
+**Source:** `com/hypixel/hytale/server/core/permissions/HytalePermissions.java`
+
+**Usage Example:**
+```java
+// Check if a player has permission
+if (player.hasPermission("hytale.editor.builderTools")) {
+    // Enable builder tools
+}
+
+// Generate command permission
+String permission = HytalePermissions.fromCommand("teleport");
+// Returns "hytale.command.teleport"
+```
+
+---
+
+#### PermissionProvider
+
+`com.hypixel.hytale.server.core.permissions.provider.PermissionProvider`
+
+Interface for implementing custom permission systems.
+
+| Method | Description |
+|--------|-------------|
+| `getName()` | Returns the provider name |
+| `addUserPermissions(UUID, Set<String>)` | Add permissions to a user |
+| `removeUserPermissions(UUID, Set<String>)` | Remove permissions from a user |
+| `getUserPermissions(UUID)` | Get all user permissions |
+| `addGroupPermissions(String, Set<String>)` | Add permissions to a group |
+| `removeGroupPermissions(String, Set<String>)` | Remove permissions from a group |
+| `getGroupPermissions(String)` | Get all group permissions |
+| `addUserToGroup(UUID, String)` | Add user to a permission group |
+| `removeUserFromGroup(UUID, String)` | Remove user from a group |
+| `getGroupsForUser(UUID)` | Get all groups for a user |
+
+**Source:** `com/hypixel/hytale/server/core/permissions/provider/PermissionProvider.java`
+
+---
+
+#### PermissionHolder
+
+`com.hypixel.hytale.server.core.permissions.PermissionHolder`
+
+Interface for entities that can hold permissions.
+
+| Method | Description |
+|--------|-------------|
+| `hasPermission(String)` | Check if holder has a permission |
+| `hasPermission(String, boolean)` | Check permission with default value |
+
+**Source:** `com/hypixel/hytale/server/core/permissions/PermissionHolder.java`
+
+---
+
+### World Configuration
+
+#### WorldConfig (Runtime)
+
+`com.hypixel.hytale.server.core.universe.world.WorldConfig`
+
+Complete world configuration for runtime world management.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `UUID` | `UUID` | Random | Unique world identifier |
+| `DisplayName` | `String` | - | Player-facing world name |
+| `Seed` | `long` | Current time | World generation seed |
+| `SpawnProvider` | `ISpawnProvider` | null | Controls spawn location |
+| `WorldGen` | `IWorldGenProvider` | Default | World generator |
+| `WorldMap` | `IWorldMapProvider` | Default | World map provider |
+| `ChunkStorage` | `IChunkStorageProvider` | Default | Chunk storage system |
+| `IsTicking` | `boolean` | true | Enable chunk ticking |
+| `IsBlockTicking` | `boolean` | true | Enable block ticking |
+| `IsPvpEnabled` | `boolean` | false | Enable player vs player |
+| `IsFallDamageEnabled` | `boolean` | true | Enable fall damage |
+| `IsGameTimePaused` | `boolean` | false | Pause day/night cycle |
+| `GameTime` | `Instant` | 5:30 AM | Current game time |
+| `ForcedWeather` | `String` | null | Force specific weather |
+| `GameMode` | `GameMode` | Server default | Default game mode |
+| `IsSpawningNPC` | `boolean` | true | Allow NPC spawning |
+| `IsSpawnMarkersEnabled` | `boolean` | true | Show spawn markers |
+| `IsAllNPCFrozen` | `boolean` | false | Freeze all NPCs |
+| `GameplayConfig` | `String` | "Default" | Gameplay config reference |
+| `IsSavingPlayers` | `boolean` | true | Save player data |
+| `IsSavingChunks` | `boolean` | true | Save chunk data |
+| `SaveNewChunks` | `boolean` | true | Save newly generated chunks |
+| `IsUnloadingChunks` | `boolean` | true | Allow chunk unloading |
+| `DeleteOnUniverseStart` | `boolean` | false | Delete world on server start |
+| `DeleteOnRemove` | `boolean` | false | Delete files when removed |
+
+**Source:** `com/hypixel/hytale/server/core/universe/world/WorldConfig.java`
+
+**JSON Example:**
+```json
+{
+  "DisplayName": "Adventure World",
+  "Seed": 12345,
+  "IsPvpEnabled": true,
+  "IsFallDamageEnabled": true,
+  "GameMode": "Adventure",
+  "DaytimeDurationSeconds": 1200,
+  "NighttimeDurationSeconds": 600
+}
+```
+
+---
+
+#### WorldConfig (Gameplay Asset)
+
+`com.hypixel.hytale.server.core.asset.type.gameplay.WorldConfig`
+
+World configuration as part of gameplay config assets.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `AllowBlockBreaking` | `boolean` | true | Allow players to break blocks |
+| `AllowBlockGathering` | `boolean` | true | Allow resource gathering |
+| `AllowBlockPlacement` | `boolean` | true | Allow block placement |
+| `BlockPlacementFragilityTimer` | `float` | 0 | Seconds blocks are fragile after placement |
+| `DaytimeDurationSeconds` | `int` | 1728 | Real seconds for daytime (29 minutes) |
+| `NighttimeDurationSeconds` | `int` | 1728 | Real seconds for nighttime (29 minutes) |
+| `TotalMoonPhases` | `int` | 5 | Number of moon phases |
+| `Sleep` | `SleepConfig` | Default | Sleep configuration |
+
+**Source:** `com/hypixel/hytale/server/core/asset/type/gameplay/WorldConfig.java`
+
+**Note:** Default day/night cycle is 48 real minutes (2880 seconds total), with equal day and night periods of 1728 seconds each.
+
+---
+
+#### SleepConfig
+
+`com.hypixel.hytale.server.core.asset.type.gameplay.SleepConfig`
+
+Configuration for sleeping mechanics in worlds.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `WakeUpHour` | `float` | 5.5 | In-game hour when players wake up (5:30 AM) |
+| `AllowedSleepHoursRange` | `double[2]` | null | Hour range when sleeping is allowed |
+
+**Source:** `com/hypixel/hytale/server/core/asset/type/gameplay/SleepConfig.java`
+
+**JSON Example:**
+```json
+{
+  "Sleep": {
+    "WakeUpHour": 6.0,
+    "AllowedSleepHoursRange": [20.0, 6.0]
+  }
+}
+```
+
+---
+
+### Combat Configuration
+
+#### CombatConfig
+
+`com.hypixel.hytale.server.core.asset.type.gameplay.CombatConfig`
+
+Configuration for combat mechanics.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `OutOfCombatDelaySeconds` | `Duration` | 5000ms | Delay before considered out of combat |
+| `StaminaBrokenEffectId` | `String` | "Stamina_Broken" | Effect applied when stamina depleted |
+| `DisplayHealthBars` | `boolean` | true | Show health bars above entities |
+| `DisplayCombatText` | `boolean` | true | Show damage numbers |
+| `DisableNPCIncomingDamage` | `boolean` | false | Make NPCs invulnerable |
+| `DisablePlayerIncomingDamage` | `boolean` | false | Make players invulnerable |
+
+**Source:** `com/hypixel/hytale/server/core/asset/type/gameplay/CombatConfig.java`
+
+**JSON Example:**
+```json
+{
+  "Combat": {
+    "OutOfCombatDelaySeconds": 8,
+    "DisplayHealthBars": true,
+    "DisplayCombatText": true,
+    "DisablePlayerIncomingDamage": false
+  }
+}
+```
+
+---
+
+### Death and Respawn Configuration
+
+#### DeathConfig
+
+`com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig`
+
+Configuration for death and item loss mechanics.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `RespawnController` | `RespawnController` | HomeOrSpawnPoint | Determines respawn location |
+| `ItemsLossMode` | `ItemsLossMode` | NONE | How items are lost on death |
+| `ItemsAmountLossPercentage` | `double` | 10.0 | Percentage of items lost (0-100) |
+| `ItemsDurabilityLossPercentage` | `double` | 10.0 | Durability lost on death (0-100) |
+
+**Source:** `com/hypixel/hytale/server/core/asset/type/gameplay/DeathConfig.java`
+
+---
+
+#### ItemsLossMode
+
+`com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig.ItemsLossMode`
+
+Defines how items are lost upon death.
+
+| Value | Description |
+|-------|-------------|
+| `NONE` | No items are lost |
+| `ALL` | All items are lost |
+| `CONFIGURED` | Use configured percentage for items with `DropOnDeath=true` |
+
+**Source:** `com/hypixel/hytale/server/core/asset/type/gameplay/DeathConfig.java`
+
+---
+
+### Gameplay Configuration
+
+#### GameplayConfig
+
+`com.hypixel.hytale.server.core.asset.type.gameplay.GameplayConfig`
+
+Master configuration for gameplay mechanics, combining multiple sub-configurations.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `String` | Configuration identifier (e.g., "Default") |
+| `Gathering` | `GatheringConfig` | Resource gathering settings |
+| `World` | `WorldConfig` | World mechanics settings |
+| `WorldMap` | `WorldMapConfig` | World map settings |
+| `Death` | `DeathConfig` | Death and respawn settings |
+| `Respawn` | `RespawnConfig` | Respawn mechanics |
+| `ShowItemPickupNotifications` | `boolean` | Show item pickup UI |
+| `ItemDurability` | `ItemDurabilityConfig` | Durability settings |
+| `ItemEntity` | `ItemEntityConfig` | Dropped item settings |
+| `Combat` | `CombatConfig` | Combat mechanics |
+| `Player` | `PlayerConfig` | Player settings |
+| `CameraEffects` | `CameraEffectsConfig` | Camera effect settings |
+| `Crafting` | `CraftingConfig` | Crafting settings |
+| `Spawn` | `SpawnConfig` | Spawning settings |
+| `MaxEnvironmentalNPCSpawns` | `int` | Max NPC spawns (-1 for infinite) |
+| `CreativePlaySoundSet` | `String` | Sound set for creative mode |
+
+**Source:** `com/hypixel/hytale/server/core/asset/type/gameplay/GameplayConfig.java`
+
+**JSON Example:**
+```json
+{
+  "Id": "Adventure",
+  "World": {
+    "AllowBlockBreaking": true,
+    "DaytimeDurationSeconds": 1200
+  },
+  "Combat": {
+    "DisplayHealthBars": true,
+    "OutOfCombatDelaySeconds": 5
+  },
+  "Death": {
+    "ItemsLossMode": "CONFIGURED",
+    "ItemsAmountLossPercentage": 25.0
+  },
+  "MaxEnvironmentalNPCSpawns": 300
+}
+```
+
+---
+
+## Source Package Reference
+
+| Package | Contents |
+|---------|----------|
+| `com.hypixel.hytale.protocol` | Protocol enums and data types |
+| `com.hypixel.hytale.protocol.packets.connection` | Connection-related packets |
+| `com.hypixel.hytale.protocol.packets.setup` | Setup packets (WorldSettings) |
+| `com.hypixel.hytale.server.core.permissions` | Permission system |
+| `com.hypixel.hytale.server.core.permissions.provider` | Permission providers |
+| `com.hypixel.hytale.server.core.universe.world` | World management |
+| `com.hypixel.hytale.server.core.asset.type.gameplay` | Gameplay configuration assets |
+
+---
+
 *Documentation generated from decompiled Hytale server code.*

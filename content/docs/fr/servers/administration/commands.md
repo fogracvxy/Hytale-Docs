@@ -2601,3 +2601,530 @@ Affiche un titre d'evenement a tous les joueurs.
 /eventtitle --major Victoire !
 /eventtitle --secondary="Evenement Mondial" Le Dragon S'eveille
 ```
+
+---
+
+## Commandes de Debogage Supplementaires
+
+Commandes avancees de debogage et de test.
+
+### debugplayerposition
+
+Affiche des informations detaillees de position et rotation pour le debogage.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/debugplayerposition` |
+
+**Informations affichees :**
+- Position du corps (X, Y, Z)
+- Rotation du corps (Tangage, Lacet, Roulis)
+- Rotation de la tete (Tangage, Lacet, Roulis)
+- Statut de teleportation en attente
+- Sphere de debogage visuelle a la position du joueur
+
+**Exemples :**
+```
+/debugplayerposition
+```
+
+---
+
+### hitdetection
+
+Bascule le debogage visuel pour la detection des coups.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/hitdetection` |
+
+**Notes :**
+- Active/desactive l'affichage de debogage visuel pour les interactions de selection
+- Utile pour deboguer les hitbox de combat et d'interaction
+
+**Exemples :**
+```
+/hitdetection
+```
+
+---
+
+### hudtest
+
+Teste l'affichage et le masquage des composants HUD.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/hudtest [--reset] [joueur]` |
+
+**Parametres :**
+- `--reset` (drapeau) - Afficher la barre rapide au lieu de la cacher
+- `joueur` (optionnel) - Joueur cible
+
+**Notes :**
+- Sans `--reset`, cache le composant HUD de la barre rapide
+- Avec `--reset`, affiche le composant HUD de la barre rapide
+
+**Exemples :**
+```
+/hudtest
+/hudtest --reset
+/hudtest NomJoueur
+```
+
+---
+
+### messagetest
+
+Teste l'envoi de messages avec des parametres de message traduits imbriques.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/messagetest` |
+| **Alias** | `msgtest` |
+
+**Notes :**
+- Commande developpeur pour tester le systeme de traduction de messages
+- Affiche un exemple de message traduit imbrique
+
+**Exemples :**
+```
+/messagetest
+/msgtest
+```
+
+---
+
+### builderToolsLegend
+
+Affiche ou cache la legende HUD des outils de construction.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/builderToolsLegend [--hide]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `--hide` (drapeau) - Cacher la legende des outils de construction au lieu de l'afficher
+
+**Notes :**
+- Affiche toujours le selecteur d'emplacement de materiau
+- Affiche/cache le panneau de legende des outils de construction
+
+**Exemples :**
+```
+/builderToolsLegend
+/builderToolsLegend --hide
+```
+
+---
+
+### networkChunkSending
+
+Controle si les chunks sont envoyes sur le reseau au joueur.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/networkChunkSending <active>` |
+
+**Parametres :**
+- `active` - Valeur booleenne (true/false) pour activer ou desactiver l'envoi de chunks
+
+**Notes :**
+- Utile pour deboguer la transmission reseau des chunks
+- La desactivation empeche l'envoi de nouveaux chunks au joueur
+
+**Exemples :**
+```
+/networkChunkSending true
+/networkChunkSending false
+```
+
+---
+
+### pidcheck
+
+Verifie si un ID de processus est en cours d'execution.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/pidcheck [--singleplayer] [pid]` |
+
+**Parametres :**
+- `--singleplayer` (drapeau) - Verifier le PID client en mode solo
+- `pid` (optionnel) - ID de processus a verifier
+
+**Notes :**
+- En mode solo, verifie si le processus client est toujours en cours
+- Utile pour deboguer la gestion des processus et le cycle de vie du serveur
+
+**Exemples :**
+```
+/pidcheck 12345
+/pidcheck --singleplayer
+```
+
+---
+
+### validatecpb
+
+Valide et teste le chargement des fichiers prefab.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/validatecpb [chemin]` |
+
+**Parametres :**
+- `chemin` (optionnel) - Chemin specifique a valider. Si non fourni, valide tous les packs d'assets.
+
+**Notes :**
+- Charge et valide de maniere asynchrone tous les fichiers `.prefab.json`
+- Signale les erreurs pour les blocs ou modeles d'entites manquants
+- Les resultats sont enregistres dans la console
+
+**Exemples :**
+```
+/validatecpb
+/validatecpb C:/chemin/vers/assets
+```
+
+---
+
+## Commandes Collision Hitbox
+
+Commandes pour gerer les composants de collision hitbox sur les entites.
+
+### hitboxcollision
+
+Commande parente pour la gestion des collisions hitbox.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/hitboxcollision <sous-commande>` |
+
+**Sous-commandes :**
+- `add` - Ajouter une collision hitbox a une entite
+- `remove` - Retirer une collision hitbox d'une entite
+
+---
+
+### hitboxcollision add
+
+Ajoute un composant de collision hitbox a une entite.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/hitboxcollision add <entity\|self> <hitboxCollisionConfig> [entite]` |
+
+**Sous-commandes :**
+- `entity` - Ajouter une collision hitbox a une entite specifique
+- `self` - Ajouter une collision hitbox a soi-meme ou au joueur cible
+
+**Parametres :**
+- `hitboxCollisionConfig` - L'asset de configuration de collision hitbox
+- `entite` (optionnel) - ID de l'entite cible
+
+**Exemples :**
+```
+/hitboxcollision add entity Player_Hitbox 12345
+/hitboxcollision add self Player_Hitbox
+```
+
+---
+
+### hitboxcollision remove
+
+Retire le composant de collision hitbox d'une entite.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/hitboxcollision remove <entity\|self> [entite]` |
+
+**Sous-commandes :**
+- `entity` - Retirer la collision hitbox d'une entite specifique
+- `self` - Retirer la collision hitbox de soi-meme ou du joueur cible
+
+**Parametres :**
+- `entite` (optionnel) - ID de l'entite cible
+
+**Exemples :**
+```
+/hitboxcollision remove entity 12345
+/hitboxcollision remove self
+```
+
+---
+
+## Commandes Repulsion
+
+Commandes pour gerer les composants de repulsion des entites (effets de recul).
+
+### repulsion
+
+Commande parente pour la gestion de la repulsion.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/repulsion <sous-commande>` |
+
+**Sous-commandes :**
+- `add` - Ajouter une repulsion a une entite
+- `remove` - Retirer une repulsion d'une entite
+
+---
+
+### repulsion add
+
+Ajoute un composant de repulsion a une entite.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/repulsion add <entity\|self> <repulsionConfig> [entite]` |
+
+**Sous-commandes :**
+- `entity` - Ajouter une repulsion a une entite specifique
+- `self` - Ajouter une repulsion a soi-meme ou au joueur cible
+
+**Parametres :**
+- `repulsionConfig` - L'asset de configuration de repulsion
+- `entite` (optionnel) - ID de l'entite cible
+
+**Exemples :**
+```
+/repulsion add entity Standard_Repulsion 12345
+/repulsion add self Player_Repulsion
+```
+
+---
+
+### repulsion remove
+
+Retire le composant de repulsion d'une entite.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/repulsion remove <entity\|self> [entite]` |
+
+**Sous-commandes :**
+- `entity` - Retirer la repulsion d'une entite specifique
+- `self` - Retirer la repulsion de soi-meme ou du joueur cible
+
+**Parametres :**
+- `entite` (optionnel) - ID de l'entite cible
+
+**Exemples :**
+```
+/repulsion remove entity 12345
+/repulsion remove self
+```
+
+---
+
+## Commandes de Mise a Jour Git
+
+Commandes pour gerer les assets et prefabs via les operations Git.
+
+### update
+
+Commande parente pour les operations de mise a jour Git.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/update <sous-commande>` |
+
+**Sous-commandes :**
+- `assets` - Gerer le depot d'assets
+- `prefabs` - Gerer le depot de prefabs
+
+---
+
+### update assets
+
+Operations Git pour le depot d'assets.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/update assets <sous-commande>` |
+
+**Sous-commandes :**
+
+| Sous-commande | Syntaxe | Description |
+|---------------|---------|-------------|
+| `status` | `/update assets status` | Executer git status sur les assets |
+| `reset` | `/update assets reset` | Reinitialiser les assets au HEAD (git reset --hard head) |
+| `pull` | `/update assets pull` | Tirer les derniers changements d'assets |
+
+**Exemples :**
+```
+/update assets status
+/update assets pull
+/update assets reset
+```
+
+---
+
+### update prefabs
+
+Operations Git pour le depot de prefabs.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/update prefabs <sous-commande>` |
+
+**Sous-commandes :**
+
+| Sous-commande | Syntaxe | Description |
+|---------------|---------|-------------|
+| `status` | `/update prefabs status` | Executer git status sur les prefabs |
+| `commit` | `/update prefabs commit` | Valider les changements de prefabs |
+| `pull` | `/update prefabs pull` | Tirer les derniers changements de prefabs |
+| `push` | `/update prefabs push` | Pousser les changements de prefabs vers le distant |
+| `all` | `/update prefabs all` | Valider, tirer et pousser tous les changements |
+
+**Notes :**
+- Les messages de commit incluent automatiquement le nom d'affichage de l'expediteur
+- Les operations sont effectuees sur le depot principal et les sous-modules
+
+**Exemples :**
+```
+/update prefabs status
+/update prefabs commit
+/update prefabs pull
+/update prefabs push
+/update prefabs all
+```
+
+---
+
+## Meta Commandes
+
+Commandes pour inspecter et exporter les informations du systeme de commandes.
+
+### commands dump
+
+Exporte toutes les commandes enregistrees vers un fichier JSON.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/commands dump` |
+
+**Notes :**
+- Cree un fichier JSON a `dumps/commands.dump.json`
+- Contient les noms de commandes, noms de classes, proprietaires et permissions
+- Utile pour le debogage et la documentation
+
+**Exemples :**
+```
+/commands dump
+```
+
+---
+
+## Commandes Instantane d'Entite
+
+Commandes pour gerer l'historique des instantanes d'entites (utilise pour la compensation de latence et le replay).
+
+### entity snapshot
+
+Commande parente pour les operations d'instantane d'entite.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/entity snapshot <sous-commande>` |
+| **Alias** | `snap` |
+
+**Sous-commandes :**
+- `length` - Definir la longueur de l'historique des instantanes
+- `history` - Visualiser l'historique des instantanes
+
+---
+
+### entity snapshot length
+
+Definit la longueur de l'historique des instantanes d'entites.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/entity snapshot length <longueur>` |
+
+**Parametres :**
+- `longueur` - Longueur de l'historique en millisecondes
+
+**Notes :**
+- Controle jusqu'ou les positions des entites sont tracees
+- Utilise pour la compensation de latence cote serveur
+
+**Exemples :**
+```
+/entity snapshot length 500
+/entity snapshot length 1000
+```
+
+---
+
+### entity snapshot history
+
+Visualise l'historique des instantanes d'entites avec des effets de particules.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/entity snapshot history` |
+
+**Notes :**
+- Fait apparaitre des effets de particules aux positions historiques des entites
+- Affiche toutes les positions tracees du tick le plus ancien au tick actuel
+- Utile pour deboguer le suivi de position des entites
+
+**Exemples :**
+```
+/entity snapshot history
+```
+
+---
+
+## Commandes Chunk Supplementaires
+
+### chunk lighting
+
+Exporte les donnees d'octree d'eclairage du chunk dans le journal du serveur.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/chunk lighting <x> <y> <z>` |
+
+**Parametres :**
+- `x y z` - Coordonnees de bloc (supporte les coordonnees relatives avec ~)
+
+**Notes :**
+- Exporte la structure d'octree d'eclairage dans le journal du serveur
+- Le chunk doit etre charge
+- Utile pour deboguer les problemes d'eclairage
+
+**Exemples :**
+```
+/chunk lighting 0 64 0
+/chunk lighting ~ ~ ~
+```
+
+---
+
+## Commandes Stats Serveur Supplementaires
+
+### server stats gc
+
+Affiche les statistiques du ramasse-miettes.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/server stats gc` |
+
+**Informations affichees :**
+- Nom du collecteur GC
+- Noms des pools de memoire
+- Nombre de collections
+- Temps total de collection
+
+**Exemples :**
+```
+/server stats gc
+```

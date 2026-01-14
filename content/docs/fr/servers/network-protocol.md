@@ -1486,3 +1486,460 @@ Les paquets d'effets gerent les effets visuels et le post-traitement.
 - `6` - Memories : Interface de memoire/journal
 
 **Taille fixe :** 1 octet
+
+---
+
+### Paquets de Craft
+
+Les paquets de craft gerent la gestion des recettes et les operations de fabrication.
+
+#### CraftItemAction (Action de Fenetre)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande de fabrication d'un objet en utilisant l'interface de craft actuelle. Envoye comme WindowAction dans le paquet SendWindowAction.
+
+| Champ | Type | Taille | Description |
+|-------|------|--------|-------------|
+| craftCount | int32 LE | 4 | Nombre d'objets a fabriquer |
+
+**Taille fixe :** 4 octets
+
+#### CraftRecipeAction (Action de Fenetre)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande de fabrication d'une recette specifique par ID. Utilise avec la fonctionnalite du livre de recettes.
+
+| Champ | Type | Taille | Description |
+|-------|------|--------|-------------|
+| recipeIdOffset | int32 LE | 4 | Offset vers la chaine d'ID de recette |
+| craftCount | int32 LE | 4 | Nombre de fois a fabriquer |
+| recipeId | VarString | Variable | Chaine d'identifiant de recette |
+
+**Taille fixe :** 8 octets (minimum)
+**Taille maximale :** 16 384 012 octets
+
+#### CancelCraftingAction (Action de Fenetre)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Annule une operation de craft en cours.
+
+| Champ | Type | Taille | Description |
+|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Action vide |
+
+**Taille fixe :** 0 octets
+
+#### UpdateRecipes (Paquet d'Assets)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Envoie le registre complet des recettes au client pendant la phase de configuration.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = recettes presentes |
+| 1 | recipes | RecipeData[] | Variable | Tableau de definitions de recettes |
+
+**Taille maximale :** 1 677 721 600 octets
+
+#### UpdateKnownRecipes (ID 221)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour la liste des recettes debloquees/connues du client.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = recettes presentes |
+| 1 | recipes | String[] | Variable | Tableau d'IDs de recettes connues |
+
+**Taille maximale :** 1 677 721 600 octets
+
+---
+
+### Paquets de Monture/PNJ
+
+Les paquets de monture et PNJ gerent les mecaniques de chevauchement et les interactions avec les PNJ.
+
+#### MountNPC (ID 192)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande de monter une entite PNJ (creature chevauchable, vehicule).
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | networkId | int32 LE | 4 | ID reseau de l'entite a monter |
+
+**Taille fixe :** 4 octets
+
+#### DismountNPC (ID 193)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande de descendre de l'entite actuellement montee.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Paquet vide |
+
+**Taille fixe :** 0 octets
+
+#### SyncInteractionChain (ID 290)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Synchronise l'etat d'une chaine d'interaction avec le serveur. Utilise pour les dialogues PNJ complexes ou les interactions en plusieurs etapes.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Indicateurs de presence |
+| 1 | interactionChainId | int32 LE | 4 | Identifiant de la chaine d'interaction |
+| 5 | stringOffset | int32 LE | 4 | Offset vers les donnees de chaine |
+| 9+ | (Donnees variables) | Variable | Variable | Donnees de la chaine d'interaction |
+
+**Taille fixe :** 9 octets (minimum)
+**Taille maximale :** 16 384 013 octets
+
+---
+
+### Paquets d'Acces Serveur/Permissions
+
+Les paquets d'acces serveur controlent les permissions des joueurs et l'accessibilite du serveur dans les mondes solo.
+
+#### UpdateServerAccess (ID 251)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Notifie le client des parametres d'acces serveur mis a jour. Utilise quand l'hote change l'acces LAN/amis.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | access | octet | 1 | Valeur enum Access |
+
+**Valeurs Access :**
+- `0` - Private : Pas d'acces externe
+- `1` - LAN : Acces reseau local uniquement
+- `2` - Friend : Les amis peuvent rejoindre
+- `3` - Open : N'importe qui peut rejoindre
+
+**Taille fixe :** 1 octet
+
+#### SetServerAccess (ID 252)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande du client pour changer le niveau d'acces du serveur (hote uniquement).
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | access | octet | 1 | Valeur enum Access desiree |
+
+**Taille fixe :** 1 octet
+
+---
+
+### Paquets de Chargement d'Assets
+
+Les paquets d'assets gerent le transfert et la synchronisation des assets de jeu pendant la configuration de connexion.
+
+#### AssetInitialize (ID 21)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Initie le transfert d'assets, fournissant des metadonnees sur les assets a envoyer.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Indicateurs de presence |
+| 1 | totalParts | int32 LE | 4 | Nombre total de parties d'assets |
+| 5 | totalSize | int64 LE | 8 | Taille totale de tous les assets en octets |
+| 13 | hashOffset | int32 LE | 4 | Offset vers la chaine de hachage d'asset |
+| 17+ | hash | VarString | Variable | Hachage du bundle d'assets pour mise en cache |
+
+**Taille fixe :** 17 octets (minimum)
+**Taille maximale :** 16 384 021 octets
+
+#### AssetPart (ID 22)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Transfere un morceau de donnees d'asset. Les gros assets sont divises en plusieurs parties.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = donnees presentes |
+| 1 | partIndex | int32 LE | 4 | Index de cette partie (base 0) |
+| 5 | data | byte[] | Variable | Morceau de donnees d'asset |
+
+**Taille maximale :** 1 677 721 600 octets
+
+#### AssetFinalize (ID 24)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Signale la fin du transfert d'assets, permettant au client de finaliser le chargement.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Paquet vide |
+
+**Taille fixe :** 0 octets
+
+#### RequestAssets (ID 23)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Le client demande les donnees d'assets au serveur.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = hachage present |
+| 1 | hash | VarString | Variable | Hachage d'asset en cache du client (pour mises a jour delta) |
+
+**Taille fixe :** 1 octet (minimum)
+**Taille maximale :** 16 384 006 octets
+
+---
+
+### Paquets de Configuration du Monde
+
+Les paquets de configuration du monde configurent les parametres du monde pendant la phase de configuration.
+
+#### WorldSettings (ID 20)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Envoie la configuration du monde incluant la hauteur et les assets requis.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = requiredAssets present |
+| 1 | worldHeight | int32 LE | 4 | Hauteur maximale du monde en blocs |
+| 5 | requiredAssets | Asset[] | Variable | Tableau de definitions d'assets requis |
+
+**Taille fixe :** 5 octets (minimum)
+**Taille maximale :** 1 677 721 600 octets
+
+#### ServerTags (ID 34)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Envoie les tags definis par le serveur utilises pour les mecaniques de jeu et le filtrage.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = tags presents |
+| 1 | tags | `Map<String, int32>` | Variable | Dictionnaire de noms de tags vers IDs |
+
+**Taille maximale :** 1 677 721 600 octets
+
+---
+
+### Paquets de Fluides/Generation du Monde
+
+Les paquets de fluides et generation du monde gerent les caracteristiques du terrain comme l'eau et la lave.
+
+#### SetFluids (ID 136)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Definit les donnees de fluides pour une section de chunk.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = donnees presentes |
+| 1 | x | int32 LE | 4 | Coordonnee X du chunk |
+| 5 | y | int32 LE | 4 | Coordonnee Y du chunk |
+| 9 | z | int32 LE | 4 | Coordonnee Z du chunk |
+| 13 | data | byte[] | Variable | Donnees de niveau de fluide compressees (max 4 096 000 octets) |
+
+**Taille fixe :** 13 octets (minimum)
+**Taille maximale :** 4 096 018 octets
+
+---
+
+### Paquets de Sommeil/Temps
+
+Les paquets de sommeil gerent les mecaniques de sommeil multijoueur pour la progression du temps.
+
+#### UpdateSleepState (ID 157)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour l'interface de sommeil du client et synchronise la progression du sommeil.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = horloge presente, bit 1 = multijoueur present |
+| 1 | grayFade | octet | 1 | Booleen : activer le fondu gris de l'ecran |
+| 2 | sleepUi | octet | 1 | Booleen : afficher l'interface de sommeil |
+| 3 | clock | SleepClock | 33 | Donnees de l'horloge de sommeil (optionnel) |
+| 36 | multiplayer | SleepMultiplayer | Variable | Info sommeil multijoueur (optionnel) |
+
+**Structure SleepClock (33 octets) :**
+
+| Champ | Type | Taille | Description |
+|-------|------|--------|-------------|
+| startGametime | InstantData | 12 | Heure de jeu au debut du sommeil (optionnel) |
+| targetGametime | InstantData | 12 | Heure de reveil cible (optionnel) |
+| progress | float LE | 4 | Progression du sommeil (0.0-1.0) |
+| durationSeconds | float LE | 4 | Duree du sommeil en secondes |
+
+**Taille fixe :** 36 octets (minimum)
+**Taille maximale :** 65 536 050 octets
+
+---
+
+### Paquets d'Interface Personnalisee
+
+Les paquets d'interface personnalisee permettent aux serveurs de creer des interfaces dynamiques.
+
+#### CustomHud (ID 217)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Met a jour la superposition HUD personnalisee avec des elements d'interface definis par le serveur.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = commandes presentes |
+| 1 | clear | octet | 1 | Booleen : effacer les elements HUD existants |
+| 2 | commands | CustomUICommand[] | Variable | Tableau de commandes d'interface |
+
+**Taille maximale :** 1 677 721 600 octets
+
+#### CustomPage (ID 218)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Ouvre ou met a jour une page/ecran d'interface personnalisee.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Indicateurs de presence |
+| 1 | isInitial | octet | 1 | Booleen : chargement initial de la page |
+| 2 | clear | octet | 1 | Booleen : effacer le contenu existant |
+| 3 | lifetime | octet | 1 | Enum CustomPageLifetime |
+| 4 | keyOffset | int32 LE | 4 | Offset vers la chaine de cle de page |
+| 8 | commandsOffset | int32 LE | 4 | Offset vers le tableau de commandes |
+| 12 | eventBindingsOffset | int32 LE | 4 | Offset vers les liaisons d'evenements |
+| 16+ | (Donnees variables) | Variable | Variable | Contenu de la page |
+
+**Valeurs CustomPageLifetime :**
+- `0` - CantClose : La page ne peut pas etre fermee par l'utilisateur
+- `1` - CanClose : L'utilisateur peut fermer la page
+- `2` - AutoClose : La page se ferme automatiquement
+
+**Taille fixe :** 16 octets (minimum)
+**Taille maximale :** 1 677 721 600 octets
+
+---
+
+### Paquets de Portail
+
+Les paquets de portail gerent les transitions de dimension/monde.
+
+#### UpdatePortal (ID 229)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour l'etat et la definition du portail pour les transitions de dimension.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = etat present, bit 1 = definition presente |
+| 1 | state | PortalState | 5 | Etat actuel du portail (optionnel) |
+| 6 | definition | PortalDef | Variable | Donnees de definition du portail (optionnel) |
+
+**Taille fixe :** 6 octets (minimum)
+**Taille maximale :** 16 384 020 octets
+
+---
+
+### Paquets de Liste de Joueurs
+
+Les paquets de liste de joueurs gerent l'affichage de la liste des joueurs du serveur.
+
+#### UpdateServerPlayerList (ID 226)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour la liste des joueurs affichee dans le menu pause/tab.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = joueurs presents |
+| 1 | players | ServerPlayerListUpdate[] | Variable | Tableau de mises a jour de joueurs |
+
+**Structure ServerPlayerListUpdate (32 octets chacune) :**
+
+| Champ | Type | Taille | Description |
+|-------|------|--------|-------------|
+| uuid | UUID | 16 | UUID du joueur |
+| username | VarString | Variable | Nom d'affichage du joueur |
+| action | octet | 1 | Ajouter, Supprimer ou Mettre a jour |
+
+**Taille maximale :** 131 072 006 octets
+
+---
+
+### Paquets du Mode Creatif
+
+Les paquets du mode creatif gerent les operations d'inventaire en mode creatif.
+
+#### SetCreativeItem (ID 171)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Definit un objet dans l'inventaire du mode creatif, permettant de faire apparaitre n'importe quel objet.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | inventorySectionId | int32 LE | 4 | Section d'inventaire cible |
+| 4 | slotId | int32 LE | 4 | Index de l'emplacement cible |
+| 8 | override | octet | 1 | Booleen : remplacer l'objet existant |
+| 9 | item | ItemQuantity | Variable | Donnees de l'objet a definir |
+
+**Taille fixe :** 9 octets (minimum)
+**Taille maximale :** 16 384 019 octets
+
+#### SmartMoveItemStack (ID 176)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Deplacement intelligent d'objet qui trouve automatiquement le meilleur emplacement de destination.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | fromSectionId | int32 LE | 4 | ID de la section source |
+| 4 | fromSlotId | int32 LE | 4 | Index de l'emplacement source |
+| 8 | quantity | int32 LE | 4 | Nombre d'objets a deplacer |
+| 12 | moveType | octet | 1 | Valeur enum SmartMoveType |
+
+**Valeurs SmartMoveType :**
+- `0` - EquipOrMergeStack : Equiper l'objet ou fusionner avec une pile existante
+
+**Taille fixe :** 13 octets
+
+---
+
+### Paquets d'Effets/Statuts
+
+Les paquets d'effets gerent les effets de statut d'entite et les buffs/debuffs.
+
+#### UpdateEntityEffects (Paquet d'Assets)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Envoie le registre de definitions d'effets pendant la configuration.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = effets presents |
+| 1 | effects | EffectData[] | Variable | Tableau de definitions d'effets |
+
+**Taille maximale :** 1 677 721 600 octets

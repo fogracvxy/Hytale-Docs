@@ -2601,3 +2601,530 @@ Displays an event title to all players.
 /eventtitle --major Victory!
 /eventtitle --secondary="World Event" Dragon Awakens
 ```
+
+---
+
+## Additional Debug Commands
+
+Advanced debugging and testing commands.
+
+### debugplayerposition
+
+Displays detailed position and rotation information for debugging.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/debugplayerposition` |
+
+**Information displayed:**
+- Body position (X, Y, Z)
+- Body rotation (Pitch, Yaw, Roll)
+- Head rotation (Pitch, Yaw, Roll)
+- Pending teleport status
+- Visual debug sphere at player position
+
+**Examples:**
+```
+/debugplayerposition
+```
+
+---
+
+### hitdetection
+
+Toggles visual debugging for hit detection.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/hitdetection` |
+
+**Notes:**
+- Enables/disables visual debug display for select interactions
+- Useful for debugging combat and interaction hit boxes
+
+**Examples:**
+```
+/hitdetection
+```
+
+---
+
+### hudtest
+
+Tests showing and hiding HUD components.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/hudtest [--reset] [player]` |
+
+**Parameters:**
+- `--reset` (flag) - Show the hotbar instead of hiding it
+- `player` (optional) - Target player
+
+**Notes:**
+- Without `--reset`, hides the hotbar HUD component
+- With `--reset`, shows the hotbar HUD component
+
+**Examples:**
+```
+/hudtest
+/hudtest --reset
+/hudtest PlayerName
+```
+
+---
+
+### messagetest
+
+Tests sending messages with nested translated parameter messages.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/messagetest` |
+| **Aliases** | `msgtest` |
+
+**Notes:**
+- Developer command for testing message translation system
+- Displays example nested translated message
+
+**Examples:**
+```
+/messagetest
+/msgtest
+```
+
+---
+
+### builderToolsLegend
+
+Shows or hides the builder tools HUD legend.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/builderToolsLegend [--hide]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `--hide` (flag) - Hide the builder tools legend instead of showing it
+
+**Notes:**
+- Always shows the material slot selector
+- Shows/hides the builder tools legend panel
+
+**Examples:**
+```
+/builderToolsLegend
+/builderToolsLegend --hide
+```
+
+---
+
+### networkChunkSending
+
+Controls whether chunks are sent over the network to the player.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/networkChunkSending <enabled>` |
+
+**Parameters:**
+- `enabled` - Boolean value (true/false) to enable or disable chunk sending
+
+**Notes:**
+- Useful for debugging network chunk transmission
+- Disabling stops new chunks from being sent to the player
+
+**Examples:**
+```
+/networkChunkSending true
+/networkChunkSending false
+```
+
+---
+
+### pidcheck
+
+Checks if a process ID is currently running.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/pidcheck [--singleplayer] [pid]` |
+
+**Parameters:**
+- `--singleplayer` (flag) - Check the client PID in singleplayer mode
+- `pid` (optional) - Process ID to check
+
+**Notes:**
+- In singleplayer mode, checks if the client process is still running
+- Useful for debugging process management and server lifecycle
+
+**Examples:**
+```
+/pidcheck 12345
+/pidcheck --singleplayer
+```
+
+---
+
+### validatecpb
+
+Validates and tests loading of prefab files.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/validatecpb [path]` |
+
+**Parameters:**
+- `path` (optional) - Specific path to validate. If not provided, validates all asset packs.
+
+**Notes:**
+- Asynchronously loads and validates all `.prefab.json` files
+- Reports errors for missing blocks or entity models
+- Results are logged to the console
+
+**Examples:**
+```
+/validatecpb
+/validatecpb C:/path/to/assets
+```
+
+---
+
+## Hitbox Collision Commands
+
+Commands for managing hitbox collision components on entities.
+
+### hitboxcollision
+
+Parent command for hitbox collision management.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/hitboxcollision <subcommand>` |
+
+**Subcommands:**
+- `add` - Add hitbox collision to an entity
+- `remove` - Remove hitbox collision from an entity
+
+---
+
+### hitboxcollision add
+
+Adds a hitbox collision component to an entity.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/hitboxcollision add <entity\|self> <hitboxCollisionConfig> [entity]` |
+
+**Subcommands:**
+- `entity` - Add hitbox collision to a specific entity
+- `self` - Add hitbox collision to yourself or target player
+
+**Parameters:**
+- `hitboxCollisionConfig` - The hitbox collision configuration asset
+- `entity` (optional) - Target entity ID
+
+**Examples:**
+```
+/hitboxcollision add entity Player_Hitbox 12345
+/hitboxcollision add self Player_Hitbox
+```
+
+---
+
+### hitboxcollision remove
+
+Removes the hitbox collision component from an entity.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/hitboxcollision remove <entity\|self> [entity]` |
+
+**Subcommands:**
+- `entity` - Remove hitbox collision from a specific entity
+- `self` - Remove hitbox collision from yourself or target player
+
+**Parameters:**
+- `entity` (optional) - Target entity ID
+
+**Examples:**
+```
+/hitboxcollision remove entity 12345
+/hitboxcollision remove self
+```
+
+---
+
+## Repulsion Commands
+
+Commands for managing entity repulsion components (push-back effects).
+
+### repulsion
+
+Parent command for repulsion management.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/repulsion <subcommand>` |
+
+**Subcommands:**
+- `add` - Add repulsion to an entity
+- `remove` - Remove repulsion from an entity
+
+---
+
+### repulsion add
+
+Adds a repulsion component to an entity.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/repulsion add <entity\|self> <repulsionConfig> [entity]` |
+
+**Subcommands:**
+- `entity` - Add repulsion to a specific entity
+- `self` - Add repulsion to yourself or target player
+
+**Parameters:**
+- `repulsionConfig` - The repulsion configuration asset
+- `entity` (optional) - Target entity ID
+
+**Examples:**
+```
+/repulsion add entity Standard_Repulsion 12345
+/repulsion add self Player_Repulsion
+```
+
+---
+
+### repulsion remove
+
+Removes the repulsion component from an entity.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/repulsion remove <entity\|self> [entity]` |
+
+**Subcommands:**
+- `entity` - Remove repulsion from a specific entity
+- `self` - Remove repulsion from yourself or target player
+
+**Parameters:**
+- `entity` (optional) - Target entity ID
+
+**Examples:**
+```
+/repulsion remove entity 12345
+/repulsion remove self
+```
+
+---
+
+## Git Update Commands
+
+Commands for managing assets and prefabs through Git operations.
+
+### update
+
+Parent command for Git update operations.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/update <subcommand>` |
+
+**Subcommands:**
+- `assets` - Manage assets repository
+- `prefabs` - Manage prefabs repository
+
+---
+
+### update assets
+
+Git operations for the assets repository.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/update assets <subcommand>` |
+
+**Subcommands:**
+
+| Subcommand | Syntax | Description |
+|------------|--------|-------------|
+| `status` | `/update assets status` | Run git status on assets |
+| `reset` | `/update assets reset` | Reset assets to HEAD (git reset --hard head) |
+| `pull` | `/update assets pull` | Pull latest assets changes |
+
+**Examples:**
+```
+/update assets status
+/update assets pull
+/update assets reset
+```
+
+---
+
+### update prefabs
+
+Git operations for the prefabs repository.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/update prefabs <subcommand>` |
+
+**Subcommands:**
+
+| Subcommand | Syntax | Description |
+|------------|--------|-------------|
+| `status` | `/update prefabs status` | Run git status on prefabs |
+| `commit` | `/update prefabs commit` | Commit prefab changes |
+| `pull` | `/update prefabs pull` | Pull latest prefab changes |
+| `push` | `/update prefabs push` | Push prefab changes to remote |
+| `all` | `/update prefabs all` | Commit, pull, and push all changes |
+
+**Notes:**
+- Commit messages automatically include the sender's display name
+- Operations are performed on both main repo and submodules
+
+**Examples:**
+```
+/update prefabs status
+/update prefabs commit
+/update prefabs pull
+/update prefabs push
+/update prefabs all
+```
+
+---
+
+## Meta Commands
+
+Commands for inspecting and dumping command system information.
+
+### commands dump
+
+Dumps all registered commands to a JSON file.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/commands dump` |
+
+**Notes:**
+- Creates a JSON file at `dumps/commands.dump.json`
+- Contains command names, class names, owners, and permissions
+- Useful for debugging and documentation
+
+**Examples:**
+```
+/commands dump
+```
+
+---
+
+## Entity Snapshot Commands
+
+Commands for managing entity snapshot history (used for lag compensation and replay).
+
+### entity snapshot
+
+Parent command for entity snapshot operations.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/entity snapshot <subcommand>` |
+| **Aliases** | `snap` |
+
+**Subcommands:**
+- `length` - Set snapshot history length
+- `history` - Visualize snapshot history
+
+---
+
+### entity snapshot length
+
+Sets the length of entity snapshot history.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/entity snapshot length <length>` |
+
+**Parameters:**
+- `length` - History length in milliseconds
+
+**Notes:**
+- Controls how far back entity positions are tracked
+- Used for server-side lag compensation
+
+**Examples:**
+```
+/entity snapshot length 500
+/entity snapshot length 1000
+```
+
+---
+
+### entity snapshot history
+
+Visualizes entity snapshot history with particle effects.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/entity snapshot history` |
+
+**Notes:**
+- Spawns particle effects at historical entity positions
+- Shows all tracked positions from oldest to current tick
+- Useful for debugging entity position tracking
+
+**Examples:**
+```
+/entity snapshot history
+```
+
+---
+
+## Additional Chunk Commands
+
+### chunk lighting
+
+Dumps chunk lighting octree data to the server log.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/chunk lighting <x> <y> <z>` |
+
+**Parameters:**
+- `x y z` - Block coordinates (supports relative coordinates with ~)
+
+**Notes:**
+- Outputs lighting octree structure to server log
+- Chunk must be loaded
+- Useful for debugging lighting issues
+
+**Examples:**
+```
+/chunk lighting 0 64 0
+/chunk lighting ~ ~ ~
+```
+
+---
+
+## Additional Server Stats Commands
+
+### server stats gc
+
+Displays garbage collection statistics.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/server stats gc` |
+
+**Information displayed:**
+- GC collector name
+- Memory pool names
+- Collection count
+- Total collection time
+
+**Examples:**
+```
+/server stats gc
+```
