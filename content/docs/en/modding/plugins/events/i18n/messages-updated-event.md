@@ -44,6 +44,7 @@ public class MessagesUpdated implements IEvent<Void> {
 |--------|-----------|-------------|
 | `getChangedMessages` | `public Map<String, Map<String, String>> getChangedMessages()` | Returns the map of all changed translations organized by language |
 | `getRemovedMessages` | `public Map<String, Map<String, String>> getRemovedMessages()` | Returns the map of all removed translations organized by language |
+| `toString` | `@Nonnull public String toString()` | Returns a string representation of the event including changed and removed messages |
 
 ## Usage Example
 

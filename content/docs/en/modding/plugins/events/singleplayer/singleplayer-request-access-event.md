@@ -35,6 +35,7 @@ public class SingleplayerRequestAccessEvent implements IEvent<Void> {
 | Method | Signature | Description |
 |--------|-----------|-------------|
 | `getAccess` | `public Access getAccess()` | Returns the access request object for the singleplayer session |
+| `toString` | `@Nonnull public String toString()` | Returns a string representation of the event including the access object |
 
 ## Usage Example
 

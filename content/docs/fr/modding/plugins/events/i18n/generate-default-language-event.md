@@ -30,6 +30,12 @@ public class GenerateDefaultLanguageEvent implements IEvent<Void> {
 |-------|------|-----------|-------------|
 | `translationFiles` | `ConcurrentHashMap<String, TranslationMap>` | N/A (interne) | Carte thread-safe des noms de fichiers de traduction vers leurs traductions |
 
+## Constructeur
+
+| Signature | Description |
+|-----------|-------------|
+| `public GenerateDefaultLanguageEvent(ConcurrentHashMap<String, TranslationMap> translationFiles)` | Cree un nouvel evenement avec la carte de fichiers de traduction donnee |
+
 ## Methodes
 
 | Methode | Signature | Description |
