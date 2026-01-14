@@ -27,8 +27,8 @@ function extractTextFromChildren(children: React.ReactNode): string {
   }
   // Check if it's a React element with props
   if (typeof children === "object" && "props" in children) {
-    const element = children as React.ReactElement;
-    return extractTextFromChildren(element.props?.children);
+    const props = (children as React.ReactElement).props as { children?: React.ReactNode };
+    return extractTextFromChildren(props?.children);
   }
   return "";
 }
