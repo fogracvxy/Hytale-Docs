@@ -124,6 +124,8 @@ export const sidebarConfig: SidebarItem[] = [
           { titleKey: "effectsSystem", href: "/docs/modding/plugins/effects-system" },
           { titleKey: "audioSystem", href: "/docs/modding/plugins/audio-system" },
           { titleKey: "entitySpawning", href: "/docs/modding/plugins/entity-spawning" },
+          { titleKey: "craftingSystem", href: "/docs/modding/plugins/crafting-system" },
+          { titleKey: "npcSystem", href: "/docs/modding/plugins/npc-system" },
           {
             titleKey: "events",
             items: [

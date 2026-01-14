@@ -2314,3 +2314,489 @@ As of the analyzed version, Hytale does not implement a traditional RCON protoco
 | Permission Commands | `com/hypixel/hytale/server/core/permissions/commands/PermCommand.java` |
 | Say Command | `com/hypixel/hytale/server/core/console/command/SayCommand.java` |
 | World Config | `com/hypixel/hytale/server/core/universe/world/commands/worldconfig/WorldConfigCommand.java` |
+
+---
+
+## Additional World Packets
+
+This section documents world-related packets for terrain, biomes, and environment management.
+
+### SetChunkHeightmap (ID 132)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sends heightmap data for a chunk column. Used for rendering optimization, occlusion culling, and shadow calculation.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = heightmap present |
+| 1 | x | int32 LE | 4 | Chunk column X coordinate |
+| 5 | z | int32 LE | 4 | Chunk column Z coordinate |
+| 9 | heightmap | VarInt + byte[] | Variable | Heightmap data (max 4,096,000 bytes) |
+
+**Fixed Size:** 9 bytes (minimum)
+**Max Size:** 4,096,014 bytes
+
+---
+
+### SetChunkTintmap (ID 133)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sends tintmap data for biome-based color tinting of grass, leaves, and water within a chunk column.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = tintmap present |
+| 1 | x | int32 LE | 4 | Chunk column X coordinate |
+| 5 | z | int32 LE | 4 | Chunk column Z coordinate |
+| 9 | tintmap | VarInt + byte[] | Variable | Tint color data (max 4,096,000 bytes) |
+
+**Fixed Size:** 9 bytes (minimum)
+**Max Size:** 4,096,014 bytes
+
+---
+
+### SetChunkEnvironments (ID 134)
+
+**Direction:** Server -> Client
+**Compressed:** Yes (Zstd)
+**Description:** Sends environment zone data for a chunk column. Defines which environment (biome/zone) applies to each area, affecting ambient sounds, music, and weather transitions.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = environments present |
+| 1 | x | int32 LE | 4 | Chunk column X coordinate |
+| 5 | z | int32 LE | 4 | Chunk column Z coordinate |
+| 9 | environments | VarInt + byte[] | Variable | Environment zone indices (max 4,096,000 bytes) |
+
+**Fixed Size:** 9 bytes (minimum)
+**Max Size:** 4,096,014 bytes
+
+---
+
+### ServerSetFluid (ID 142)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates a single fluid block at a specific position. Used for water/lava flow updates, bucket interactions, and fluid physics.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | x | int32 LE | 4 | Block X coordinate |
+| 4 | y | int32 LE | 4 | Block Y coordinate |
+| 8 | z | int32 LE | 4 | Block Z coordinate |
+| 12 | fluidId | int32 LE | 4 | Fluid type ID (0 = none, 1 = water, 2 = lava, etc.) |
+| 16 | fluidLevel | byte | 1 | Fluid level (0-15, 0 = empty, 15 = source) |
+
+**Fixed Size:** 17 bytes
+
+---
+
+### ServerSetFluids (ID 143)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Batch update for multiple fluid blocks within a chunk. More efficient than multiple ServerSetFluid packets.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | x | int32 LE | 4 | Chunk X coordinate |
+| 4 | y | int32 LE | 4 | Chunk Y coordinate |
+| 8 | z | int32 LE | 4 | Chunk Z coordinate |
+| 12 | cmds | VarInt + SetFluidCmd[] | Variable | Array of fluid update commands |
+
+**SetFluidCmd Structure (7 bytes each):**
+
+| Field | Type | Size | Description |
+|-------|------|------|-------------|
+| index | int16 LE | 2 | Block index within chunk (0-4095) |
+| fluidId | int32 LE | 4 | Fluid type ID |
+| fluidLevel | byte | 1 | Fluid level (0-15) |
+
+**Fixed Size:** 12 bytes (minimum)
+**Max Size:** 28,672,017 bytes
+
+---
+
+### UpdateTimeSettings (ID 145)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the world's time configuration including day/night cycle durations and moon phases.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | daytimeDurationSeconds | int32 LE | 4 | Length of daytime in seconds |
+| 4 | nighttimeDurationSeconds | int32 LE | 4 | Length of nighttime in seconds |
+| 8 | totalMoonPhases | byte | 1 | Number of moon phases in the cycle |
+| 9 | timePaused | byte | 1 | Boolean: time progression paused |
+
+**Fixed Size:** 10 bytes
+
+---
+
+### UpdateEditorTimeOverride (ID 147)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Forces a specific time in editor mode, bypassing normal time progression. Used for testing lighting and time-sensitive content.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = gameTime present |
+| 1 | gameTime | InstantData | 12 | Target game time (optional) |
+| 13 | paused | byte | 1 | Boolean: time progression paused |
+
+**Fixed Size:** 14 bytes
+
+---
+
+### ClearEditorTimeOverride (ID 148)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Clears any editor time override, resuming normal time progression.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty packet |
+
+**Fixed Size:** 0 bytes
+
+---
+
+### ServerSetPaused (ID 159)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Authoritative pause state from server. Unlike the bidirectional SetPaused (ID 158), this is a server-only notification of pause state changes.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | paused | byte | 1 | Boolean: game paused state |
+
+**Fixed Size:** 1 byte
+
+---
+
+### UpdateSunSettings (ID 360)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates sun position and angle for custom lighting scenarios, cinematics, or zone-specific lighting.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | heightPercentage | float LE | 4 | Sun height (0.0 = horizon, 1.0 = zenith) |
+| 4 | angleRadians | float LE | 4 | Sun rotation angle in radians |
+
+**Fixed Size:** 8 bytes
+
+---
+
+## Additional Player Packets
+
+This section documents player-related packets for stats, abilities, and state management.
+
+### SetClientId (ID 100)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Assigns a unique client identifier to the player. Sent during connection setup.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | clientId | int32 LE | 4 | Unique client session identifier |
+
+**Fixed Size:** 4 bytes
+
+---
+
+### SetMovementStates (ID 102)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Sets the player's movement state flags, used for server-authoritative movement correction.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = movementStates present |
+| 1 | movementStates | SavedMovementStates | 1 | Saved movement flags (optional) |
+
+**Fixed Size:** 2 bytes
+
+---
+
+### SetBlockPlacementOverride (ID 103)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Enables or disables block placement override mode, allowing placement in normally restricted areas (editor/creative mode feature).
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | enabled | byte | 1 | Boolean: override enabled |
+
+**Fixed Size:** 1 byte
+
+---
+
+### LoadHotbar (ID 106)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Request to load a saved hotbar configuration from a specific inventory row.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | inventoryRow | byte | 1 | Source inventory row index |
+
+**Fixed Size:** 1 byte
+
+---
+
+### SaveHotbar (ID 107)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Request to save the current hotbar to a specific inventory row.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | inventoryRow | byte | 1 | Target inventory row index |
+
+**Fixed Size:** 1 byte
+
+---
+
+### UpdateMovementSettings (ID 110)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the player's movement parameters including speed, jump height, and physics settings.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = movementSettings present |
+| 1 | movementSettings | MovementSettings | 251 | Full movement configuration (optional) |
+
+**Fixed Size:** 252 bytes
+
+---
+
+### DamageInfo (ID 112)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Notifies the client of damage received, including source position and cause for directional indicators and death screens.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = position present, bit 1 = cause present |
+| 1 | damageSourcePosition | Vector3d | 24 | World position of damage source (optional) |
+| 25 | damageAmount | float LE | 4 | Amount of damage dealt |
+| 29 | damageCause | DamageCause | Variable | Damage cause details (optional) |
+
+**Fixed Size:** 29 bytes (minimum)
+**Max Size:** 32,768,048 bytes
+
+---
+
+### ReticleEvent (ID 113)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Triggers a reticle/crosshair animation event such as hit confirmation or invalid action feedback.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | eventIndex | int32 LE | 4 | Reticle event ID from asset registry |
+
+**Fixed Size:** 4 bytes
+
+---
+
+### DisplayDebug (ID 114)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Renders a debug visualization shape in the world. Used for development, debugging collision, and pathfinding.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Presence flags for optional fields |
+| 1 | shape | byte | 1 | DebugShape enum: Sphere, Box, Line, etc. |
+| 2 | color | Vector3f | 12 | RGB color (optional) |
+| 14 | time | float LE | 4 | Display duration in seconds |
+| 18 | fade | byte | 1 | Boolean: fade out animation |
+| 19 | matrixOffset | int32 LE | 4 | Offset to transformation matrix |
+| 23 | frustumProjectionOffset | int32 LE | 4 | Offset to frustum projection |
+| 27+ | matrix | VarInt + float[] | Variable | 4x4 transformation matrix (optional) |
+| - | frustumProjection | VarInt + float[] | Variable | Frustum projection matrix (optional) |
+
+**Fixed Size:** 27 bytes (minimum)
+**Max Size:** 32,768,037 bytes
+
+---
+
+### ClearDebugShapes (ID 115)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Clears all debug visualization shapes from the client.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty packet |
+
+**Fixed Size:** 0 bytes
+
+---
+
+### UpdateMemoriesFeatureStatus (ID 118)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the unlock status of the memories/journal feature for the player.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | isFeatureUnlocked | byte | 1 | Boolean: memories feature unlocked |
+
+**Fixed Size:** 1 byte
+
+---
+
+## Additional Setup Packets
+
+This section documents packets used during the connection setup and initialization phase.
+
+### WorldLoadProgress (ID 21)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Reports world loading progress to the client for display in the loading screen.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = status present |
+| 1 | percentComplete | int32 LE | 4 | Overall loading progress (0-100) |
+| 5 | percentCompleteSubitem | int32 LE | 4 | Current task progress (0-100) |
+| 9 | status | VarString | Variable | Status message to display (optional) |
+
+**Fixed Size:** 9 bytes (minimum)
+**Max Size:** 16,384,014 bytes
+
+---
+
+### WorldLoadFinished (ID 22)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Signals that world loading is complete and the client can dismiss the loading screen.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty packet |
+
+**Fixed Size:** 0 bytes
+
+---
+
+### RemoveAssets (ID 27)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Instructs the client to remove specific assets from memory. Used for dynamic content management.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = asset array present |
+| 1 | asset | VarInt + Asset[] | Variable | Array of assets to remove (optional) |
+
+**Fixed Size:** 1 byte (minimum)
+**Max Size:** 1,677,721,600 bytes
+
+---
+
+### RequestCommonAssetsRebuild (ID 28)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Requests the server to rebuild and resend common asset data. Used when client detects asset corruption or version mismatch.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| (no fields) | - | 0 | Empty packet |
+
+**Fixed Size:** 0 bytes
+
+---
+
+### SetUpdateRate (ID 29)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Sets the client's expected update rate for entity and world synchronization.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | updatesPerSecond | int32 LE | 4 | Target updates per second (tick rate) |
+
+**Fixed Size:** 4 bytes
+
+---
+
+### SetTimeDilation (ID 30)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Sets the time dilation factor for slow-motion or fast-forward effects.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | timeDilation | float LE | 4 | Time scale multiplier (1.0 = normal, 0.5 = half speed, 2.0 = double speed) |
+
+**Fixed Size:** 4 bytes
+
+---
+
+### UpdateFeatures (ID 31)
+
+**Direction:** Server -> Client
+**Compressed:** No
+**Description:** Updates the enabled/disabled status of client-side gameplay features.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = features map present |
+| 1 | features | VarInt + Map | Variable | Dictionary of feature flags (optional) |
+
+**ClientFeature Values:**
+- `0` - SplitVelocity: Split velocity mechanics
+- `1` - Mantling: Ledge grab/mantle ability
+- `2` - SprintForce: Sprint force mechanics
+- `3` - CrouchSlide: Crouch sliding ability
+- `4` - SafetyRoll: Fall damage roll
+- `5` - DisplayHealthBars: Show entity health bars
+- `6` - DisplayCombatText: Show damage numbers
+
+**Fixed Size:** 1 byte (minimum)
+**Max Size:** 8,192,006 bytes
+
+---
+
+### PlayerOptions (ID 33)
+
+**Direction:** Client -> Server
+**Compressed:** No
+**Description:** Sends player customization options including skin data to the server.
+
+| Offset | Field | Type | Size | Description |
+|--------|-------|------|------|-------------|
+| 0 | nullBits | byte | 1 | Bit 0 = skin present |
+| 1 | skin | PlayerSkin | Variable | Player skin data (optional) |
+
+**Fixed Size:** 1 byte (minimum)
+**Max Size:** 327,680,184 bytes

@@ -19,22 +19,22 @@ export const documentationProgress: DocumentationProgress = {
     },
     {
       id: "commands",
-      documented: 155,
+      documented: 165,
       total: 168,
     },
     {
       id: "events",
-      documented: 63,
+      documented: 65,
       total: 65,
     },
     {
       id: "components",
-      documented: 70,
+      documented: 85,
       total: 100,
     },
     {
       id: "packets",
-      documented: 140,
+      documented: 180,
       total: 268,
     },
   ],

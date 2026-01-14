@@ -4164,3 +4164,554 @@ Parent command for interaction management.
 - `run` - Run an interaction
 - `snapshotsource` - Set snapshot source for interactions
 - `clear` - Clear current interaction
+
+---
+
+## Builder Tools Commands
+
+Commands for creative building and world editing. These commands require Creative mode.
+
+### pos1
+
+Sets the first corner position for a selection region.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/pos1 [x] [y] [z]` |
+| **Permission** | `hytale.editor.selection.use` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `x y z` (optional) - Specific coordinates. If not provided, uses the player's current position.
+
+**Examples:**
+```
+/pos1
+/pos1 100 64 200
+```
+
+---
+
+### pos2
+
+Sets the second corner position for a selection region.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/pos2 [x] [y] [z]` |
+| **Permission** | `hytale.editor.selection.use` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `x y z` (optional) - Specific coordinates. If not provided, uses the player's current position.
+
+**Examples:**
+```
+/pos2
+/pos2 150 80 250
+```
+
+---
+
+### copy
+
+Copies the selected region to the clipboard.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/copy [--noEntities] [--onlyEntities] [--empty] [--keepanchors]` |
+| **Permission** | `hytale.editor.selection.clipboard` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `--noEntities` (flag) - Exclude entities from the copy
+- `--onlyEntities` (flag) - Only copy entities, not blocks
+- `--empty` (flag) - Copy empty/air blocks
+- `--keepanchors` (flag) - Preserve anchor points
+
+**Alternative Syntax:**
+`/copy <xMin> <yMin> <zMin> <xMax> <yMax> <zMax> [flags]` - Copy a specific region by coordinates.
+
+**Examples:**
+```
+/copy
+/copy --noEntities
+/copy --onlyEntities
+/copy 0 0 0 50 50 50
+```
+
+---
+
+### cut
+
+Cuts the selected region to the clipboard (copy and delete).
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/cut [--noEntities] [--onlyEntities] [--empty] [--keepanchors]` |
+| **Permission** | `hytale.editor.selection.clipboard` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `--noEntities` (flag) - Exclude entities from the cut
+- `--onlyEntities` (flag) - Only cut entities, not blocks
+- `--empty` (flag) - Include empty/air blocks
+- `--keepanchors` (flag) - Preserve anchor points
+
+**Examples:**
+```
+/cut
+/cut --noEntities
+/cut 0 0 0 50 50 50
+```
+
+---
+
+### paste
+
+Pastes the clipboard contents at the current location or specified coordinates.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/paste [position]` |
+| **Permission** | `hytale.editor.selection.clipboard` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `position` (optional) - Target position (supports relative coordinates with ~). If not provided, pastes at player position.
+
+**Examples:**
+```
+/paste
+/paste 100 64 200
+/paste ~ ~10 ~
+```
+
+---
+
+### set
+
+Sets all blocks in the selection to a specific block pattern.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/set <pattern>` |
+| **Aliases** | `setBlocks` |
+| **Permission** | `hytale.editor.selection.modify` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `pattern` - Block pattern to fill (e.g., block type or weighted pattern)
+
+**Examples:**
+```
+/set Stone
+/set Dirt
+/set 50%Stone,50%Dirt
+```
+
+---
+
+### fill
+
+Fills the selection with a block pattern (similar to set).
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/fill <pattern>` |
+| **Aliases** | `fillBlocks` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `pattern` - Block pattern to fill
+
+**Examples:**
+```
+/fill Stone
+/fill Water
+```
+
+---
+
+### replace
+
+Replaces blocks in the selection from one type to another.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/replace [from] <to> [--substringSwap] [--regex]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `from` (optional) - Source block type or pattern to replace. If omitted, replaces all non-air blocks.
+- `to` - Destination block pattern
+- `--substringSwap` (flag) - Replace blocks by substring matching in their IDs
+- `--regex` (flag) - Use regex pattern matching for the `from` parameter
+
+**Examples:**
+```
+/replace Stone
+/replace Stone Dirt
+/replace Grass Flower --substringSwap
+/replace ".*_Wood" Oak_Planks --regex
+```
+
+---
+
+### undo
+
+Undoes the last builder tools operation.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/undo [count]` |
+| **Aliases** | `u` |
+| **Permission** | `hytale.editor.history` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `count` (optional) - Number of operations to undo (default: 1)
+
+**Examples:**
+```
+/undo
+/undo 5
+/u
+```
+
+---
+
+### redo
+
+Redoes a previously undone builder tools operation.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/redo [count]` |
+| **Aliases** | `r` |
+| **Permission** | `hytale.editor.history` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `count` (optional) - Number of operations to redo (default: 1)
+
+**Examples:**
+```
+/redo
+/redo 3
+/r
+```
+
+---
+
+### rotate
+
+Rotates the selection or clipboard around an axis.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/rotate <angle> [axis]` or `/rotate <yaw> <pitch> <roll>` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `angle` - Rotation angle in degrees (must be multiple of 90 for simple rotation)
+- `axis` (optional) - Rotation axis: X, Y, or Z (default: Y)
+- `yaw pitch roll` - Arbitrary rotation angles for complex rotation
+
+**Examples:**
+```
+/rotate 90
+/rotate 180 Y
+/rotate 90 X
+/rotate 45 30 0
+```
+
+---
+
+### flip
+
+Flips the selection along an axis.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/flip [direction]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `direction` (optional) - Direction to flip (north, south, east, west, up, down). If not specified, uses the player's facing direction.
+
+**Examples:**
+```
+/flip
+/flip north
+/flip up
+```
+
+---
+
+### stack
+
+Stacks/repeats the selection multiple times in a direction.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/stack [count] [direction] [--empty] [--spacing=<n>]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `count` (optional) - Number of times to stack (default: 1)
+- `direction` (optional) - Stacking direction. If not specified, uses player's facing direction.
+- `--empty` (flag) - Include empty/air blocks
+- `--spacing` (optional) - Gap between stacked copies
+
+**Examples:**
+```
+/stack
+/stack 5
+/stack 3 up
+/stack 10 north --spacing=2
+```
+
+---
+
+### move
+
+Moves the selection contents in a direction.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/move [distance] [direction] [--empty] [--entities]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `distance` (optional) - Distance to move (default: 1)
+- `direction` (optional) - Movement direction. If not specified, uses player's facing direction.
+- `--empty` (flag) - Leave empty space behind
+- `--entities` (flag) - Also move entities within the selection
+
+**Examples:**
+```
+/move
+/move 10
+/move 5 up
+/move 20 north --entities
+```
+
+---
+
+### expand
+
+Expands the selection in a direction.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/expand [distance] [axis]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `distance` (optional) - Distance to expand (default: 1)
+- `axis` (optional) - Axis to expand along (X, Y, Z). If not specified, uses player's facing direction.
+
+**Examples:**
+```
+/expand
+/expand 10
+/expand 5 Y
+```
+
+---
+
+### hollow
+
+Hollows out the selection, leaving only the outer shell.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/hollow [blockType] [thickness] [--floor] [--roof] [--perimeter]` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `blockType` (optional) - Block to fill the hollow with (default: Air/Empty)
+- `thickness` (optional) - Shell thickness (default: 1, max: 128)
+- `--floor` / `--bottom` (flag) - Include floor in hollow
+- `--roof` / `--ceiling` / `--top` (flag) - Include roof in hollow
+- `--perimeter` / `--all` (flag) - Include both floor and roof
+
+**Examples:**
+```
+/hollow
+/hollow Air 2
+/hollow Stone 1 --perimeter
+```
+
+---
+
+### walls
+
+Creates walls around the selection.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/walls <pattern> [thickness] [--floor] [--roof] [--perimeter]` |
+| **Aliases** | `wall`, `side`, `sides` |
+| **Game Mode** | Creative |
+
+**Parameters:**
+- `pattern` - Block pattern for the walls
+- `thickness` (optional) - Wall thickness (default: 1, max: 128)
+- `--floor` / `--bottom` (flag) - Include floor
+- `--roof` / `--ceiling` / `--top` (flag) - Include roof/ceiling
+- `--perimeter` / `--all` (flag) - Include both floor and roof
+
+**Examples:**
+```
+/walls Stone
+/walls Brick 2
+/walls Glass 1 --perimeter
+```
+
+---
+
+### deselect
+
+Clears the current selection.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/deselect` |
+| **Aliases** | `clearselection` |
+| **Game Mode** | Creative |
+
+**Examples:**
+```
+/deselect
+/clearselection
+```
+
+---
+
+## Adventure Commands
+
+Commands for managing adventure game mechanics.
+
+### objective
+
+Manages objectives for adventure gameplay.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/objective <subcommand>` |
+| **Aliases** | `obj` |
+
+**Subcommands:**
+
+| Subcommand | Syntax | Description |
+|------------|--------|-------------|
+| `start objective` | `/objective start objective <objectiveId>` | Start a specific objective |
+| `start line` | `/objective start line <objectiveLineId>` | Start an objective line |
+| `complete` | `/objective complete` | Complete the current objective |
+| `panel` | `/objective panel` | Show the objective panel |
+| `history` | `/objective history` | Show objective history |
+| `locationmarker` | `/objective locationmarker` | Manage location markers |
+| `reachlocationmarker` | `/objective reachlocationmarker` | Trigger location marker reach |
+
+**Examples:**
+```
+/objective start objective Tutorial_Quest
+/objective start line MainStory_Chapter1
+/objective complete
+/obj panel
+```
+
+---
+
+### reputation
+
+Manages player reputation with factions.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/reputation <subcommand>` |
+
+**Subcommands:**
+
+| Subcommand | Syntax | Description |
+|------------|--------|-------------|
+| `add` | `/reputation add <faction> <amount>` | Add reputation with a faction |
+| `set` | `/reputation set <faction> <value>` | Set reputation to a specific value |
+| `rank` | `/reputation rank <faction>` | Get current rank with a faction |
+| `value` | `/reputation value <faction>` | Get current reputation value |
+
+**Examples:**
+```
+/reputation add Kweebecs 100
+/reputation set Trorks -50
+/reputation rank Kweebecs
+/reputation value Trorks
+```
+
+---
+
+## Instance Commands
+
+Commands for managing game instances.
+
+### instance
+
+Manages game instances for instanced content.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/instance <subcommand>` |
+| **Aliases** | `instances`, `inst` |
+
+**Subcommands:**
+
+| Subcommand | Syntax | Description |
+|------------|--------|-------------|
+| `spawn` | `/instance spawn <instanceId>` | Spawn into an instance |
+| `exit` | `/instance exit` | Exit the current instance |
+| `migrate` | `/instance migrate` | Migrate instance data |
+| `edit new` | `/instance edit new <name>` | Create a new instance |
+| `edit copy` | `/instance edit copy <source> <dest>` | Copy an instance |
+| `edit load` | `/instance edit load <instanceId>` | Load an instance for editing |
+| `edit list` | `/instance edit list` | List available instances |
+
+**Examples:**
+```
+/instance spawn Dungeon_Forest
+/instance exit
+/inst edit list
+/instance edit new MyDungeon
+```
+
+---
+
+## Spawn Commands
+
+Commands for teleporting to spawn points.
+
+### spawn
+
+Teleports a player to the world spawn point.
+
+| Property | Value |
+|----------|-------|
+| **Syntax** | `/spawn [spawnIndex] [player]` |
+| **Permission** | `spawn.self`, `spawn.other` |
+
+**Parameters:**
+- `spawnIndex` (optional) - Index of spawn point if multiple exist
+- `player` (optional) - Target player (requires `spawn.other` permission)
+
+**Subcommands:**
+- `/spawn set` - Set a new spawn point
+- `/spawn setdefault` - Set the default spawn point
+
+**Examples:**
+```
+/spawn
+/spawn 0
+/spawn PlayerName
+/spawn set
+```

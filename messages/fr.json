@@ -55,6 +55,8 @@
     "effectsSystem": "Système d'Effets",
     "audioSystem": "Système Audio",
     "entitySpawning": "Spawn d'Entités",
+    "craftingSystem": "Système de Craft",
+    "npcSystem": "Système NPC",
     "events": "Événements",
     "eventsOverview": "Vue d'ensemble",
     "playerEvents": "Événements Joueur",

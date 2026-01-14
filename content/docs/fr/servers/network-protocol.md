@@ -2283,3 +2283,489 @@ Dans la version analysee, Hytale n'implemente pas de protocole RCON traditionnel
 | Commandes Permission | `com/hypixel/hytale/server/core/permissions/commands/PermCommand.java` |
 | Commande Say | `com/hypixel/hytale/server/core/console/command/SayCommand.java` |
 | Config Monde | `com/hypixel/hytale/server/core/universe/world/commands/worldconfig/WorldConfigCommand.java` |
+
+---
+
+## Paquets de Monde Supplementaires
+
+Cette section documente les paquets lies au monde pour la gestion du terrain, des biomes et de l'environnement.
+
+### SetChunkHeightmap (ID 132)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Envoie les donnees de heightmap pour une colonne de chunk. Utilise pour l'optimisation du rendu, le culling d'occlusion et le calcul des ombres.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = heightmap present |
+| 1 | x | int32 LE | 4 | Coordonnee X de la colonne de chunk |
+| 5 | z | int32 LE | 4 | Coordonnee Z de la colonne de chunk |
+| 9 | heightmap | VarInt + byte[] | Variable | Donnees de heightmap (max 4 096 000 octets) |
+
+**Taille fixe :** 9 octets (minimum)
+**Taille maximale :** 4 096 014 octets
+
+---
+
+### SetChunkTintmap (ID 133)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Envoie les donnees de tintmap pour la teinte des couleurs basee sur le biome de l'herbe, des feuilles et de l'eau dans une colonne de chunk.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = tintmap present |
+| 1 | x | int32 LE | 4 | Coordonnee X de la colonne de chunk |
+| 5 | z | int32 LE | 4 | Coordonnee Z de la colonne de chunk |
+| 9 | tintmap | VarInt + byte[] | Variable | Donnees de couleur de teinte (max 4 096 000 octets) |
+
+**Taille fixe :** 9 octets (minimum)
+**Taille maximale :** 4 096 014 octets
+
+---
+
+### SetChunkEnvironments (ID 134)
+
+**Direction :** Serveur -> Client
+**Compresse :** Oui (Zstd)
+**Description :** Envoie les donnees de zone d'environnement pour une colonne de chunk. Definit quel environnement (biome/zone) s'applique a chaque zone, affectant les sons ambiants, la musique et les transitions meteorologiques.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = environments present |
+| 1 | x | int32 LE | 4 | Coordonnee X de la colonne de chunk |
+| 5 | z | int32 LE | 4 | Coordonnee Z de la colonne de chunk |
+| 9 | environments | VarInt + byte[] | Variable | Indices de zone d'environnement (max 4 096 000 octets) |
+
+**Taille fixe :** 9 octets (minimum)
+**Taille maximale :** 4 096 014 octets
+
+---
+
+### ServerSetFluid (ID 142)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour un seul bloc de fluide a une position specifique. Utilise pour les mises a jour d'ecoulement d'eau/lave, les interactions de seau et la physique des fluides.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | x | int32 LE | 4 | Coordonnee X du bloc |
+| 4 | y | int32 LE | 4 | Coordonnee Y du bloc |
+| 8 | z | int32 LE | 4 | Coordonnee Z du bloc |
+| 12 | fluidId | int32 LE | 4 | ID du type de fluide (0 = aucun, 1 = eau, 2 = lave, etc.) |
+| 16 | fluidLevel | octet | 1 | Niveau de fluide (0-15, 0 = vide, 15 = source) |
+
+**Taille fixe :** 17 octets
+
+---
+
+### ServerSetFluids (ID 143)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Mise a jour groupee pour plusieurs blocs de fluide dans un chunk. Plus efficace que plusieurs paquets ServerSetFluid.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | x | int32 LE | 4 | Coordonnee X du chunk |
+| 4 | y | int32 LE | 4 | Coordonnee Y du chunk |
+| 8 | z | int32 LE | 4 | Coordonnee Z du chunk |
+| 12 | cmds | VarInt + SetFluidCmd[] | Variable | Tableau de commandes de mise a jour de fluide |
+
+**Structure SetFluidCmd (7 octets chacune) :**
+
+| Champ | Type | Taille | Description |
+|-------|------|--------|-------------|
+| index | int16 LE | 2 | Index du bloc dans le chunk (0-4095) |
+| fluidId | int32 LE | 4 | ID du type de fluide |
+| fluidLevel | octet | 1 | Niveau de fluide (0-15) |
+
+**Taille fixe :** 12 octets (minimum)
+**Taille maximale :** 28 672 017 octets
+
+---
+
+### UpdateTimeSettings (ID 145)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour la configuration temporelle du monde, y compris les durees du cycle jour/nuit et les phases lunaires.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | daytimeDurationSeconds | int32 LE | 4 | Duree du jour en secondes |
+| 4 | nighttimeDurationSeconds | int32 LE | 4 | Duree de la nuit en secondes |
+| 8 | totalMoonPhases | octet | 1 | Nombre de phases lunaires dans le cycle |
+| 9 | timePaused | octet | 1 | Booleen : progression du temps en pause |
+
+**Taille fixe :** 10 octets
+
+---
+
+### UpdateEditorTimeOverride (ID 147)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Force un temps specifique en mode editeur, contournant la progression normale du temps. Utilise pour tester l'eclairage et le contenu sensible au temps.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = gameTime present |
+| 1 | gameTime | InstantData | 12 | Temps de jeu cible (optionnel) |
+| 13 | paused | octet | 1 | Booleen : progression du temps en pause |
+
+**Taille fixe :** 14 octets
+
+---
+
+### ClearEditorTimeOverride (ID 148)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Efface tout override de temps de l'editeur, reprenant la progression normale du temps.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Paquet vide |
+
+**Taille fixe :** 0 octet
+
+---
+
+### ServerSetPaused (ID 159)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Etat de pause autoritaire du serveur. Contrairement au SetPaused bidirectionnel (ID 158), ceci est une notification serveur uniquement des changements d'etat de pause.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | paused | octet | 1 | Booleen : etat du jeu en pause |
+
+**Taille fixe :** 1 octet
+
+---
+
+### UpdateSunSettings (ID 360)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour la position et l'angle du soleil pour des scenarios d'eclairage personnalises, cinematiques ou eclairage specifique a une zone.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | heightPercentage | float LE | 4 | Hauteur du soleil (0.0 = horizon, 1.0 = zenith) |
+| 4 | angleRadians | float LE | 4 | Angle de rotation du soleil en radians |
+
+**Taille fixe :** 8 octets
+
+---
+
+## Paquets Joueur Supplementaires
+
+Cette section documente les paquets lies au joueur pour les statistiques, capacites et gestion d'etat.
+
+### SetClientId (ID 100)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Attribue un identifiant client unique au joueur. Envoye pendant la configuration de connexion.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | clientId | int32 LE | 4 | Identifiant unique de session client |
+
+**Taille fixe :** 4 octets
+
+---
+
+### SetMovementStates (ID 102)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Definit les indicateurs d'etat de mouvement du joueur, utilise pour la correction de mouvement autoritaire du serveur.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = movementStates present |
+| 1 | movementStates | SavedMovementStates | 1 | Indicateurs de mouvement sauvegardes (optionnel) |
+
+**Taille fixe :** 2 octets
+
+---
+
+### SetBlockPlacementOverride (ID 103)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Active ou desactive le mode de surcharge de placement de bloc, permettant le placement dans des zones normalement restreintes (fonctionnalite mode editeur/creatif).
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | enabled | octet | 1 | Booleen : surcharge activee |
+
+**Taille fixe :** 1 octet
+
+---
+
+### LoadHotbar (ID 106)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande de charger une configuration de barre d'acces rapide sauvegardee depuis une ligne d'inventaire specifique.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | inventoryRow | octet | 1 | Index de la ligne d'inventaire source |
+
+**Taille fixe :** 1 octet
+
+---
+
+### SaveHotbar (ID 107)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande de sauvegarder la barre d'acces rapide actuelle vers une ligne d'inventaire specifique.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | inventoryRow | octet | 1 | Index de la ligne d'inventaire cible |
+
+**Taille fixe :** 1 octet
+
+---
+
+### UpdateMovementSettings (ID 110)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour les parametres de mouvement du joueur, y compris la vitesse, la hauteur de saut et les parametres physiques.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = movementSettings present |
+| 1 | movementSettings | MovementSettings | 251 | Configuration complete du mouvement (optionnel) |
+
+**Taille fixe :** 252 octets
+
+---
+
+### DamageInfo (ID 112)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Notifie le client des degats recus, y compris la position source et la cause pour les indicateurs directionnels et ecrans de mort.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = position presente, bit 1 = cause presente |
+| 1 | damageSourcePosition | Vector3d | 24 | Position mondiale de la source de degats (optionnel) |
+| 25 | damageAmount | float LE | 4 | Quantite de degats infliges |
+| 29 | damageCause | DamageCause | Variable | Details de la cause des degats (optionnel) |
+
+**Taille fixe :** 29 octets (minimum)
+**Taille maximale :** 32 768 048 octets
+
+---
+
+### ReticleEvent (ID 113)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Declenche un evenement d'animation de reticule/viseur comme la confirmation de coup ou le retour d'action invalide.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | eventIndex | int32 LE | 4 | ID d'evenement de reticule du registre d'assets |
+
+**Taille fixe :** 4 octets
+
+---
+
+### DisplayDebug (ID 114)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Affiche une forme de visualisation de debogage dans le monde. Utilise pour le developpement, le debogage de collision et le pathfinding.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Indicateurs de presence pour les champs optionnels |
+| 1 | shape | octet | 1 | Enum DebugShape : Sphere, Box, Line, etc. |
+| 2 | color | Vector3f | 12 | Couleur RVB (optionnel) |
+| 14 | time | float LE | 4 | Duree d'affichage en secondes |
+| 18 | fade | octet | 1 | Booleen : animation de fondu |
+| 19 | matrixOffset | int32 LE | 4 | Offset vers la matrice de transformation |
+| 23 | frustumProjectionOffset | int32 LE | 4 | Offset vers la projection frustum |
+| 27+ | matrix | VarInt + float[] | Variable | Matrice de transformation 4x4 (optionnel) |
+| - | frustumProjection | VarInt + float[] | Variable | Matrice de projection frustum (optionnel) |
+
+**Taille fixe :** 27 octets (minimum)
+**Taille maximale :** 32 768 037 octets
+
+---
+
+### ClearDebugShapes (ID 115)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Efface toutes les formes de visualisation de debogage du client.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Paquet vide |
+
+**Taille fixe :** 0 octet
+
+---
+
+### UpdateMemoriesFeatureStatus (ID 118)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour le statut de deblocage de la fonctionnalite memoires/journal pour le joueur.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | isFeatureUnlocked | octet | 1 | Booleen : fonctionnalite memoires debloquee |
+
+**Taille fixe :** 1 octet
+
+---
+
+## Paquets de Configuration Supplementaires
+
+Cette section documente les paquets utilises pendant la phase de configuration et d'initialisation de la connexion.
+
+### WorldLoadProgress (ID 21)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Rapporte la progression du chargement du monde au client pour l'affichage sur l'ecran de chargement.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = status present |
+| 1 | percentComplete | int32 LE | 4 | Progression globale du chargement (0-100) |
+| 5 | percentCompleteSubitem | int32 LE | 4 | Progression de la tache actuelle (0-100) |
+| 9 | status | VarString | Variable | Message de statut a afficher (optionnel) |
+
+**Taille fixe :** 9 octets (minimum)
+**Taille maximale :** 16 384 014 octets
+
+---
+
+### WorldLoadFinished (ID 22)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Signale que le chargement du monde est termine et que le client peut fermer l'ecran de chargement.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Paquet vide |
+
+**Taille fixe :** 0 octet
+
+---
+
+### RemoveAssets (ID 27)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Ordonne au client de supprimer des assets specifiques de la memoire. Utilise pour la gestion de contenu dynamique.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = tableau asset present |
+| 1 | asset | VarInt + Asset[] | Variable | Tableau d'assets a supprimer (optionnel) |
+
+**Taille fixe :** 1 octet (minimum)
+**Taille maximale :** 1 677 721 600 octets
+
+---
+
+### RequestCommonAssetsRebuild (ID 28)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Demande au serveur de reconstruire et renvoyer les donnees d'assets communs. Utilise quand le client detecte une corruption d'asset ou une incompatibilite de version.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| (aucun champ) | - | 0 | Paquet vide |
+
+**Taille fixe :** 0 octet
+
+---
+
+### SetUpdateRate (ID 29)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Definit le taux de mise a jour attendu du client pour la synchronisation des entites et du monde.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | updatesPerSecond | int32 LE | 4 | Mises a jour cibles par seconde (tick rate) |
+
+**Taille fixe :** 4 octets
+
+---
+
+### SetTimeDilation (ID 30)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Definit le facteur de dilatation temporelle pour les effets de ralenti ou d'acceleration.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | timeDilation | float LE | 4 | Multiplicateur d'echelle de temps (1.0 = normal, 0.5 = moitie de vitesse, 2.0 = double vitesse) |
+
+**Taille fixe :** 4 octets
+
+---
+
+### UpdateFeatures (ID 31)
+
+**Direction :** Serveur -> Client
+**Compresse :** Non
+**Description :** Met a jour le statut active/desactive des fonctionnalites de gameplay cote client.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = carte features presente |
+| 1 | features | VarInt + Map | Variable | Dictionnaire d'indicateurs de fonctionnalite (optionnel) |
+
+**Valeurs ClientFeature :**
+- `0` - SplitVelocity : Mecaniques de velocite divisee
+- `1` - Mantling : Capacite d'agripper les rebords
+- `2` - SprintForce : Mecaniques de force de sprint
+- `3` - CrouchSlide : Capacite de glissade accroupie
+- `4` - SafetyRoll : Roulade de degats de chute
+- `5` - DisplayHealthBars : Afficher les barres de vie des entites
+- `6` - DisplayCombatText : Afficher les nombres de degats
+
+**Taille fixe :** 1 octet (minimum)
+**Taille maximale :** 8 192 006 octets
+
+---
+
+### PlayerOptions (ID 33)
+
+**Direction :** Client -> Serveur
+**Compresse :** Non
+**Description :** Envoie les options de personnalisation du joueur, y compris les donnees de skin, au serveur.
+
+| Offset | Champ | Type | Taille | Description |
+|--------|-------|------|--------|-------------|
+| 0 | nullBits | octet | 1 | Bit 0 = skin present |
+| 1 | skin | PlayerSkin | Variable | Donnees de skin du joueur (optionnel) |
+
+**Taille fixe :** 1 octet (minimum)
+**Taille maximale :** 327 680 184 octets

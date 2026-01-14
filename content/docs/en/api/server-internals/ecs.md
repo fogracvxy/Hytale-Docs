@@ -4800,3 +4800,697 @@ EntityUIComponent healthBar = EntityUIComponent.getAssetMap()
 // Create packet for entity UI
 com.hypixel.hytale.protocol.EntityUIComponent packet = healthBar.toPacket();
 ```
+
+---
+
+## Physics Components
+
+These components handle physics simulation including gravity, mass, drag, and velocity calculations.
+
+### PhysicsValues
+
+**Package:** `com.hypixel.hytale.server.core.modules.physics.component`
+
+The `PhysicsValues` component stores physics properties for an entity including mass, drag coefficient, and gravity direction. These values are used by physics systems to calculate entity motion.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/physics/component/PhysicsValues.java`
+
+```java
+public class PhysicsValues implements Component<EntityStore> {
+   public static final BuilderCodec<PhysicsValues> CODEC = BuilderCodec.builder(...)
+      .append(new KeyedCodec<>("Mass", Codec.DOUBLE), ...)
+      .append(new KeyedCodec<>("DragCoefficient", Codec.DOUBLE), ...)
+      .append(new KeyedCodec<>("InvertedGravity", Codec.BOOLEAN), ...)
+      .build();
+
+   private static final double DEFAULT_MASS = 1.0;
+   private static final double DEFAULT_DRAG_COEFFICIENT = 0.5;
+   private static final boolean DEFAULT_INVERTED_GRAVITY = false;
+
+   protected double mass;
+   protected double dragCoefficient;
+   protected boolean invertedGravity;
+
+   public static ComponentType<EntityStore, PhysicsValues> getComponentType() {
+      return EntityModule.get().getPhysicsValuesComponentType();
+   }
+
+   public double getMass();
+   public double getDragCoefficient();
+   public boolean isInvertedGravity();
+   public void replaceValues(PhysicsValues other);
+   public void resetToDefault();
+   public void scale(float scale);
+}
+```
+
+**Properties:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `mass` | double | 1.0 | Entity mass (must be > 0), affects momentum and knockback |
+| `dragCoefficient` | double | 0.5 | Air resistance coefficient (>= 0), slows entity motion |
+| `invertedGravity` | boolean | false | Whether gravity is inverted (entity falls upward) |
+
+**How to use:**
+
+```java
+// Create physics values for a heavy entity
+PhysicsValues physics = new PhysicsValues(5.0, 0.3, false);
+holder.addComponent(PhysicsValues.getComponentType(), physics);
+
+// Create a floating entity (inverted gravity)
+PhysicsValues floatingPhysics = new PhysicsValues(1.0, 0.5, true);
+holder.addComponent(PhysicsValues.getComponentType(), floatingPhysics);
+
+// Modify physics at runtime
+PhysicsValues physics = store.getComponent(ref, PhysicsValues.getComponentType());
+physics.scale(2.0f);  // Double mass and drag
+
+// Reset to defaults
+physics.resetToDefault();
+```
+
+**Usage notes:**
+- Mass affects knockback resistance - heavier entities are pushed less
+- Drag coefficient affects how quickly entities slow down in air
+- Inverted gravity can be used for special effects or gameplay mechanics
+- Works with `Velocity` component for motion calculations
+
+---
+
+### Projectile (Marker Component)
+
+**Package:** `com.hypixel.hytale.server.core.modules.projectile.component`
+
+The `Projectile` marker component identifies an entity as a projectile. Uses the singleton pattern for memory efficiency.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/projectile/component/Projectile.java`
+
+```java
+public class Projectile implements Component<EntityStore> {
+   @Nonnull
+   public static Projectile INSTANCE = new Projectile();
+   @Nonnull
+   public static final BuilderCodec<Projectile> CODEC =
+       BuilderCodec.builder(Projectile.class, () -> INSTANCE).build();
+
+   public static ComponentType<EntityStore, Projectile> getComponentType() {
+      return ProjectileModule.get().getProjectileComponentType();
+   }
+
+   private Projectile() {}
+
+   @Override
+   public Component<EntityStore> clone() {
+      return this;
+   }
+}
+```
+
+**Properties:**
+- None (marker component)
+
+**How to add/remove:**
+
+```java
+// Mark entity as a projectile
+holder.addComponent(Projectile.getComponentType(), Projectile.INSTANCE);
+
+// Check if entity is a projectile
+Archetype<EntityStore> archetype = store.getArchetype(ref);
+boolean isProjectile = archetype.contains(Projectile.getComponentType());
+
+// Remove projectile marker
+commandBuffer.removeComponent(ref, Projectile.getComponentType());
+```
+
+**Usage notes:**
+- Used by projectile systems to identify entities that should follow ballistic physics
+- Different from `ProjectileComponent` which stores projectile state data
+- Projectiles typically also have `Velocity`, `TransformComponent`, and `DespawnComponent`
+
+---
+
+## Animation and Model Components
+
+These components handle entity visual representation including models and animations.
+
+### ActiveAnimationComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `ActiveAnimationComponent` tracks which animations are currently playing on each animation slot of an entity. Supports multiple simultaneous animations on different slots.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/ActiveAnimationComponent.java`
+
+```java
+public class ActiveAnimationComponent implements Component<EntityStore> {
+   private final String[] activeAnimations = new String[AnimationSlot.VALUES.length];
+   private boolean isNetworkOutdated = false;
+
+   public static ComponentType<EntityStore, ActiveAnimationComponent> getComponentType() {
+      return EntityModule.get().getActiveAnimationComponentType();
+   }
+
+   public String[] getActiveAnimations();
+   public void setPlayingAnimation(AnimationSlot slot, @Nullable String animation);
+   public boolean consumeNetworkOutdated();
+}
+```
+
+**Properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `activeAnimations` | String[] | Array of animation IDs indexed by AnimationSlot |
+| `isNetworkOutdated` | boolean | Flag for network synchronization |
+
+**AnimationSlot enum (from protocol):**
+
+| Slot | Description |
+|------|-------------|
+| `Body` | Main body animation (walk, run, idle) |
+| `Arms` | Arm animations (attack, block, use) |
+| `Head` | Head animations (look around) |
+| `Overlay` | Overlay effects (hit flash, glow) |
+
+**How to use:**
+
+```java
+// Get animation component
+ActiveAnimationComponent anim = store.getComponent(ref, ActiveAnimationComponent.getComponentType());
+
+// Set walking animation on body slot
+anim.setPlayingAnimation(AnimationSlot.Body, "walk");
+
+// Set attack animation on arms slot
+anim.setPlayingAnimation(AnimationSlot.Arms, "sword_swing");
+
+// Clear an animation slot
+anim.setPlayingAnimation(AnimationSlot.Overlay, null);
+
+// Get all active animations
+String[] animations = anim.getActiveAnimations();
+String bodyAnim = animations[AnimationSlot.Body.ordinal()];
+```
+
+**Usage notes:**
+- Animations are referenced by string IDs defined in model assets
+- Multiple slots allow blending animations (e.g., walking while attacking)
+- Network sync ensures clients see the same animations
+- Animation transitions are handled by the animation system
+
+---
+
+### ModelComponent
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `ModelComponent` stores the current model for an entity. This determines the visual appearance and available animations.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/ModelComponent.java`
+
+```java
+public class ModelComponent implements Component<EntityStore> {
+   private final Model model;
+   private boolean isNetworkOutdated = true;
+
+   public static ComponentType<EntityStore, ModelComponent> getComponentType() {
+      return EntityModule.get().getModelComponentType();
+   }
+
+   public ModelComponent(Model model);
+   public Model getModel();
+   public boolean consumeNetworkOutdated();
+}
+```
+
+**Properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `model` | Model | The entity's current model asset |
+| `isNetworkOutdated` | boolean | Flag for network synchronization |
+
+**How to use:**
+
+```java
+// Get model from assets
+Model zombieModel = Model.getAssetMap().getAsset("hytale:zombie");
+
+// Create entity with model
+holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(zombieModel));
+
+// Access model data
+ModelComponent modelComp = store.getComponent(ref, ModelComponent.getComponentType());
+Model model = modelComp.getModel();
+
+// Get model properties
+String modelId = model.getId();
+BoundingBox bounds = model.getBoundingBox();
+```
+
+**Usage notes:**
+- Models define entity appearance, hitbox, and animation skeleton
+- Changing models at runtime triggers network sync to clients
+- Works with `ActiveAnimationComponent` for animation playback
+- Model assets are loaded from game data files
+
+---
+
+### PersistentModel
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `PersistentModel` component stores a model reference that persists with entity serialization. Unlike `ModelComponent`, this stores only a reference and is saved/loaded with the entity.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/PersistentModel.java`
+
+```java
+public class PersistentModel implements Component<EntityStore> {
+   public static final BuilderCodec<PersistentModel> CODEC = BuilderCodec.builder(...)
+      .append(new KeyedCodec<>("Model", Model.ModelReference.CODEC), ...)
+      .build();
+
+   private Model.ModelReference modelReference;
+
+   public static ComponentType<EntityStore, PersistentModel> getComponentType() {
+      return EntityModule.get().getPersistentModelComponentType();
+   }
+
+   public PersistentModel(Model.ModelReference modelReference);
+   public Model.ModelReference getModelReference();
+   public void setModelReference(Model.ModelReference modelReference);
+}
+```
+
+**Properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `modelReference` | Model.ModelReference | Reference to the model asset |
+
+**How to use:**
+
+```java
+// Create persistent model reference
+Model.ModelReference modelRef = new Model.ModelReference("hytale:custom_npc");
+holder.addComponent(PersistentModel.getComponentType(), new PersistentModel(modelRef));
+
+// Access persistent model
+PersistentModel persistent = store.getComponent(ref, PersistentModel.getComponentType());
+Model.ModelReference ref = persistent.getModelReference();
+
+// Update model reference
+persistent.setModelReference(new Model.ModelReference("hytale:different_model"));
+```
+
+**Usage notes:**
+- Used for entities that need to remember their model across saves
+- Model.ModelReference is a lightweight reference, not the full model data
+- The actual Model is resolved from the reference when needed
+- Commonly used for NPCs with customizable appearances
+
+---
+
+### PersistentDynamicLight
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `PersistentDynamicLight` component adds a dynamic light source to an entity that persists with serialization. The light follows the entity and illuminates the surrounding area.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/PersistentDynamicLight.java`
+
+```java
+public class PersistentDynamicLight implements Component<EntityStore> {
+   public static final BuilderCodec<PersistentDynamicLight> CODEC = BuilderCodec.builder(...)
+      .addField(new KeyedCodec<>("Light", ProtocolCodecs.COLOR_LIGHT), ...)
+      .build();
+
+   private ColorLight colorLight;
+
+   public static ComponentType<EntityStore, PersistentDynamicLight> getComponentType() {
+      return EntityModule.get().getPersistentDynamicLightComponentType();
+   }
+
+   public PersistentDynamicLight(ColorLight colorLight);
+   public ColorLight getColorLight();
+   public void setColorLight(ColorLight colorLight);
+}
+```
+
+**Properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `colorLight` | ColorLight | Light color and intensity settings |
+
+**How to use:**
+
+```java
+// Create a torch-like orange light
+ColorLight torchLight = new ColorLight(255, 200, 100, 15);  // RGB + radius
+holder.addComponent(PersistentDynamicLight.getComponentType(),
+    new PersistentDynamicLight(torchLight));
+
+// Create a magical blue glow
+ColorLight magicLight = new ColorLight(100, 150, 255, 10);
+holder.addComponent(PersistentDynamicLight.getComponentType(),
+    new PersistentDynamicLight(magicLight));
+
+// Update light at runtime
+PersistentDynamicLight light = store.getComponent(ref, PersistentDynamicLight.getComponentType());
+light.setColorLight(new ColorLight(255, 0, 0, 20));  // Red warning light
+```
+
+**Usage notes:**
+- Light radius is in blocks
+- Color values are RGB (0-255)
+- Light follows entity position automatically
+- Used for glowing entities, held torches, magical effects
+- Persists across world saves and loads
+
+---
+
+### HeadRotation
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `HeadRotation` component tracks the independent rotation of an entity's head, separate from body rotation. This allows entities to look at targets while moving in a different direction.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/HeadRotation.java`
+
+```java
+public class HeadRotation implements Component<EntityStore> {
+   public static final BuilderCodec<HeadRotation> CODEC = BuilderCodec.builder(...)
+      .append(new KeyedCodec<>("Rotation", Vector3f.ROTATION), ...)
+      .build();
+
+   private final Vector3f rotation = new Vector3f();
+
+   public static ComponentType<EntityStore, HeadRotation> getComponentType() {
+      return EntityModule.get().getHeadRotationComponentType();
+   }
+
+   public HeadRotation();
+   public HeadRotation(Vector3f rotation);
+   public Vector3f getRotation();
+   public void setRotation(Vector3f rotation);
+   public Vector3d getDirection();
+   public Vector3i getAxisDirection();
+   public Vector3i getHorizontalAxisDirection();
+   public Axis getAxis();
+   public void teleportRotation(Vector3f rotation);
+}
+```
+
+**Properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `rotation` | Vector3f | Yaw, pitch, and roll of the head |
+
+**How to use:**
+
+```java
+// Create entity with head rotation
+holder.addComponent(HeadRotation.getComponentType(), new HeadRotation());
+
+// Make entity look at a position
+HeadRotation head = store.getComponent(ref, HeadRotation.getComponentType());
+Vector3d entityPos = transform.getPosition();
+Vector3d targetPos = getTargetPosition();
+Vector3d direction = targetPos.subtract(entityPos).normalize();
+float yaw = (float) Math.atan2(-direction.getX(), -direction.getZ());
+float pitch = (float) Math.asin(direction.getY());
+head.setRotation(new Vector3f(pitch, yaw, 0));
+
+// Get look direction as unit vector
+Vector3d lookDir = head.getDirection();
+
+// Get dominant axis (for block placement, etc.)
+Axis dominantAxis = head.getAxis();
+```
+
+**Usage notes:**
+- Yaw is horizontal rotation (looking left/right)
+- Pitch is vertical rotation (looking up/down)
+- Roll is tilt rotation (rarely used for heads)
+- `getAxisDirection()` returns the nearest cardinal direction
+- Used by AI to track look-at targets independently of movement
+
+---
+
+## Tag and Marker Components
+
+These are lightweight components that mark entities with specific flags or categories.
+
+### HiddenFromAdventurePlayers
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `HiddenFromAdventurePlayers` marker component hides an entity from players in Adventure Mode. The entity is still visible to players in Creative or other modes. Uses the singleton pattern.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/HiddenFromAdventurePlayers.java`
+
+```java
+public class HiddenFromAdventurePlayers implements Component<EntityStore> {
+   public static final HiddenFromAdventurePlayers INSTANCE = new HiddenFromAdventurePlayers();
+   public static final BuilderCodec<HiddenFromAdventurePlayers> CODEC =
+       BuilderCodec.builder(HiddenFromAdventurePlayers.class, () -> INSTANCE).build();
+
+   public static ComponentType<EntityStore, HiddenFromAdventurePlayers> getComponentType() {
+      return EntityModule.get().getHiddenFromAdventurePlayerComponentType();
+   }
+
+   private HiddenFromAdventurePlayers() {}
+
+   @Override
+   public Component<EntityStore> clone() {
+      return INSTANCE;
+   }
+}
+```
+
+**Properties:**
+- None (marker component)
+
+**How to add/remove:**
+
+```java
+// Hide entity from adventure players
+holder.addComponent(HiddenFromAdventurePlayers.getComponentType(),
+    HiddenFromAdventurePlayers.INSTANCE);
+
+// Check if entity is hidden
+Archetype<EntityStore> archetype = store.getArchetype(ref);
+boolean isHidden = archetype.contains(HiddenFromAdventurePlayers.getComponentType());
+
+// Make entity visible again
+commandBuffer.removeComponent(ref, HiddenFromAdventurePlayers.getComponentType());
+```
+
+**Usage notes:**
+- Used for debug entities, editor-only objects, or admin tools
+- Entity still exists and processes normally, just not visible
+- Useful for game mode-specific content
+- Combine with other visibility systems for fine-grained control
+
+---
+
+### WorldGenId
+
+**Package:** `com.hypixel.hytale.server.core.modules.entity.component`
+
+The `WorldGenId` component stores the world generation ID for entities spawned by world generation. This helps track which generation pass created the entity and prevent duplicate spawning.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/core/modules/entity/component/WorldGenId.java`
+
+```java
+public class WorldGenId implements Component<EntityStore> {
+   public static final int NON_WORLD_GEN_ID = 0;
+   public static final BuilderCodec<WorldGenId> CODEC = BuilderCodec.builder(...)
+      .append(new KeyedCodec<>("WorldGenId", Codec.INTEGER), ...)
+      .build();
+
+   private int worldGenId;
+
+   public static ComponentType<EntityStore, WorldGenId> getComponentType() {
+      return EntityModule.get().getWorldGenIdComponentType();
+   }
+
+   public WorldGenId(int worldGenId);
+   public int getWorldGenId();
+}
+```
+
+**Properties:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `worldGenId` | int | 0 | World generation pass ID (0 = not from world gen) |
+
+**How to use:**
+
+```java
+// Mark entity as generated by world gen pass 5
+holder.addComponent(WorldGenId.getComponentType(), new WorldGenId(5));
+
+// Check if entity is from world generation
+WorldGenId worldGen = store.getComponent(ref, WorldGenId.getComponentType());
+if (worldGen != null && worldGen.getWorldGenId() != WorldGenId.NON_WORLD_GEN_ID) {
+    // Entity was created by world generation
+    int passId = worldGen.getWorldGenId();
+}
+```
+
+**Usage notes:**
+- `NON_WORLD_GEN_ID` (0) indicates the entity was not spawned by world generation
+- Different generation passes have unique IDs
+- Used to prevent re-generating entities in already-generated areas
+- Related to `FromWorldGen` component which stores additional world gen info
+
+---
+
+## AI and Behavior Components
+
+These components support the NPC AI system including pathfinding, roles, and behavior trees.
+
+### NPCEntity
+
+**Package:** `com.hypixel.hytale.server.npc.entities`
+
+The `NPCEntity` component is a comprehensive component that manages Non-Player Character behavior. It extends `LivingEntity` and provides AI, pathfinding, roles, and state management.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/npc/entities/NPCEntity.java`
+
+```java
+public class NPCEntity extends LivingEntity implements INonPlayerCharacter {
+   public static final BuilderCodec<NPCEntity> CODEC = BuilderCodec.builder(...)
+      .addField(new KeyedCodec<>("Env", Codec.STRING), ...)         // Environment
+      .addField(new KeyedCodec<>("HvrPhs", Codec.DOUBLE), ...)      // Hover phase
+      .addField(new KeyedCodec<>("HvrHght", Codec.DOUBLE), ...)     // Hover height
+      .addField(new KeyedCodec<>("SpawnName", Codec.STRING), ...)   // Spawn role name
+      .addField(new KeyedCodec<>("MdlScl", Codec.DOUBLE), ...)      // Model scale
+      .append(new KeyedCodec<>("PathManager", PathManager.CODEC), ...) // Pathfinding
+      .addField(new KeyedCodec<>("LeashPos", Vector3d.CODEC), ...)  // Leash position
+      .addField(new KeyedCodec<>("RoleName", Codec.STRING), ...)    // Current role
+      .build();
+
+   private Role role;
+   private PathManager pathManager;
+   private Vector3d leashPoint;
+   private float hoverPhase;
+   private double hoverHeight;
+   private float initialModelScale;
+   // ... and more
+
+   public static ComponentType<EntityStore, NPCEntity> getComponentType();
+   public Role getRole();
+   public PathManager getPathManager();
+   public AlarmStore getAlarmStore();
+   // ... and more methods
+}
+```
+
+**Key Properties:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `role` | Role | Current AI role defining behavior |
+| `pathManager` | PathManager | Manages pathfinding and navigation |
+| `leashPoint` | Vector3d | Tether point for NPCs with limited range |
+| `hoverHeight` | double | Height offset for flying NPCs |
+| `initialModelScale` | float | Model scaling factor |
+| `environmentIndex` | int | Reference to environment asset |
+
+**Related Classes:**
+
+- **Role**: Defines NPC behavior, combat, state transitions, and instructions
+- **PathManager**: Handles A* pathfinding and navigation
+- **AlarmStore**: Manages timed events and alarms for the NPC
+
+**How to use:**
+
+```java
+// Get NPC component
+NPCEntity npc = store.getComponent(ref, NPCEntity.getComponentType());
+
+// Access the role (behavior definition)
+Role role = npc.getRole();
+if (role != null) {
+    String roleName = role.getRoleName();
+    boolean isHostile = !role.isFriendly(ref, componentAccessor);
+}
+
+// Access pathfinding
+PathManager pathManager = npc.getPathManager();
+if (pathManager.hasPath()) {
+    Vector3d nextWaypoint = pathManager.getNextWaypoint();
+}
+
+// Check NPC state
+if (npc.isDespawning()) {
+    // NPC is being removed
+}
+
+// Set leash point (limit NPC movement range)
+npc.setLeashPoint(new Vector3d(100, 64, 200));
+```
+
+**Usage notes:**
+- NPCEntity is a high-level component combining many AI features
+- Roles define behavior through instruction trees and state machines
+- PathManager uses A* algorithm for navigation
+- Supports flocking, separation, and group behavior
+- Includes combat support, target tracking, and interaction handling
+- Environment affects NPC behavior (day/night, weather, biome)
+
+---
+
+### PathManager
+
+**Package:** `com.hypixel.hytale.server.npc.entities`
+
+The `PathManager` class manages pathfinding for NPC entities. It stores the current path, handles path calculation requests, and provides navigation utilities.
+
+**Source file:** `server-analyzer/decompiled/com/hypixel/hytale/server/npc/entities/PathManager.java`
+
+```java
+public class PathManager {
+   public static final BuilderCodec<PathManager> CODEC = ...;
+
+   private Path currentPath;
+   private int currentWaypointIndex;
+   private boolean isPathPending;
+   // ... pathfinding state
+
+   public boolean hasPath();
+   public Path getCurrentPath();
+   public Vector3d getNextWaypoint();
+   public void setPath(Path path);
+   public void clearPath();
+   public boolean advanceWaypoint();
+   public float getRemainingDistance();
+}
+```
+
+**Key Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `hasPath()` | Returns true if NPC has an active path |
+| `getCurrentPath()` | Gets the current navigation path |
+| `getNextWaypoint()` | Gets the next position to move toward |
+| `setPath(Path)` | Sets a new path for the NPC |
+| `clearPath()` | Clears the current path |
+| `advanceWaypoint()` | Moves to the next waypoint in the path |
+| `getRemainingDistance()` | Gets distance remaining to destination |
+
+**Usage notes:**
+- Paths are calculated using A* algorithm in `AStarBase`
+- Supports ground, flying, and swimming navigation
+- Waypoints are world positions the NPC moves between
+- Path requests can be async to avoid blocking
+- Works with motion controllers for actual movement

@@ -4164,3 +4164,554 @@ Commande parente pour la gestion des interactions.
 - `run` - Executer une interaction
 - `snapshotsource` - Definir la source d'instantane pour les interactions
 - `clear` - Effacer l'interaction actuelle
+
+---
+
+## Commandes Outils de Construction
+
+Commandes pour la construction creative et l'edition du monde. Ces commandes necessitent le mode Creatif.
+
+### pos1
+
+Definit la premiere position de coin pour une region de selection.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/pos1 [x] [y] [z]` |
+| **Permission** | `hytale.editor.selection.use` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `x y z` (optionnel) - Coordonnees specifiques. Si non fourni, utilise la position actuelle du joueur.
+
+**Exemples :**
+```
+/pos1
+/pos1 100 64 200
+```
+
+---
+
+### pos2
+
+Definit la deuxieme position de coin pour une region de selection.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/pos2 [x] [y] [z]` |
+| **Permission** | `hytale.editor.selection.use` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `x y z` (optionnel) - Coordonnees specifiques. Si non fourni, utilise la position actuelle du joueur.
+
+**Exemples :**
+```
+/pos2
+/pos2 150 80 250
+```
+
+---
+
+### copy
+
+Copie la region selectionnee dans le presse-papiers.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/copy [--noEntities] [--onlyEntities] [--empty] [--keepanchors]` |
+| **Permission** | `hytale.editor.selection.clipboard` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `--noEntities` (drapeau) - Exclure les entites de la copie
+- `--onlyEntities` (drapeau) - Copier uniquement les entites, pas les blocs
+- `--empty` (drapeau) - Copier les blocs vides/air
+- `--keepanchors` (drapeau) - Preserver les points d'ancrage
+
+**Syntaxe alternative :**
+`/copy <xMin> <yMin> <zMin> <xMax> <yMax> <zMax> [drapeaux]` - Copier une region specifique par coordonnees.
+
+**Exemples :**
+```
+/copy
+/copy --noEntities
+/copy --onlyEntities
+/copy 0 0 0 50 50 50
+```
+
+---
+
+### cut
+
+Coupe la region selectionnee vers le presse-papiers (copier et supprimer).
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/cut [--noEntities] [--onlyEntities] [--empty] [--keepanchors]` |
+| **Permission** | `hytale.editor.selection.clipboard` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `--noEntities` (drapeau) - Exclure les entites de la coupe
+- `--onlyEntities` (drapeau) - Couper uniquement les entites, pas les blocs
+- `--empty` (drapeau) - Inclure les blocs vides/air
+- `--keepanchors` (drapeau) - Preserver les points d'ancrage
+
+**Exemples :**
+```
+/cut
+/cut --noEntities
+/cut 0 0 0 50 50 50
+```
+
+---
+
+### paste
+
+Colle le contenu du presse-papiers a la position actuelle ou aux coordonnees specifiees.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/paste [position]` |
+| **Permission** | `hytale.editor.selection.clipboard` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `position` (optionnel) - Position cible (supporte les coordonnees relatives avec ~). Si non fourni, colle a la position du joueur.
+
+**Exemples :**
+```
+/paste
+/paste 100 64 200
+/paste ~ ~10 ~
+```
+
+---
+
+### set
+
+Definit tous les blocs de la selection a un motif de bloc specifique.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/set <motif>` |
+| **Alias** | `setBlocks` |
+| **Permission** | `hytale.editor.selection.modify` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `motif` - Motif de bloc a remplir (ex: type de bloc ou motif pondere)
+
+**Exemples :**
+```
+/set Stone
+/set Dirt
+/set 50%Stone,50%Dirt
+```
+
+---
+
+### fill
+
+Remplit la selection avec un motif de bloc (similaire a set).
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/fill <motif>` |
+| **Alias** | `fillBlocks` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `motif` - Motif de bloc a remplir
+
+**Exemples :**
+```
+/fill Stone
+/fill Water
+```
+
+---
+
+### replace
+
+Remplace les blocs dans la selection d'un type a un autre.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/replace [de] <vers> [--substringSwap] [--regex]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `de` (optionnel) - Type ou motif de bloc source a remplacer. Si omis, remplace tous les blocs non-air.
+- `vers` - Motif de bloc de destination
+- `--substringSwap` (drapeau) - Remplacer les blocs par correspondance de sous-chaine dans leurs IDs
+- `--regex` (drapeau) - Utiliser la correspondance de motif regex pour le parametre `de`
+
+**Exemples :**
+```
+/replace Stone
+/replace Stone Dirt
+/replace Grass Flower --substringSwap
+/replace ".*_Wood" Oak_Planks --regex
+```
+
+---
+
+### undo
+
+Annule la derniere operation des outils de construction.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/undo [nombre]` |
+| **Alias** | `u` |
+| **Permission** | `hytale.editor.history` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `nombre` (optionnel) - Nombre d'operations a annuler (defaut: 1)
+
+**Exemples :**
+```
+/undo
+/undo 5
+/u
+```
+
+---
+
+### redo
+
+Refait une operation des outils de construction precedemment annulee.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/redo [nombre]` |
+| **Alias** | `r` |
+| **Permission** | `hytale.editor.history` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `nombre` (optionnel) - Nombre d'operations a refaire (defaut: 1)
+
+**Exemples :**
+```
+/redo
+/redo 3
+/r
+```
+
+---
+
+### rotate
+
+Fait pivoter la selection ou le presse-papiers autour d'un axe.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/rotate <angle> [axe]` ou `/rotate <lacet> <tangage> <roulis>` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `angle` - Angle de rotation en degres (doit etre un multiple de 90 pour une rotation simple)
+- `axe` (optionnel) - Axe de rotation: X, Y ou Z (defaut: Y)
+- `lacet tangage roulis` - Angles de rotation arbitraires pour une rotation complexe
+
+**Exemples :**
+```
+/rotate 90
+/rotate 180 Y
+/rotate 90 X
+/rotate 45 30 0
+```
+
+---
+
+### flip
+
+Retourne la selection le long d'un axe.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/flip [direction]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `direction` (optionnel) - Direction de retournement (north, south, east, west, up, down). Si non specifie, utilise la direction dans laquelle le joueur regarde.
+
+**Exemples :**
+```
+/flip
+/flip north
+/flip up
+```
+
+---
+
+### stack
+
+Empile/repete la selection plusieurs fois dans une direction.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/stack [nombre] [direction] [--empty] [--spacing=<n>]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `nombre` (optionnel) - Nombre de fois a empiler (defaut: 1)
+- `direction` (optionnel) - Direction d'empilement. Si non specifie, utilise la direction dans laquelle le joueur regarde.
+- `--empty` (drapeau) - Inclure les blocs vides/air
+- `--spacing` (optionnel) - Ecart entre les copies empilees
+
+**Exemples :**
+```
+/stack
+/stack 5
+/stack 3 up
+/stack 10 north --spacing=2
+```
+
+---
+
+### move
+
+Deplace le contenu de la selection dans une direction.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/move [distance] [direction] [--empty] [--entities]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `distance` (optionnel) - Distance a deplacer (defaut: 1)
+- `direction` (optionnel) - Direction de deplacement. Si non specifie, utilise la direction dans laquelle le joueur regarde.
+- `--empty` (drapeau) - Laisser un espace vide derriere
+- `--entities` (drapeau) - Deplacer aussi les entites dans la selection
+
+**Exemples :**
+```
+/move
+/move 10
+/move 5 up
+/move 20 north --entities
+```
+
+---
+
+### expand
+
+Etend la selection dans une direction.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/expand [distance] [axe]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `distance` (optionnel) - Distance d'extension (defaut: 1)
+- `axe` (optionnel) - Axe d'extension (X, Y, Z). Si non specifie, utilise la direction dans laquelle le joueur regarde.
+
+**Exemples :**
+```
+/expand
+/expand 10
+/expand 5 Y
+```
+
+---
+
+### hollow
+
+Creuse la selection, ne laissant que la coque exterieure.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/hollow [typeBloc] [epaisseur] [--floor] [--roof] [--perimeter]` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `typeBloc` (optionnel) - Bloc pour remplir le creux (defaut: Air/Vide)
+- `epaisseur` (optionnel) - Epaisseur de la coque (defaut: 1, max: 128)
+- `--floor` / `--bottom` (drapeau) - Inclure le sol dans le creux
+- `--roof` / `--ceiling` / `--top` (drapeau) - Inclure le toit dans le creux
+- `--perimeter` / `--all` (drapeau) - Inclure le sol et le toit
+
+**Exemples :**
+```
+/hollow
+/hollow Air 2
+/hollow Stone 1 --perimeter
+```
+
+---
+
+### walls
+
+Cree des murs autour de la selection.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/walls <motif> [epaisseur] [--floor] [--roof] [--perimeter]` |
+| **Alias** | `wall`, `side`, `sides` |
+| **Mode de jeu** | Creative |
+
+**Parametres :**
+- `motif` - Motif de bloc pour les murs
+- `epaisseur` (optionnel) - Epaisseur du mur (defaut: 1, max: 128)
+- `--floor` / `--bottom` (drapeau) - Inclure le sol
+- `--roof` / `--ceiling` / `--top` (drapeau) - Inclure le toit/plafond
+- `--perimeter` / `--all` (drapeau) - Inclure le sol et le toit
+
+**Exemples :**
+```
+/walls Stone
+/walls Brick 2
+/walls Glass 1 --perimeter
+```
+
+---
+
+### deselect
+
+Efface la selection actuelle.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/deselect` |
+| **Alias** | `clearselection` |
+| **Mode de jeu** | Creative |
+
+**Exemples :**
+```
+/deselect
+/clearselection
+```
+
+---
+
+## Commandes Aventure
+
+Commandes pour gerer les mecaniques de jeu d'aventure.
+
+### objective
+
+Gere les objectifs pour le gameplay d'aventure.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/objective <sous-commande>` |
+| **Alias** | `obj` |
+
+**Sous-commandes :**
+
+| Sous-commande | Syntaxe | Description |
+|---------------|---------|-------------|
+| `start objective` | `/objective start objective <objectiveId>` | Demarrer un objectif specifique |
+| `start line` | `/objective start line <objectiveLineId>` | Demarrer une ligne d'objectif |
+| `complete` | `/objective complete` | Completer l'objectif actuel |
+| `panel` | `/objective panel` | Afficher le panneau d'objectifs |
+| `history` | `/objective history` | Afficher l'historique des objectifs |
+| `locationmarker` | `/objective locationmarker` | Gerer les marqueurs de lieu |
+| `reachlocationmarker` | `/objective reachlocationmarker` | Declencher l'atteinte d'un marqueur |
+
+**Exemples :**
+```
+/objective start objective Tutorial_Quest
+/objective start line MainStory_Chapter1
+/objective complete
+/obj panel
+```
+
+---
+
+### reputation
+
+Gere la reputation du joueur avec les factions.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/reputation <sous-commande>` |
+
+**Sous-commandes :**
+
+| Sous-commande | Syntaxe | Description |
+|---------------|---------|-------------|
+| `add` | `/reputation add <faction> <montant>` | Ajouter de la reputation avec une faction |
+| `set` | `/reputation set <faction> <valeur>` | Definir la reputation a une valeur specifique |
+| `rank` | `/reputation rank <faction>` | Obtenir le rang actuel avec une faction |
+| `value` | `/reputation value <faction>` | Obtenir la valeur de reputation actuelle |
+
+**Exemples :**
+```
+/reputation add Kweebecs 100
+/reputation set Trorks -50
+/reputation rank Kweebecs
+/reputation value Trorks
+```
+
+---
+
+## Commandes Instance
+
+Commandes pour gerer les instances de jeu.
+
+### instance
+
+Gere les instances de jeu pour le contenu instance.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/instance <sous-commande>` |
+| **Alias** | `instances`, `inst` |
+
+**Sous-commandes :**
+
+| Sous-commande | Syntaxe | Description |
+|---------------|---------|-------------|
+| `spawn` | `/instance spawn <instanceId>` | Apparaitre dans une instance |
+| `exit` | `/instance exit` | Quitter l'instance actuelle |
+| `migrate` | `/instance migrate` | Migrer les donnees d'instance |
+| `edit new` | `/instance edit new <nom>` | Creer une nouvelle instance |
+| `edit copy` | `/instance edit copy <source> <dest>` | Copier une instance |
+| `edit load` | `/instance edit load <instanceId>` | Charger une instance pour edition |
+| `edit list` | `/instance edit list` | Lister les instances disponibles |
+
+**Exemples :**
+```
+/instance spawn Dungeon_Forest
+/instance exit
+/inst edit list
+/instance edit new MyDungeon
+```
+
+---
+
+## Commandes Spawn
+
+Commandes pour se teleporter aux points d'apparition.
+
+### spawn
+
+Teleporte un joueur au point d'apparition du monde.
+
+| Propriete | Valeur |
+|-----------|--------|
+| **Syntaxe** | `/spawn [indexSpawn] [joueur]` |
+| **Permission** | `spawn.self`, `spawn.other` |
+
+**Parametres :**
+- `indexSpawn` (optionnel) - Index du point d'apparition si plusieurs existent
+- `joueur` (optionnel) - Joueur cible (necessite la permission `spawn.other`)
+
+**Sous-commandes :**
+- `/spawn set` - Definir un nouveau point d'apparition
+- `/spawn setdefault` - Definir le point d'apparition par defaut
+
+**Exemples :**
+```
+/spawn
+/spawn 0
+/spawn NomJoueur
+/spawn set
+```
