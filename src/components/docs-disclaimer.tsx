@@ -26,7 +26,7 @@ export function DocsDisclaimer() {
   if (!isVisible) return null;
 
   return (
-    <div className="relative bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-orange-500/10 border-b border-orange-500/30">
+    <div className="sticky top-16 z-40 relative bg-gradient-to-r from-orange-500/10 via-orange-500/20 to-orange-500/10 border-b border-orange-500/30">
       <div className="container px-4">
         <div className="flex items-center justify-center gap-3 py-2.5 text-sm">
           <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />

@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { Navbar, Footer, Sidebar } from "@/components/layout";
-import { DocumentationProgress } from "@/components/documentation-progress";
 import { DocsDisclaimer } from "@/components/docs-disclaimer";
 import { DisclaimerToast } from "@/components/disclaimer-toast";
 
@@ -17,7 +16,6 @@ export default async function DocsLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <DocumentationProgress />
       <DocsDisclaimer />
       <div className="flex-1 w-full max-w-[1600px] mx-auto px-4 lg:px-6">
         <div className="flex gap-6 lg:gap-8">
