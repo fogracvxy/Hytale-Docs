@@ -105,4 +105,4 @@ HytaleDocs is a community project and is **not affiliated with, endorsed by, or 
 
 ---
 
-Made with extreame lazyness by claude
+Made with love by the Hytale community
