@@ -3,7 +3,12 @@
 import * as React from "react";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, BadgeCheck } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Collapsible,
   CollapsibleContent,
@@ -73,13 +78,23 @@ function SidebarLink({
     <Link
       href={item.href || "#"}
       className={cn(
-        "block rounded-md px-2.5 py-1.5 text-sm transition-colors hover:bg-muted truncate",
+        "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors hover:bg-muted",
         isActive
           ? "bg-primary/10 font-medium text-primary border-l-2 border-primary -ml-[2px] pl-[12px]"
           : "text-muted-foreground hover:text-foreground"
       )}
     >
-      {title}
+      <span className="truncate">{title}</span>
+      {item.verified && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-[--color-hytale-green]" />
+          </TooltipTrigger>
+          <TooltipContent side="right" className="text-xs">
+            {t("verified")}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </Link>
   );
 }

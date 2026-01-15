@@ -205,7 +205,8 @@
     "systemRequirements": "Configuration Requise",
     "hytaleVsMinecraft": "Hytale vs Minecraft",
     "knownIssues": "Dépannage",
-    "performanceOptimization": "Guide Performance"
+    "performanceOptimization": "Guide Performance",
+    "verified": "Testé & Vérifié"
   },
   "metadata": {
     "title": "HytaleDocs",
