@@ -480,6 +480,13 @@
       "packets": "Packets Reseau"
     }
   },
+  "docsDisclaimer": {
+    "title": "Documentation Communautaire",
+    "message": "Cette documentation peut contenir des erreurs. Verifiez toujours contre le code reel.",
+    "reportLink": "Signaler une erreur",
+    "toastTitle": "Avis Documentation",
+    "toastMessage": "Cette documentation est maintenue par la communaute et basee sur du code decompile. Certaines informations peuvent etre inexactes ou obsoletes."
+  },
   "terms": {
     "title": "Conditions d'Utilisation",
     "lastUpdated": "Derniere mise a jour",

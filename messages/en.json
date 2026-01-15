@@ -480,6 +480,13 @@
       "packets": "Network Packets"
     }
   },
+  "docsDisclaimer": {
+    "title": "Community Documentation",
+    "message": "This documentation may contain errors. Always verify against actual code.",
+    "reportLink": "Report an error",
+    "toastTitle": "Documentation Notice",
+    "toastMessage": "This documentation is community-maintained and based on decompiled code. Some information may be inaccurate or outdated."
+  },
   "terms": {
     "title": "Terms of Use",
     "lastUpdated": "Last updated",
