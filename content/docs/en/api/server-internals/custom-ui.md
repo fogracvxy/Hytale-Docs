@@ -3,245 +3,168 @@ id: custom-ui
 title: Custom UI System
 sidebar_label: Custom UI
 sidebar_position: 7
-description: Complete guide to creating interactive player interfaces in Hytale plugins
+description: Step-by-step guide to creating custom UI pages with Hytale's DSL
 ---
 
 # Custom UI System
 
-:::info Tested & Verified
-This documentation has been tested with a working plugin. Examples are confirmed to work.
-:::
+This guide teaches you how to create custom UI pages for Hytale plugins. You'll learn the UI file syntax, available components, and how to make interactive pages.
 
-## Required Imports
+## How Custom UI Works
+
+Hytale uses a **client-server architecture** for custom UI:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           CLIENT                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  resources/Common/UI/Custom/YourPlugin/                      │   │
+│  │  └── YourPage.ui  (loaded when player connects)              │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+                              ▲                    │
+                              │ Commands           │ Events
+                              │ (set values)       │ (button clicks)
+                              │                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                           SERVER                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  InteractiveCustomUIPage                                      │   │
+│  │  - build(): load layout, set values, bind events             │   │
+│  │  - handleDataEvent(): respond to user interactions           │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Key points:**
+- `.ui` files are **downloaded to the client** when the player connects
+- The server **cannot create UI files dynamically** - they must exist beforehand
+- Any syntax error in a `.ui` file will **crash the player's connection**
+- The server sends **commands** to manipulate UI elements
+- The client sends **events** back when the player interacts
+
+---
+
+## Tutorial: Creating Your First Custom UI
+
+### Step 1: Project Structure
+
+Your plugin needs these files:
+
+```
+your-plugin/
+├── build.gradle
+├── src/main/
+│   ├── java/com/yourname/plugin/
+│   │   ├── YourPlugin.java
+│   │   ├── commands/
+│   │   │   └── OpenUICommand.java
+│   │   └── ui/
+│   │       └── MyPage.java
+│   └── resources/
+│       ├── manifest.json
+│       └── Common/
+│           └── UI/
+│               └── Custom/
+│                   └── YourPlugin/
+│                       └── MyPage.ui
+```
+
+### Step 2: Configure manifest.json
+
+Your manifest must include `IncludesAssetPack: true`:
+
+```json
+{
+  "Identifier": "your-plugin",
+  "Name": "Your Plugin",
+  "Version": "1.0.0",
+  "EntryPoint": "com.yourname.plugin.YourPlugin",
+  "IncludesAssetPack": true
+}
+```
+
+### Step 3: Create the UI File
+
+Create `src/main/resources/Common/UI/Custom/YourPlugin/MyPage.ui`:
+
+```
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Width: 400, Height: 300);
+  Background: #141c26(0.95);
+  LayoutMode: Top;
+  Padding: (Full: 20);
+
+  Label {
+    Text: "Hello World!";
+    Anchor: (Height: 40);
+    Style: (FontSize: 24, TextColor: #ffffff, HorizontalAlignment: Center, RenderBold: true);
+  }
+
+  Group { Anchor: (Height: 20); }
+
+  $C.@TextButton #MyButton {
+    @Text = "Click Me";
+    Anchor: (Width: 150, Height: 44);
+  }
+}
+```
+
+### Step 4: Create the Java Page Handler
+
+Create `src/main/java/com/yourname/plugin/ui/MyPage.java`:
 
 ```java
-// === Core UI Page ===
-import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
-import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
-import com.hypixel.hytale.server.core.ui.builder.EventData;
-import com.hypixel.hytale.server.core.ui.Value;
-import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
-import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+package com.yourname.plugin.ui;
 
-// === Codec (for event data) ===
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-
-// === ECS Components ===
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.ui.builder.EventData;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-// === Player & Command ===
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.Message;
-
-// === Dropdown (optional) ===
-import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
-import com.hypixel.hytale.server.core.ui.LocalizableString;
-
-// === Notifications (optional) ===
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.server.core.Message;
 
-// === Page Management ===
-import com.hypixel.hytale.protocol.packets.interface_.Page;
-```
+import javax.annotation.Nonnull;
 
-## Overview
+public class MyPage extends InteractiveCustomUIPage<MyPage.EventData> {
 
-The Custom UI system allows plugins to create interactive player interfaces. The system uses a **client-server architecture**:
+    // Path relative to Common/UI/Custom/
+    public static final String LAYOUT = "YourPlugin/MyPage.ui";
 
-- **Layout files (`.ui`)** are stored on the **client** - plugins cannot create them
-- **Server sends commands** to manipulate elements in those layouts
-- **Events flow back** from client to server when players interact
+    private final PlayerRef playerRef;
 
-```
-┌─────────────────────┐                    ┌─────────────────────┐
-│    Server Plugin    │                    │       Client        │
-│                     │                    │                     │
-│  InteractiveCustom  │───── Commands ────>│  .ui Layout Files   │
-│    UIPage           │                    │  (Pages/*.ui)       │
-│  UICommandBuilder   │<───── Events ──────│                     │
-│  UIEventBuilder     │                    │                     │
-└─────────────────────┘                    └─────────────────────┘
-```
-
-<InfoBox type="danger" title="Critical: Layout Files are Client-Side">
-**Layout files (`.ui`) are CLIENT assets.** If you reference a layout that doesn't exist on the client, you'll get an error like `Could not find document Pages/MyPage.ui for Custom UI Append command` and the client will disconnect. **Only use layouts that are guaranteed to exist.**
-</InfoBox>
-
-## Available Layout Files
-
-Not all layout files are available on every client. Use these **guaranteed safe** layouts:
-
-### Core Server Layouts (Always Available)
-
-| Layout | Used By | Key Selectors |
-|--------|---------|---------------|
-| `Pages/PluginListPage.ui` | `/plugins` command | `#PluginList`, `#PluginName`, `#PluginDescription` |
-| `Pages/PluginListButton.ui` | Plugin list items | `#Button`, `#CheckBox` |
-| `Pages/CommandListPage.ui` | `/commands` command | `#CommandList`, `#SubcommandCards` |
-| `Pages/BasicTextButton.ui` | Various pages | `LabelStyle`, `SelectedLabelStyle` |
-| `Common/TextButton.ui` | Button component | `LabelStyle`, `SelectedLabelStyle` |
-
-### Adventure/Builtin Layouts (May Not Be Available)
-
-These layouts may only work when specific content packs are loaded:
-
-| Layout | Module | Key Selectors |
-|--------|--------|---------------|
-| `Pages/DialogPage.ui` | Adventure Objectives | `#EntityName`, `#Dialog`, `#CloseButton` |
-| `Pages/ShopPage.ui` | Adventure Shop | `#ElementList` |
-| `Pages/ShopElementButton.ui` | Shop items | `#Icon`, `#Name`, `#Description`, `#Cost` |
-| `Pages/BarterPage.ui` | Adventure Barter | `#TradeGrid`, `#TradeButton` |
-| `Pages/BarterTradeRow.ui` | Barter items | `#OutputSlot`, `#InputSlot` |
-| `Pages/Memories/*.ui` | Adventure Memories | `#IconList`, `#RecordButton` |
-
-### Builder Tools Layouts
-
-| Layout | Used By | Key Selectors |
-|--------|---------|---------------|
-| `Pages/EntitySpawnPage.ui` | NPC spawning | `#NPCList`, `#ModelList`, `#ScaleSlider` |
-| `Pages/PrefabListPage.ui` | Prefab browser | `#FileList` |
-| `Pages/ParticleSpawnPage.ui` | Particle testing | `#ParticleSystemList` |
-| `Pages/ImageImportPage.ui` | Image import | File browser elements |
-
-### Portal/Teleporter Layouts
-
-| Layout | Used By | Key Selectors |
-|--------|---------|---------------|
-| `Pages/PortalDeviceSummon.ui` | Portal summon | `#Artwork`, `#Pills`, `#SummonButton` |
-| `Pages/Teleporter.ui` | Teleporter config | `#WorldDropdown`, `#WarpDropdown` |
-| `Pages/WarpListPage.ui` | Warp list | `#WarpList` |
-
-**Recommendation**: Use `Pages/PluginListPage.ui` or `Pages/EntitySpawnPage.ui` as your base layout - they're guaranteed to work.
-
-## Tested UI Elements
-
-These elements have been **tested and verified to work** in plugins:
-
-### EntitySpawnPage.ui Elements
-
-| Element | Selector | Type | Properties |
-|---------|----------|------|------------|
-| **Search Input** | `#SearchInput` | Input Field | `.Value`, `.PlaceholderText` |
-| **Scale Slider** | `#ScaleSlider` | Slider | `.Value` (float 0-1) |
-| **Rotation Slider** | `#RotationOffset` | Slider | `.Value` (float) |
-| **Count Input** | `#Count` | Numeric Input | `.Value` |
-| **Tab Buttons** | `#TabNPC`, `#TabItems`, `#TabModel` | Buttons | `.Style` |
-| **Spawn Button** | `#Spawn` | Button | Activating event |
-| **Clear Button** | `#ClearMaterial` | Button | Activating event |
-| **Item Slot** | `#ItemMaterialSlot` | Drag-drop slot | Dropped event |
-
-### PluginListPage.ui Elements
-
-| Element | Selector | Type | Properties |
-|---------|----------|------|------------|
-| **Plugin Name** | `#PluginName` | Text | `.Text` |
-| **Plugin ID** | `#PluginIdentifier` | Text | `.Text` |
-| **Plugin Version** | `#PluginVersion` | Text | `.Text`, `.Visible` |
-| **Description** | `#PluginDescription` | Text | `.Text` |
-| **Option Checkbox** | `#DescriptiveOnlyOption` | Container | `.Visible` |
-| **Plugin List** | `#PluginList` | List Container | `.clear()`, `.append()` |
-
-### PluginListButton.ui Elements (for list items)
-
-| Element | Selector | Type | Properties |
-|---------|----------|------|------------|
-| **Button** | `#Button` | Button | `.Text`, `.Style`, Activating event |
-| **Checkbox** | `#CheckBox` | Checkbox | `.Value` (boolean), `.Visible`, ValueChanged event |
-
-### TeleporterSettingsPage.ui Elements (Dropdowns)
-
-| Element | Selector | Type | Properties |
-|---------|----------|------|------------|
-| **World Dropdown** | `#WorldDropdown` | Dropdown | `.Entries`, `.Value` |
-| **Warp Dropdown** | `#WarpDropdown` | Dropdown | `.Entries`, `.Value` |
-
-### Working Test Example
-
-This code tests all main UI element types using `EntitySpawnPage.ui`:
-
-```java
-public class UIComponentTestPage extends InteractiveCustomUIPage<UIComponentTestPage.TestEventData> {
-
-    public static final String LAYOUT = "Pages/EntitySpawnPage.ui";
-
-    private static final Value<String> TAB_STYLE_ACTIVE = Value.ref("Common.ui", "DefaultTextButtonStyle");
-    private static final Value<String> TAB_STYLE_INACTIVE = Value.ref("Common.ui", "SecondaryTextButtonStyle");
-
-    public UIComponentTestPage(@Nonnull PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CanDismiss, TestEventData.CODEC);
+    public MyPage(@Nonnull PlayerRef playerRef) {
+        super(playerRef, CustomPageLifetime.CanDismiss, EventData.CODEC);
+        this.playerRef = playerRef;
     }
 
     @Override
     public void build(
             @Nonnull Ref<EntityStore> ref,
-            @Nonnull UICommandBuilder commandBuilder,
-            @Nonnull UIEventBuilder eventBuilder,
+            @Nonnull UICommandBuilder cmd,
+            @Nonnull UIEventBuilder evt,
             @Nonnull Store<EntityStore> store
     ) {
-        commandBuilder.append(LAYOUT);
+        // Load the layout
+        cmd.append(LAYOUT);
 
-        // Input field placeholder
-        commandBuilder.set("#SearchInput.PlaceholderText", "Type here to test input");
-
-        // Slider initial value
-        commandBuilder.set("#ScaleSlider.Value", 0.5f);
-
-        // Tab button styles
-        commandBuilder.set("#TabNPC.Style", TAB_STYLE_ACTIVE);
-        commandBuilder.set("#TabItems.Style", TAB_STYLE_INACTIVE);
-        commandBuilder.set("#TabModel.Style", TAB_STYLE_INACTIVE);
-
-        // Input field change event (captures value with @)
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.ValueChanged,
-            "#SearchInput",
-            new EventData().append("Action", "InputChanged").append("@Value", "#SearchInput.Value"),
-            false
-        );
-
-        // Slider change event
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.ValueChanged,
-            "#ScaleSlider",
-            new EventData().append("Action", "SliderChanged").append("@Value", "#ScaleSlider.Value"),
-            false
-        );
-
-        // Tab button events
-        eventBuilder.addEventBinding(
+        // Bind button click event
+        evt.addEventBinding(
             CustomUIEventBindingType.Activating,
-            "#TabNPC",
-            new EventData().append("Action", "TabClick").append("Tab", "NPC"),
-            false
-        );
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#TabItems",
-            new EventData().append("Action", "TabClick").append("Tab", "Items"),
-            false
-        );
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#TabModel",
-            new EventData().append("Action", "TabClick").append("Tab", "Model"),
-            false
-        );
-
-        // Spawn button event
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#Spawn",
-            new EventData().append("Action", "SpawnClick"),
+            "#MyButton",
+            new EventData().append("Action", "click"),
             false
         );
     }
@@ -250,337 +173,73 @@ public class UIComponentTestPage extends InteractiveCustomUIPage<UIComponentTest
     public void handleDataEvent(
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,
-            @Nonnull TestEventData data
+            @Nonnull EventData data
     ) {
-        UICommandBuilder commandBuilder = new UICommandBuilder();
-
-        if ("InputChanged".equals(data.action)) {
-            commandBuilder.set("#SearchInput.PlaceholderText", "You typed: " + data.value);
-        }
-        else if ("SliderChanged".equals(data.action)) {
-            commandBuilder.set("#SearchInput.PlaceholderText", "Slider: " + data.value);
-        }
-        else if ("TabClick".equals(data.action)) {
-            // Update tab styles to show which is active
-            commandBuilder.set("#TabNPC.Style", "NPC".equals(data.tab) ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE);
-            commandBuilder.set("#TabItems.Style", "Items".equals(data.tab) ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE);
-            commandBuilder.set("#TabModel.Style", "Model".equals(data.tab) ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE);
-        }
-        else if ("SpawnClick".equals(data.action)) {
-            commandBuilder.set("#SearchInput.PlaceholderText", "Spawn button clicked!");
-        }
-
-        this.sendUpdate(commandBuilder, false);
-    }
-
-    public static class TestEventData {
-        public static final BuilderCodec<TestEventData> CODEC = BuilderCodec.builder(
-                TestEventData.class, TestEventData::new
-        )
-        .append(new KeyedCodec<>("Action", Codec.STRING), (e, s) -> e.action = s, e -> e.action)
-        .add()
-        .append(new KeyedCodec<>("Tab", Codec.STRING), (e, s) -> e.tab = s, e -> e.tab)
-        .add()
-        .append(new KeyedCodec<>("Value", Codec.STRING), (e, s) -> e.value = s, e -> e.value)
-        .add()
-        .build();
-
-        private String action;
-        private String tab;
-        private String value;
-
-        public TestEventData() {}
-    }
-}
-```
-
-### Dropdown Example (TeleporterSettingsPage)
-
-```java
-import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
-import com.hypixel.hytale.server.core.message.LocalizableString;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
-// In your build() method:
-commandBuilder.append("Pages/Teleporter.ui");
-
-// Create dropdown entries
-ObjectArrayList<DropdownEntryInfo> options = new ObjectArrayList<>();
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 1"), "opt1"));
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 2"), "opt2"));
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 3"), "opt3"));
-
-// Set dropdown entries and selected value
-commandBuilder.set("#WorldDropdown.Entries", options);
-commandBuilder.set("#WorldDropdown.Value", "opt1");
-
-// Listen for selection changes
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.ValueChanged,
-    "#WorldDropdown",
-    new EventData().append("Action", "DropdownChanged").append("@Value", "#WorldDropdown.Value"),
-    false
-);
-```
-
-## UI Element Properties Reference
-
-These are all the properties that can be set on UI elements via `commandBuilder.set()`:
-
-### Text Properties
-
-| Property | Type | Description | Example |
-|----------|------|-------------|---------|
-| `.Text` | String/Message | Text content | `set("#Title.Text", "Hello")` |
-| `.TextSpans` | Message | Rich text with formatting | `set("#Name.TextSpans", Message.raw("Bold"))` |
-| `.PlaceholderText` | String/Message | Input placeholder hint | `set("#Input.PlaceholderText", "Enter name...")` |
-
-### Visibility & State
-
-| Property | Type | Description | Example |
-|----------|------|-------------|---------|
-| `.Visible` | boolean | Show/hide element | `set("#Panel.Visible", false)` |
-| `.Disabled` | boolean | Enable/disable interaction | `set("#Button.Disabled", true)` |
-
-### Values & Data
-
-| Property | Type | Description | Example |
-|----------|------|-------------|---------|
-| `.Value` | String/float/int | Input value, slider position | `set("#Slider.Value", 0.5f)` |
-| `.Entries` | DropdownEntryInfo[] | Dropdown options | `set("#Dropdown.Entries", options)` |
-| `.Slots` | ItemGridSlot[] | Inventory slots | `set("#Grid.Slots", slots)` |
-| `.ItemId` | String | Item to display | `set("#Icon.ItemId", itemId)` |
-
-### Styling & Appearance
-
-| Property | Type | Description | Example |
-|----------|------|-------------|---------|
-| `.Style` | `Value<String>` | Visual style reference | `set("#Tab.Style", TAB_ACTIVE_STYLE)` |
-| `.Color` | String (hex) | Color value | `set("#Tint.Color", "#5B9E28")` |
-| `.Background` | String (asset path) | Background image | `set("#Artwork.Background", "Pages/Portals/splash.png")` |
-| `.AssetPath` | String (asset path) | Asset/icon path | `set("#Icon.AssetPath", iconPath)` |
-
-### Complex Objects (via setObject)
-
-These require `commandBuilder.setObject()`:
-
-| Type | Description | Example |
-|------|-------------|---------|
-| `LocalizableString` | Translatable text | `setObject("#Name.Text", LocalizableString.fromMessageId("key"))` |
-| `ItemStack` | Item with quantity | `setObject("#Slot.Item", itemStack)` |
-| `ItemGridSlot` | Inventory slot | `setObject("#Grid.Slots", slots)` |
-| `PatchStyle` | Texture/patch styling | `setObject("#Panel.Style", patchStyle)` |
-| `DropdownEntryInfo` | Dropdown option | Used in arrays for `.Entries` |
-
-### Selector + Property Examples
-
-```java
-// Basic element property
-commandBuilder.set("#PluginName.Text", "My Plugin");
-
-// Nested element property
-commandBuilder.set("#MainPage #Title.Text", "Welcome");
-
-// Array element property
-commandBuilder.set("#PluginList[0] #Button.Text", "First Item");
-
-// Input with multiple properties
-commandBuilder.set("#SearchInput.Value", "");
-commandBuilder.set("#SearchInput.PlaceholderText", "Search...");
-
-// Dropdown setup
-List<DropdownEntryInfo> options = new ArrayList<>();
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 1"), "opt1"));
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 2"), "opt2"));
-commandBuilder.set("#Dropdown.Entries", options);
-commandBuilder.set("#Dropdown.Value", "opt1");
-```
-
-## Threading Requirements
-
-:::warning Critical: World Thread
-UI operations **must run on the world thread**. Failure to do so causes:
-```
-Assert not in thread: Expected WorldThread but was ForkJoinPool.commonPool-worker-X
-```
-:::
-
-### Solution 1: Extend AbstractPlayerCommand (Recommended)
-
-The easiest way to ensure proper threading is to extend `AbstractPlayerCommand`:
-
-```java
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-
-public class MyUICommand extends AbstractPlayerCommand {
-
-    public MyUICommand() {
-        super("myui", "Opens my custom UI");
-    }
-
-    @Override
-    protected void execute(
-        @Nonnull CommandContext context,
-        @Nonnull Store<EntityStore> store,
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull PlayerRef playerRef,
-        @Nonnull World world
-    ) {
-        // Already on world thread - safe to open UI
-        Player player = store.getComponent(ref, Player.getComponentType());
-        MyCustomPage page = new MyCustomPage(playerRef);
-        player.getPageManager().openCustomPage(ref, store, page);
-    }
-}
-```
-
-### Solution 2: Schedule on World Thread
-
-If not using `AbstractPlayerCommand`, schedule execution on the world thread:
-
-```java
-World world = store.getExternalData().getWorld();
-world.execute(() -> {
-    // Safe to perform UI operations here
-    Player player = store.getComponent(ref, Player.getComponentType());
-    player.getPageManager().openCustomPage(ref, store, page);
-});
-```
-
-## Creating a Custom UI Page
-
-### Step 1: Extend InteractiveCustomUIPage
-
-```java
-import com.hypixel.hytale.codec.Codec;
-import com.hypixel.hytale.codec.KeyedCodec;
-import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
-import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.protocol.packets.interface_.Page;
-import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.ui.Value;
-import com.hypixel.hytale.server.core.ui.builder.EventData;
-import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
-import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-public class MyDashboardPage extends InteractiveCustomUIPage<MyDashboardPage.MyEventData> {
-
-    // Use a SAFE layout that exists on all clients
-    public static final String LAYOUT = "Pages/PluginListPage.ui";
-
-    public MyDashboardPage(@Nonnull PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CanDismiss, MyEventData.CODEC);
-    }
-
-    @Override
-    public void build(
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull UICommandBuilder commandBuilder,
-        @Nonnull UIEventBuilder eventBuilder,
-        @Nonnull Store<EntityStore> store
-    ) {
-        // Load the layout
-        commandBuilder.append(LAYOUT);
-
-        // Hide elements we don't need
-        commandBuilder.set("#DescriptiveOnlyOption.Visible", false);
-
-        // Set info panel content
-        commandBuilder.set("#PluginName.Text", "My Dashboard");
-        commandBuilder.set("#PluginIdentifier.Text", "Status: Online");
-        commandBuilder.set("#PluginVersion.Text", "v1.0.0");
-        commandBuilder.set("#PluginDescription.Text", "Welcome to my custom dashboard!");
-
-        // Clear and populate the list
-        commandBuilder.clear("#PluginList");
-
-        // Add list items
-        String[] items = {"Option A", "Option B", "Option C"};
-        for (int i = 0; i < items.length; i++) {
-            String selector = "#PluginList[" + i + "]";
-
-            // Append a button from the button template
-            commandBuilder.append("#PluginList", "Pages/PluginListButton.ui");
-
-            // Set the button text
-            commandBuilder.set(selector + " #Button.Text", items[i]);
-
-            // Disable the checkbox (we're using this for display only)
-            commandBuilder.set(selector + " #CheckBox.Visible", false);
-
-            // Register click event with data
-            eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                selector + " #Button",
-                new EventData().append("Item", items[i]).append("Index", String.valueOf(i)),
-                false
+        if ("click".equals(data.action)) {
+            NotificationUtil.sendNotification(
+                playerRef.getPacketHandler(),
+                Message.raw("Button Clicked!"),
+                Message.raw("You clicked the button."),
+                NotificationStyle.Success
             );
         }
     }
 
-    @Override
-    public void handleDataEvent(
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull Store<EntityStore> store,
-        @Nonnull MyEventData data
-    ) {
-        if (data.item != null) {
-            // Handle item selection
-            UICommandBuilder commandBuilder = new UICommandBuilder();
-            commandBuilder.set("#PluginDescription.Text", "You selected: " + data.item);
-            this.sendUpdate(commandBuilder, false);
-        }
-    }
-
-    // Event data class - must have a BuilderCodec
-    public static class MyEventData {
-        public static final BuilderCodec<MyEventData> CODEC = BuilderCodec.builder(
-            MyEventData.class, MyEventData::new
+    // Event data class with codec
+    public static class EventData {
+        public static final BuilderCodec<EventData> CODEC = BuilderCodec.builder(
+                EventData.class, EventData::new
         )
-        .append(new KeyedCodec<>("Item", Codec.STRING), (e, v) -> e.item = v, e -> e.item)
-        .add()
-        .append(new KeyedCodec<>("Index", Codec.STRING), (e, v) -> e.index = v, e -> e.index)
+        .append(new KeyedCodec<>("Action", Codec.STRING), (e, v) -> e.action = v, e -> e.action)
         .add()
         .build();
 
-        private String item;
-        private String index;
+        private String action;
 
-        public MyEventData() {}
+        public EventData() {}
     }
 }
 ```
 
-### Step 2: Create the Command
+### Step 5: Create the Command
+
+Create `src/main/java/com/yourname/plugin/commands/OpenUICommand.java`:
 
 ```java
+package com.yourname.plugin.commands;
+
+import com.yourname.plugin.ui.MyPage;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-public class DashboardCommand extends AbstractPlayerCommand {
+import javax.annotation.Nonnull;
 
-    public DashboardCommand() {
-        super("dashboard", "Opens the dashboard UI");
+public class OpenUICommand extends AbstractPlayerCommand {
+
+    public OpenUICommand() {
+        super("myui", "Opens the custom UI");
     }
 
     @Override
     protected boolean canGeneratePermission() {
-        return false; // No permission required
+        return false;
     }
 
     @Override
     protected void execute(
-        @Nonnull CommandContext context,
-        @Nonnull Store<EntityStore> store,
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull PlayerRef playerRef,
-        @Nonnull World world
+            @Nonnull CommandContext context,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull World world
     ) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
@@ -588,709 +247,471 @@ public class DashboardCommand extends AbstractPlayerCommand {
             return;
         }
 
-        MyDashboardPage page = new MyDashboardPage(playerRef);
+        MyPage page = new MyPage(playerRef);
         player.getPageManager().openCustomPage(ref, store, page);
-        context.sendMessage(Message.raw("Dashboard opened!"));
     }
 }
 ```
 
-### Step 3: Register in Plugin
+### Step 6: Register in Plugin
 
 ```java
-public class MyPlugin extends JavaPlugin {
+package com.yourname.plugin;
+
+import com.yourname.plugin.commands.OpenUICommand;
+import com.hytaledocs.server.plugin.JavaPlugin;
+
+public class YourPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        CommandRegistry commandRegistry = getCommandRegistry();
-        commandRegistry.register(new DashboardCommand());
+        getCommandRegistry().register(new OpenUICommand());
+        getLogger().info("Plugin enabled!");
     }
 }
 ```
 
-## UICommandBuilder Reference
+### Step 7: Build and Test
 
-The `UICommandBuilder` sends commands to manipulate UI elements. All methods return `UICommandBuilder` for chaining.
-
-### All Methods
-
-| Method | Description |
-|--------|-------------|
-| `append(String documentPath)` | Load a layout file as the page |
-| `append(String selector, String documentPath)` | Append layout to a container |
-| `appendInline(String selector, String document)` | Append inline UI markup |
-| `insertBefore(String selector, String documentPath)` | Insert layout before element |
-| `insertBeforeInline(String selector, String document)` | Insert inline markup before element |
-| `clear(String selector)` | Remove all children from container |
-| `remove(String selector)` | Remove element from DOM |
-| `set(String selector, T value)` | Set property value (many overloads) |
-| `setObject(String selector, Object data)` | Set complex object via codec |
-| `setNull(String selector)` | Set property to null |
-| `getCommands()` | Get array of commands to send |
-
-### Loading Layouts
-
-```java
-// Load a layout file as the page (MUST exist on client)
-commandBuilder.append("Pages/PluginListPage.ui");
-
-// Append a layout to a container (adds children to list)
-commandBuilder.append("#PluginList", "Pages/PluginListButton.ui");
-
-// Insert before an existing element
-commandBuilder.insertBefore("#FirstItem", "Pages/PluginListButton.ui");
+```bash
+./gradlew build
 ```
 
-### Setting Values (Type Overloads)
+Copy the JAR to your server's `plugins/` folder, restart, and run `/myui`.
 
-```java
-// String
-commandBuilder.set("#Title.Text", "Hello World");
+---
 
-// Message (with translation support)
-commandBuilder.set("#Title.Text", Message.raw("Hello World"));
-commandBuilder.set("#Title.Text", Message.translation("my.translation.key"));
+## UI File Syntax Reference
 
-// boolean
-commandBuilder.set("#Panel.Visible", true);
-commandBuilder.set("#Button.Disabled", false);
+Hytale uses a **custom DSL** (Domain Specific Language) for UI files. This is **NOT** XAML, XML, or any standard format.
 
-// Numeric (int, float, double)
-commandBuilder.set("#Counter.Text", 42);
-commandBuilder.set("#Slider.Value", 0.75f);
-commandBuilder.set("#Position.Value", 123.456);
-
-// Value reference (for styles)
-commandBuilder.set("#Button.Style", Value.ref("Pages/BasicTextButton.ui", "SelectedLabelStyle"));
-
-// Arrays and Lists
-commandBuilder.set("#Dropdown.Entries", dropdownOptions);  // DropdownEntryInfo[]
-commandBuilder.set("#Grid.Slots", itemSlots);              // ItemGridSlot[]
-
-// Complex objects (via setObject)
-commandBuilder.setObject("#Name.Text", LocalizableString.fromMessageId("item.name.key"));
-commandBuilder.setObject("#Icon.Item", itemStack);
-```
-
-### Managing Elements
-
-```java
-// Clear all children from a container
-commandBuilder.clear("#PluginList");
-
-// Remove a specific element
-commandBuilder.remove("#OldItem");
-
-// Set value to null
-commandBuilder.setNull("#OptionalField");
-```
-
-### Inline UI (Advanced)
-
-```java
-// Append inline UI markup to an existing container
-commandBuilder.appendInline("#Container", "Label { Text: No items; Style: (Alignment: Center); }");
-```
-
-:::warning appendInline Limitations
-`appendInline()` requires a **selector to an existing container**. You cannot create a full page with inline markup alone - you must first load a layout file. **This method can cause disconnections if the markup is invalid.**
-:::
-
-## Selector Syntax
-
-Elements are targeted using CSS-like selectors:
-
-| Syntax | Example | Description |
-|--------|---------|-------------|
-| `#ID` | `#Button` | Element by ID |
-| `#ID[n]` | `#List[0]` | Array element by index |
-| `#ID.Property` | `#Button.Text` | Element property |
-| `#Parent #Child` | `#Panel #Title` | Nested element |
-| Combined | `#List[2] #Button.Text` | Array item's child property |
-
-## UIEventBuilder Reference
-
-Register event bindings to handle player interactions.
-
-### All Methods
-
-| Method | Description |
-|--------|-------------|
-| `addEventBinding(type, selector)` | Simple binding, locks interface |
-| `addEventBinding(type, selector, locksInterface)` | Control interface locking |
-| `addEventBinding(type, selector, data)` | With custom data, locks interface |
-| `addEventBinding(type, selector, data, locksInterface)` | Full control |
-| `getEvents()` | Get array of event bindings |
-
-### Event Types (CustomUIEventBindingType)
-
-| Type | Triggered When |
-|------|---------------|
-| `Activating` | Element clicked or Enter pressed |
-| `RightClicking` | Right mouse button clicked |
-| `DoubleClicking` | Double click |
-| `ValueChanged` | Value changed (inputs, sliders, checkboxes) |
-| `MouseEntered` | Mouse entered element |
-| `MouseExited` | Mouse left element |
-| `FocusGained` | Element gained focus |
-| `FocusLost` | Element lost focus |
-| `Dropped` | Drag and drop completed |
-
-### Registering Events
-
-```java
-// Simple event (triggers handleDataEvent with empty data)
-eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton");
-
-// Event with custom data
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.Activating,
-    "#SaveButton",
-    new EventData().append("Action", "Save").append("Tab", "Settings")
-);
-
-// Non-locking event (UI stays responsive during event handling)
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.ValueChanged,
-    "#Slider",
-    new EventData().append("Type", "Volume"),
-    false  // locksInterface = false
-);
-
-// Capture UI element value (prefix key with @)
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.Activating,
-    "#SearchButton",
-    new EventData()
-        .append("Action", "Search")
-        .append("@Query", "#SearchInput.Value")  // Captures input value
-);
-
-// Complex form with multiple captured values
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.Activating,
-    "#SaveButton",
-    new EventData()
-        .append("@X", "#X #Input.Value")
-        .append("@Y", "#Y #Input.Value")
-        .append("@Z", "#Z #Input.Value")
-        .append("@BlockRelative", "#BlockRelative #CheckBox.Value")
-);
-```
-
-### Interface Locking
-
-When `locksInterface = true` (default):
-- UI becomes unresponsive until event is processed
-- Prevents double-clicks and race conditions
-- Use for actions that modify state
-
-When `locksInterface = false`:
-- UI stays responsive
-- Good for real-time updates (sliders, hover effects)
-- Use for `ValueChanged` and `MouseEntered/Exited` events
-
-## EventData Codec
-
-To receive event data, create a class with a `BuilderCodec`:
-
-```java
-public static class MyEventData {
-    public static final BuilderCodec<MyEventData> CODEC = BuilderCodec.builder(
-        MyEventData.class, MyEventData::new
-    )
-    // String field
-    .append(new KeyedCodec<>("Action", Codec.STRING),
-        (data, value) -> data.action = value,
-        data -> data.action)
-    .add()
-    // Another string field
-    .append(new KeyedCodec<>("ItemId", Codec.STRING),
-        (data, value) -> data.itemId = value,
-        data -> data.itemId)
-    .add()
-    .build();
-
-    private String action;
-    private String itemId;
-
-    public MyEventData() {}
-
-    // Getters if needed
-    public String getAction() { return action; }
-    public String getItemId() { return itemId; }
-}
-```
-
-## Updating the UI
-
-To update the UI after initial build, use `sendUpdate()`:
-
-```java
-@Override
-public void handleDataEvent(Ref<EntityStore> ref, Store<EntityStore> store, MyEventData data) {
-    // Create a new command builder for the update
-    UICommandBuilder commandBuilder = new UICommandBuilder();
-
-    // Make changes
-    commandBuilder.set("#StatusText.Text", "Updated!");
-    commandBuilder.set("#Counter.Text", String.valueOf(++counter));
-
-    // Send the update (false = don't rebuild events)
-    this.sendUpdate(commandBuilder, false);
-}
-```
-
-## Closing the Page
-
-```java
-// From handleDataEvent
-Player player = store.getComponent(ref, Player.getComponentType());
-player.getPageManager().setPage(ref, store, Page.None);
-
-// Or use the close() helper
-this.close();
-```
-
-## CustomPageLifetime
-
-Controls how the page can be closed:
-
-| Lifetime | Behavior |
-|----------|----------|
-| `CantClose` | User cannot close the page (must be closed programmatically) |
-| `CanDismiss` | User can press ESC to dismiss |
-| `CanDismissOrCloseThroughInteraction` | ESC or close button interaction |
-
-## Alternative: NotificationUtil
-
-For simple messages without custom pages, use notifications:
-
-```java
-import com.hypixel.hytale.server.core.util.NotificationUtil;
-import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
-
-NotificationUtil.sendNotification(
-    playerRef.getPacketHandler(),
-    Message.raw("Title"),
-    Message.raw("Subtitle"),
-    NotificationStyle.Success
-);
-```
-
-### Notification Styles
-
-| Style | Appearance |
-|-------|------------|
-| `Default` | Standard notification |
-| `Success` | Green/positive |
-| `Warning` | Yellow/caution |
-| `Error` | Red/negative |
-
-## Common Mistakes
-
-### 1. Using Non-Existent Layout Files
-
-```java
-// BAD - DialogPage.ui may not exist on all clients
-commandBuilder.append("Pages/DialogPage.ui");
-
-// GOOD - PluginListPage.ui is always available
-commandBuilder.append("Pages/PluginListPage.ui");
-```
-
-### 2. Not Running on World Thread
-
-```java
-// BAD - Extending CommandBase doesn't guarantee world thread
-public class MyCommand extends CommandBase { ... }
-
-// GOOD - AbstractPlayerCommand handles threading
-public class MyCommand extends AbstractPlayerCommand { ... }
-```
-
-### 3. Missing Codec Fields
-
-```java
-// BAD - Field "Action" sent by UI but not in codec
-eventBuilder.addEventBinding(..., new EventData().append("Action", "Save"));
-// handleDataEvent receives null for missing fields
-
-// GOOD - All fields declared in codec
-.append(new KeyedCodec<>("Action", Codec.STRING), ...)
-```
-
-### 4. Using appendInline Without Base Layout
-
-```java
-// BAD - No base layout loaded first
-commandBuilder.appendInline("", "<panel>...</panel>");
-
-// GOOD - Load layout first, then append inline to container
-commandBuilder.append("Pages/PluginListPage.ui");
-commandBuilder.appendInline("#SomeContainer", "Label { Text: Extra; }");
-```
-
-## Source Classes
-
-| Class | Package |
-|-------|---------|
-| `CustomUIPage` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `BasicCustomUIPage` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `InteractiveCustomUIPage` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `UICommandBuilder` | `com.hypixel.hytale.server.core.ui.builder` |
-| `UIEventBuilder` | `com.hypixel.hytale.server.core.ui.builder` |
-| `EventData` | `com.hypixel.hytale.server.core.ui.builder` |
-| `PageManager` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `AbstractPlayerCommand` | `com.hypixel.hytale.server.core.command.system.basecommands` |
-| `NotificationUtil` | `com.hypixel.hytale.server.core.util` |
-
-## Built-in Page Implementations
-
-These are all the CustomUIPage implementations in Hytale - useful as reference:
-
-### Server Core Pages
-
-| Class | Layout | Purpose |
-|-------|--------|---------|
-| `PluginListPage` | `Pages/PluginListPage.ui` | Plugin management (`/plugins`) |
-| `CommandListPage` | `Pages/CommandListPage.ui` | Command help (`/commands`) |
-| `RespawnPage` | `Pages/RespawnPage.ui` | Death/respawn screen |
-| `ItemRepairPage` | `Pages/ItemRepairPage.ui` | Item repair interface |
-
-### Builder Tools Pages
-
-| Class | Layout | Purpose |
-|-------|--------|---------|
-| `EntitySpawnPage` | `Pages/EntitySpawnPage.ui` | NPC/entity spawning |
-| `ChangeModelPage` | `Pages/ChangeModelPage.ui` | Model selection |
-| `ParticleSpawnPage` | `Pages/ParticleSpawnPage.ui` | Particle testing |
-| `PrefabPage` | `Pages/PrefabListPage.ui` | Prefab browser |
-| `ImageImportPage` | `Pages/ImageImportPage.ui` | Image import |
-| `ObjImportPage` | `Pages/ObjImportPage.ui` | 3D model import |
-
-### Adventure Pages
-
-| Class | Layout | Purpose |
-|-------|--------|---------|
-| `DialogPage` | `Pages/DialogPage.ui` | NPC dialog |
-| `ShopPage` | `Pages/ShopPage.ui` | Shop interface |
-| `BarterPage` | `Pages/BarterPage.ui` | Trading interface |
-| `MemoriesPage` | `Pages/Memories/*.ui` | Collectibles tracking |
-
-### Portal/Teleporter Pages
-
-| Class | Layout | Purpose |
-|-------|--------|---------|
-| `PortalDeviceSummonPage` | `Pages/PortalDeviceSummon.ui` | Portal summoning |
-| `PortalDeviceActivePage` | `Pages/PortalDeviceActive.ui` | Active portal display |
-| `TeleporterSettingsPage` | `Pages/Teleporter.ui` | Teleporter config |
-| `WarpListPage` | `Pages/WarpListPage.ui` | Warp selection |
-
-### Instance Management Pages
-
-| Class | Layout | Purpose |
-|-------|--------|---------|
-| `InstanceListPage` | `Pages/InstanceListPage.ui` | Instance browser |
-| `ConfigureInstanceBlockPage` | `Pages/ConfigureInstanceBlockPage.ui` | Instance config |
-
-## Complete Layout File Reference
-
-All 57 `.ui` layout files found in the server code:
-
-### Core Layouts
-- `Common.ui` - Global styles and constants
-- `Common/TextButton.ui` - Reusable button component
-
-### Pages Directory (55 files)
-- `Pages/ArgumentTypeItem.ui`
-- `Pages/BarterGridSpacer.ui`
-- `Pages/BarterPage.ui`
-- `Pages/BarterTradeRow.ui`
-- `Pages/BasicTextButton.ui`
-- `Pages/ChangeModelPage.ui`
-- `Pages/CommandListPage.ui`
-- `Pages/ConfigureInstanceBlockPage.ui`
-- `Pages/DialogPage.ui`
-- `Pages/DroppedItemSlot.ui`
-- `Pages/EntitySpawnPage.ui`
-- `Pages/ImageImportPage.ui`
-- `Pages/InstanceListPage.ui`
-- `Pages/ItemRepairElement.ui`
-- `Pages/ItemRepairPage.ui`
-- `Pages/LaunchPadSettingsPage.ui`
-- `Pages/NameRespawnPointPage.ui`
-- `Pages/ObjectiveAdminPanelDataSlot.ui`
-- `Pages/ObjectiveAdminPanelPage.ui`
-- `Pages/ObjImportPage.ui`
-- `Pages/OverrideNearbyRespawnPointPage.ui`
-- `Pages/OverrideRespawnPointButton.ui`
-- `Pages/ParameterItem.ui`
-- `Pages/ParticleSpawnPage.ui`
-- `Pages/PlaySoundPage.ui`
-- `Pages/PluginListButton.ui`
-- `Pages/PluginListPage.ui`
-- `Pages/PortalDeviceActive.ui`
-- `Pages/PortalDeviceError.ui`
-- `Pages/PortalDeviceSummon.ui`
-- `Pages/PrefabEditorExitConfirm.ui`
-- `Pages/PrefabEditorSaveSettings.ui`
-- `Pages/PrefabEditorSettings.ui`
-- `Pages/PrefabListPage.ui`
-- `Pages/PrefabSavePage.ui`
-- `Pages/PrefabSpawnerSettingsPage.ui`
-- `Pages/PrefabTeleportPage.ui`
-- `Pages/RespawnPage.ui`
-- `Pages/ScriptedBrushListPage.ui`
-- `Pages/SelectOverrideRespawnPointPage.ui`
-- `Pages/ShopElementButton.ui`
-- `Pages/ShopPage.ui`
-- `Pages/SubcommandCard.ui`
-- `Pages/Teleporter.ui`
-- `Pages/TintChunkPage.ui`
-- `Pages/VariantCard.ui`
-- `Pages/WarpEntryButton.ui`
-- `Pages/WarpListPage.ui`
-
-### Subdirectories
-- `Pages/Memories/ChestMarker.ui`
-- `Pages/Memories/Memory.ui`
-- `Pages/Memories/MemoriesCategory.ui`
-- `Pages/Memories/MemoriesCategoryPanel.ui`
-- `Pages/Memories/MemoriesPanel.ui`
-- `Pages/Portals/BulletPoint.ui`
-- `Pages/Portals/Pill.ui`
-
-## Creating Custom UI Layouts (Asset Packs)
-
-To create truly custom UI layouts, you need to distribute `.ui` files as part of an asset pack to clients.
-
-### Requirements
-
-1. **File Location**: UI files must be in `resources/Common/UI/Custom/`
-2. **Manifest**: Add `"IncludesAssetPack": true` to your plugin's `manifest.json`
-
-### UI Markup Syntax
-
-UI files use a hierarchical markup language:
+### Basic Structure
 
 ```
+// Comments start with //
+
+// Import Common.ui for reusable components
+$C = "../Common.ui";
+
+// Define custom styles (optional)
+@MyStyle = LabelStyle(FontSize: 16, TextColor: #ffffff);
+
+// Root element
 Group {
-  Label #Title {
-    Text: "My Custom UI";
-    Style: $Common.@DefaultLabelStyle;
-    Anchor: (Top: 10, Width: 300, Height: 40);
-  }
+  // Properties
+  Anchor: (Width: 400, Height: 300);
+  Background: #1a1a2e;
 
-  TextField #SearchInput {
-    Style: $Common.@DefaultInputFieldStyle;
-    Background: $Common.@InputBoxBackground;
-    Anchor: (Top: 60, Width: 200, Height: 50);
-  }
-
-  Button #SubmitButton {
-    Text: "Submit";
-    Style: $Common.@DefaultTextButtonStyle;
-    Anchor: (Top: 120, Width: 100, Height: 40);
+  // Child elements
+  Label {
+    Text: "Hello";
+    Style: @MyStyle;
   }
 }
 ```
 
-### Markup Elements
+### Critical Syntax Rules
 
-| Element | Description | Properties |
-|---------|-------------|------------|
-| `Group` | Container for other elements | `LayoutMode`, `Padding` |
-| `Label` | Text display | `Text`, `Style`, `Anchor` |
-| `TextField` | Text input | `Style`, `Background`, `PlaceholderText` |
-| `Button` | Clickable button | `Text`, `Style` |
+| Rule | Correct | Wrong |
+|------|---------|-------|
+| Text values must be quoted | `Text: "Hello";` | `Text: Hello;` |
+| Properties end with semicolon | `Anchor: (Width: 100);` | `Anchor: (Width: 100)` |
+| Colors use hex format | `#ffffff` or `#fff` | `white` or `rgb(255,255,255)` |
+| Alpha in colors | `#141c26(0.95)` | `#141c26cc` |
+| Element IDs start with # | `Label #Title { }` | `Label Title { }` |
 
-### Markup Properties
+### Layout Properties
 
 | Property | Description | Example |
 |----------|-------------|---------|
-| `#identifier` | Element ID for Java access | `#MyButton` |
-| `Style` | Reference to style definition | `$Common.@DefaultLabelStyle` |
-| `Anchor` | Position and size | `(Top: 10, Width: 200, Height: 50)` |
-| `Background` | Texture reference | `$Common.@InputBoxBackground` |
-| `LayoutMode` | Child arrangement | `Center`, `Top` |
-| `Padding` | Internal spacing | `(Left: 10, Right: 10)` |
+| `Anchor` | Size and position | `Anchor: (Width: 200, Height: 50);` |
+| `Background` | Background color | `Background: #1a1a2e;` |
+| `LayoutMode` | Child arrangement | `LayoutMode: Top;` or `Center;` or `Left;` |
+| `Padding` | Internal spacing | `Padding: (Full: 20);` or `(Left: 10, Right: 10);` |
+| `FlexWeight` | Flexible sizing | `FlexWeight: 1;` |
 
-### Style References
+### LayoutMode Values
 
-- `$filename.@styleName` - Reference style from external file
-- `@styleName` - Reference style in same file
+| Mode | Description |
+|------|-------------|
+| `Top` | Stack children vertically from top |
+| `Left` | Stack children horizontally from left |
+| `Center` | Center children |
 
-Common styles from `Common.ui`:
-- `@DefaultLabelStyle`
-- `@DefaultInputFieldStyle`
-- `@DefaultTextButtonStyle`
-- `@SecondaryTextButtonStyle`
-- `@InputBoxBackground`
+### Basic Elements
 
-### Using Custom Layouts
+#### Label (Text Display)
 
-```java
-public class MyCustomPage extends InteractiveCustomUIPage<MyEventData> {
+```
+Label {
+  Text: "My Text";
+  Anchor: (Height: 30);
+  Style: (FontSize: 16, TextColor: #ffffff, HorizontalAlignment: Center);
+}
+```
 
-    // Reference your custom layout
-    public static final String LAYOUT = "Custom/MyPage.ui";
+#### Label with ID
 
-    @Override
-    public void build(...) {
-        // Load your custom layout
-        commandBuilder.append(LAYOUT);
+```
+Label #Title {
+  Text: "Default Title";
+  Anchor: (Height: 40);
+  Style: (FontSize: 24, TextColor: #ffffff, RenderBold: true);
+}
+```
 
-        // Access elements by ID
-        commandBuilder.set("#Title.Text", "Welcome!");
-        commandBuilder.set("#SearchInput.PlaceholderText", "Search...");
+#### Group (Container)
 
-        // Bind events
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#SubmitButton",
-            new EventData().append("Action", "Submit"),
-            false
-        );
+```
+Group {
+  Anchor: (Height: 100);
+  LayoutMode: Left;
+  Background: #2a2a3e;
+
+  // Children go here
+}
+```
+
+#### Spacer
+
+```
+// Vertical spacer
+Group { Anchor: (Height: 20); }
+
+// Horizontal spacer (in LayoutMode: Left)
+Group { Anchor: (Width: 20); }
+
+// Separator line
+Group { Anchor: (Height: 1); Background: #333333; }
+```
+
+#### TextButton (Custom Style)
+
+```
+@MyButtonStyle = TextButtonStyle(
+  Default: (Background: #3a7bd5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: #4a8be5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: #2a6bc5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+TextButton #MyButton {
+  Text: "Click Me";
+  Anchor: (Width: 120, Height: 44);
+  Style: @MyButtonStyle;
+}
+```
+
+---
+
+## Common.ui Components
+
+The game provides reusable components in `Common.ui`. Import them with:
+
+```
+$C = "../Common.ui";
+```
+
+Then use them with the `$C.@ComponentName` syntax.
+
+### Available Components
+
+| Component | Description | Parameters |
+|-----------|-------------|------------|
+| `$C.@TextButton` | Primary button (blue) | `@Text` |
+| `$C.@SecondaryTextButton` | Secondary button (gray) | `@Text` |
+| `$C.@CancelTextButton` | Cancel/danger button (red) | `@Text` |
+| `$C.@TextField` | Text input field | `PlaceholderText`, `FlexWeight` |
+| `$C.@NumberField` | Numeric input field | `Value`, `Anchor` |
+| `$C.@CheckBox` | Checkbox only | - |
+| `$C.@CheckBoxWithLabel` | Checkbox with text | `@Text`, `@Checked` |
+| `$C.@DropdownBox` | Dropdown selector | `Anchor` |
+| `$C.@ContentSeparator` | Horizontal separator | `Anchor` |
+| `$C.@Container` | Styled container | `Anchor` |
+| `$C.@DecoratedContainer` | Container with border | `Anchor` |
+| `$C.@DefaultSpinner` | Loading spinner | `Anchor` |
+
+### Component Examples
+
+#### Buttons
+
+```
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 50);
+
+  $C.@TextButton #SaveBtn {
+    @Text = "Save";
+    Anchor: (Width: 100, Height: 40);
+  }
+
+  Group { Anchor: (Width: 10); }
+
+  $C.@SecondaryTextButton #CancelBtn {
+    @Text = "Cancel";
+    Anchor: (Width: 100, Height: 40);
+  }
+
+  Group { Anchor: (Width: 10); }
+
+  $C.@CancelTextButton #DeleteBtn {
+    @Text = "Delete";
+    Anchor: (Width: 100, Height: 40);
+  }
+}
+```
+
+#### Text Input
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+
+  Label {
+    Text: "Username";
+    Anchor: (Width: 100);
+    Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+  }
+
+  $C.@TextField #UsernameInput {
+    FlexWeight: 1;
+    PlaceholderText: "Enter username...";
+  }
+}
+```
+
+#### Number Input
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+
+  Label {
+    Text: "Amount";
+    Anchor: (Width: 100);
+    Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+  }
+
+  $C.@NumberField #AmountInput {
+    Anchor: (Width: 80);
+    Value: 100;
+  }
+}
+```
+
+#### Checkboxes
+
+```
+$C.@CheckBoxWithLabel #EnableOption {
+  @Text = "Enable this feature";
+  @Checked = true;
+  Anchor: (Height: 28);
+}
+
+Group { Anchor: (Height: 8); }
+
+$C.@CheckBoxWithLabel #DisabledOption {
+  @Text = "This is disabled by default";
+  @Checked = false;
+  Anchor: (Height: 28);
+}
+```
+
+#### Dropdown
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+
+  Label {
+    Text: "Select:";
+    Anchor: (Width: 80);
+    Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+  }
+
+  $C.@DropdownBox #MyDropdown {
+    Anchor: (Width: 200, Height: 36);
+  }
+}
+```
+
+---
+
+## Complete Example: Settings Page
+
+Here's a complete settings page using multiple components:
+
+### SettingsPage.ui
+
+```
+$C = "../Common.ui";
+
+@PrimaryButton = TextButtonStyle(
+  Default: (Background: #3a7bd5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: #4a8be5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: #2a6bc5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+@SecondaryButton = TextButtonStyle(
+  Default: (Background: #2b3542, LabelStyle: (FontSize: 14, TextColor: #96a9be, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: #3b4552, LabelStyle: (FontSize: 14, TextColor: #b6c9de, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: #1b2532, LabelStyle: (FontSize: 14, TextColor: #96a9be, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+Group {
+  Anchor: (Width: 450, Height: 400);
+  Background: #141c26(0.98);
+  LayoutMode: Top;
+  Padding: (Full: 20);
+
+  // Title
+  Label {
+    Text: "Settings";
+    Anchor: (Height: 40);
+    Style: (FontSize: 24, TextColor: #ffffff, HorizontalAlignment: Center, RenderBold: true);
+  }
+
+  // Separator
+  Group { Anchor: (Height: 1); Background: #2b3542; }
+  Group { Anchor: (Height: 16); }
+
+  // Username field
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 44);
+
+    Label {
+      Text: "Username";
+      Anchor: (Width: 120);
+      Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
     }
+
+    $C.@TextField #UsernameInput {
+      FlexWeight: 1;
+      PlaceholderText: "Enter username...";
+    }
+  }
+
+  Group { Anchor: (Height: 12); }
+
+  // Volume slider-like number field
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 44);
+
+    Label {
+      Text: "Volume";
+      Anchor: (Width: 120);
+      Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+    }
+
+    $C.@NumberField #VolumeInput {
+      Anchor: (Width: 80);
+      Value: 75;
+    }
+
+    Label {
+      Text: "%";
+      Anchor: (Width: 30);
+      Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+    }
+  }
+
+  Group { Anchor: (Height: 16); }
+
+  // Checkboxes
+  $C.@CheckBoxWithLabel #NotificationsOption {
+    @Text = "Enable notifications";
+    @Checked = true;
+    Anchor: (Height: 28);
+  }
+
+  Group { Anchor: (Height: 8); }
+
+  $C.@CheckBoxWithLabel #SoundOption {
+    @Text = "Enable sounds";
+    @Checked = true;
+    Anchor: (Height: 28);
+  }
+
+  Group { Anchor: (Height: 8); }
+
+  $C.@CheckBoxWithLabel #AutoSaveOption {
+    @Text = "Auto-save";
+    @Checked = false;
+    Anchor: (Height: 28);
+  }
+
+  // Spacer to push buttons to bottom
+  Group { FlexWeight: 1; }
+
+  // Buttons
+  Group {
+    LayoutMode: Center;
+    Anchor: (Height: 50);
+
+    TextButton #SaveButton {
+      Text: "Save";
+      Anchor: (Width: 100, Height: 44);
+      Style: @PrimaryButton;
+    }
+
+    Group { Anchor: (Width: 16); }
+
+    TextButton #CloseButton {
+      Text: "Close";
+      Anchor: (Width: 100, Height: 44);
+      Style: @SecondaryButton;
+    }
+  }
+
+  // Footer
+  Group { Anchor: (Height: 8); }
+  Label {
+    Text: "Press ESC to close";
+    Anchor: (Height: 16);
+    Style: (FontSize: 11, TextColor: #555555, HorizontalAlignment: Center);
+  }
 }
 ```
 
-### Limitations Without Asset Packs
-
-Without distributing custom `.ui` files:
-
-- You can only use **existing layouts** (PluginListPage.ui, EntitySpawnPage.ui, etc.)
-- You must **repurpose existing elements** (use #Spawn button for teleport, etc.)
-- `appendInline()` works but requires exact markup syntax knowledge
-- `Common/TextButton.ui` and similar components have specific internal structure
-
-This is why most server-only plugins reuse layouts like `PluginListPage.ui` with `PluginListButton.ui` for list items.
-
-## Reusable Button Components
-
-Different button layouts have different property access patterns. Use the correct syntax based on which component you're using.
-
-### Available Button Components
-
-| Component | Direct Properties | Nested Properties | Styles |
-|-----------|------------------|-------------------|--------|
-| `Pages/BasicTextButton.ui` | `.Text`, `.Style` | - | `LabelStyle`, `SelectedLabelStyle` |
-| `Pages/PluginListButton.ui` | - | `#Button.Text`, `#CheckBox.Value/Visible` | `LabelStyle`, `SelectedLabelStyle` |
-| `Common/TextButton.ui` | `.Text`, `.Style` | - | `LabelStyle`, `SelectedLabelStyle` |
-| `Pages/WarpEntryButton.ui` | - | Specific to warp list | - |
-
-### BasicTextButton.ui Pattern (Simplest)
-
-Best for simple lists where you just need text items.
+### SettingsPage.java
 
 ```java
-// Define styles
-private static final Value<String> BUTTON_STYLE = Value.ref("Pages/BasicTextButton.ui", "LabelStyle");
-private static final Value<String> BUTTON_SELECTED = Value.ref("Pages/BasicTextButton.ui", "SelectedLabelStyle");
+package com.yourplugin.ui;
 
-// In build() method
-commandBuilder.append("Pages/InstanceListPage.ui");  // Layout with #List container
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.ui.builder.EventData;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.server.core.Message;
 
-for (int i = 0; i < items.size(); i++) {
-    commandBuilder.append("#List", "Pages/BasicTextButton.ui");
-    // Direct property access - no nested selector needed
-    commandBuilder.set("#List[" + i + "].Text", items.get(i));
-    commandBuilder.set("#List[" + i + "].Style", isSelected(i) ? BUTTON_SELECTED : BUTTON_STYLE);
+import javax.annotation.Nonnull;
 
-    eventBuilder.addEventBinding(
-        CustomUIEventBindingType.Activating,
-        "#List[" + i + "]",  // Bind to entire button
-        new EventData().append("Index", String.valueOf(i)),
-        false
-    );
-}
-```
+public class SettingsPage extends InteractiveCustomUIPage<SettingsPage.SettingsEventData> {
 
-### PluginListButton.ui Pattern (With Checkbox)
+    public static final String LAYOUT = "YourPlugin/SettingsPage.ui";
 
-Best when you need a checkbox alongside the button (e.g., enable/disable options).
+    private final PlayerRef playerRef;
 
-```java
-// Define styles
-private static final Value<String> STYLE_NORMAL = Value.ref("Pages/PluginListButton.ui", "LabelStyle");
-private static final Value<String> STYLE_SELECTED = Value.ref("Pages/PluginListButton.ui", "SelectedLabelStyle");
-
-// In build() method
-commandBuilder.append("Pages/PluginListPage.ui");  // Layout with #PluginList container
-
-for (int i = 0; i < items.size(); i++) {
-    String selector = "#PluginList[" + i + "]";
-    commandBuilder.append("#PluginList", "Pages/PluginListButton.ui");
-
-    // Nested property access - must use #Button and #CheckBox
-    commandBuilder.set(selector + " #Button.Text", items.get(i));
-    commandBuilder.set(selector + " #Button.Style", isSelected(i) ? STYLE_SELECTED : STYLE_NORMAL);
-    commandBuilder.set(selector + " #CheckBox.Visible", false);  // Hide checkbox if not needed
-
-    eventBuilder.addEventBinding(
-        CustomUIEventBindingType.Activating,
-        selector + " #Button",  // Bind to #Button inside the container
-        new EventData().append("Index", String.valueOf(i)),
-        false
-    );
-}
-```
-
-### Common/TextButton.ui Pattern
-
-Used with EntitySpawnPage.ui and similar builder pages.
-
-```java
-// Define styles
-private static final Value<String> BUTTON_STYLE = Value.ref("Common/TextButton.ui", "LabelStyle");
-private static final Value<String> BUTTON_SELECTED = Value.ref("Common/TextButton.ui", "SelectedLabelStyle");
-
-// In build() method
-commandBuilder.append("Pages/EntitySpawnPage.ui");  // Has #NPCList and #ModelList
-
-for (int i = 0; i < items.size(); i++) {
-    commandBuilder.append("#NPCList", "Common/TextButton.ui");
-    // Direct property access
-    commandBuilder.set("#NPCList[" + i + "].Text", items.get(i));
-    commandBuilder.set("#NPCList[" + i + "].Style", isSelected(i) ? BUTTON_SELECTED : BUTTON_STYLE);
-
-    eventBuilder.addEventBinding(
-        CustomUIEventBindingType.Activating,
-        "#NPCList[" + i + "]",
-        new EventData().append("Index", String.valueOf(i)),
-        false
-    );
-}
-```
-
-### Compatible Layout + Button Combinations
-
-| Page Layout | List Container | Compatible Button Layout |
-|-------------|----------------|-------------------------|
-| `Pages/PluginListPage.ui` | `#PluginList` | `Pages/PluginListButton.ui` |
-| `Pages/InstanceListPage.ui` | `#List` | `Pages/BasicTextButton.ui` |
-| `Pages/CommandListPage.ui` | `#CommandList` | `Pages/BasicTextButton.ui` |
-| `Pages/EntitySpawnPage.ui` | `#NPCList`, `#ModelList` | `Common/TextButton.ui` |
-| `Pages/PrefabListPage.ui` | `#FileList` | `Pages/BasicTextButton.ui` |
-| `Pages/WarpListPage.ui` | `#WarpList` | `Pages/WarpEntryButton.ui` |
-
-### Complete Example: Custom List UI
-
-This example shows a complete page using BasicTextButton.ui for a clean, simple list:
-
-```java
-public class SimpleListPage extends InteractiveCustomUIPage<SimpleListPage.EventData> {
-
-    private static final String LAYOUT = "Pages/InstanceListPage.ui";
-    private static final Value<String> STYLE = Value.ref("Pages/BasicTextButton.ui", "LabelStyle");
-    private static final Value<String> STYLE_SELECTED = Value.ref("Pages/BasicTextButton.ui", "SelectedLabelStyle");
-
-    private String[] items = {"Create World", "Delete World", "Edit World", "Teleport"};
-    private int selectedIndex = -1;
-
-    public SimpleListPage(@Nonnull PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CanDismiss, EventData.CODEC);
+    public SettingsPage(@Nonnull PlayerRef playerRef) {
+        super(playerRef, CustomPageLifetime.CanDismiss, SettingsEventData.CODEC);
+        this.playerRef = playerRef;
     }
 
     @Override
@@ -1302,54 +723,611 @@ public class SimpleListPage extends InteractiveCustomUIPage<SimpleListPage.Event
     ) {
         cmd.append(LAYOUT);
 
-        for (int i = 0; i < items.length; i++) {
-            cmd.append("#List", "Pages/BasicTextButton.ui");
-            cmd.set("#List[" + i + "].Text", items[i]);
-            cmd.set("#List[" + i + "].Style", i == selectedIndex ? STYLE_SELECTED : STYLE);
+        // Bind Save button
+        evt.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#SaveButton",
+            new EventData().append("Action", "save"),
+            false
+        );
 
-            evt.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#List[" + i + "]",
-                new EventData().append("Index", String.valueOf(i)),
-                false
-            );
-        }
+        // Bind Close button
+        evt.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#CloseButton",
+            new EventData().append("Action", "close"),
+            false
+        );
     }
 
     @Override
     public void handleDataEvent(
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,
-            @Nonnull EventData data
+            @Nonnull SettingsEventData data
     ) {
-        if (data.index != null) {
-            int newIndex = Integer.parseInt(data.index);
-
-            UICommandBuilder cmd = new UICommandBuilder();
-
-            // Deselect previous
-            if (selectedIndex >= 0) {
-                cmd.set("#List[" + selectedIndex + "].Style", STYLE);
-            }
-
-            // Select new
-            selectedIndex = newIndex;
-            cmd.set("#List[" + selectedIndex + "].Style", STYLE_SELECTED);
-
-            this.sendUpdate(cmd, false);
+        if ("close".equals(data.action)) {
+            this.close();
+        } else if ("save".equals(data.action)) {
+            NotificationUtil.sendNotification(
+                playerRef.getPacketHandler(),
+                Message.raw("Settings Saved"),
+                Message.raw("Your settings have been saved."),
+                NotificationStyle.Success
+            );
         }
     }
 
-    public static class EventData {
-        public static final BuilderCodec<EventData> CODEC = BuilderCodec.builder(
-            EventData.class, EventData::new
+    public static class SettingsEventData {
+        public static final BuilderCodec<SettingsEventData> CODEC = BuilderCodec.builder(
+                SettingsEventData.class, SettingsEventData::new
         )
-        .append(new KeyedCodec<>("Index", Codec.STRING), (e, v) -> e.index = v, e -> e.index)
+        .append(new KeyedCodec<>("Action", Codec.STRING), (e, v) -> e.action = v, e -> e.action)
         .add()
         .build();
 
-        private String index;
-        public EventData() {}
+        private String action;
+
+        public SettingsEventData() {}
     }
 }
+```
+
+---
+
+## Server-Side API Reference
+
+### InteractiveCustomUIPage
+
+Base class for interactive UI pages.
+
+```java
+public class MyPage extends InteractiveCustomUIPage<MyEventData> {
+
+    public MyPage(PlayerRef playerRef) {
+        super(
+            playerRef,                    // Player reference
+            CustomPageLifetime.CanDismiss, // How page can be closed
+            MyEventData.CODEC              // Event data codec
+        );
+    }
+
+    @Override
+    public void build(
+        Ref<EntityStore> ref,
+        UICommandBuilder cmd,
+        UIEventBuilder evt,
+        Store<EntityStore> store
+    ) {
+        // Called when page opens
+    }
+
+    @Override
+    public void handleDataEvent(
+        Ref<EntityStore> ref,
+        Store<EntityStore> store,
+        MyEventData data
+    ) {
+        // Called when player interacts
+    }
+}
+```
+
+### CustomPageLifetime
+
+| Value | Description |
+|-------|-------------|
+| `CantClose` | Cannot be closed by user |
+| `CanDismiss` | Can press ESC to close |
+| `CanDismissOrCloseThroughInteraction` | ESC or button click |
+
+### UICommandBuilder
+
+```java
+// Load layout
+cmd.append("YourPlugin/MyPage.ui");
+
+// Set text
+cmd.set("#Title.Text", "Hello World");
+
+// Set visibility
+cmd.set("#Panel.Visible", false);
+
+// Set numeric value
+cmd.set("#Slider.Value", 0.5f);
+
+// Clear container
+cmd.clear("#ItemList");
+
+// Append to container
+cmd.append("#ItemList", "YourPlugin/ListItem.ui");
+```
+
+### UIEventBuilder
+
+```java
+// Simple button event
+evt.addEventBinding(
+    CustomUIEventBindingType.Activating,
+    "#MyButton",
+    new EventData().append("Action", "click"),
+    false  // locksInterface
+);
+
+// Capture input value
+evt.addEventBinding(
+    CustomUIEventBindingType.Activating,
+    "#SubmitButton",
+    new EventData()
+        .append("Action", "submit")
+        .append("@Username", "#UsernameInput.Value"),  // @ prefix captures value
+    false
+);
+```
+
+### CustomUIEventBindingType
+
+| Type | When Triggered |
+|------|----------------|
+| `Activating` | Click or Enter |
+| `ValueChanged` | Input/slider value changes |
+| `RightClicking` | Right click |
+| `DoubleClicking` | Double click |
+| `MouseEntered` | Mouse enters element |
+| `MouseExited` | Mouse leaves element |
+| `FocusGained` | Element gains focus |
+| `FocusLost` | Element loses focus |
+
+### Updating the UI
+
+```java
+@Override
+public void handleDataEvent(...) {
+    UICommandBuilder cmd = new UICommandBuilder();
+    cmd.set("#StatusText.Text", "Updated!");
+    this.sendUpdate(cmd, false);
+}
+```
+
+### Closing the Page
+
+```java
+this.close();
+```
+
+### NotificationUtil
+
+For simple messages without a full page:
+
+```java
+NotificationUtil.sendNotification(
+    playerRef.getPacketHandler(),
+    Message.raw("Title"),
+    Message.raw("Message"),
+    NotificationStyle.Success  // or Warning, Error, Default
+);
+```
+
+---
+
+## Event Data Codec
+
+To receive data from UI events, create a class with `BuilderCodec`:
+
+```java
+public static class MyEventData {
+    public static final BuilderCodec<MyEventData> CODEC = BuilderCodec.builder(
+            MyEventData.class, MyEventData::new
+    )
+    // String field
+    .append(new KeyedCodec<>("Action", Codec.STRING),
+        (e, v) -> e.action = v,
+        e -> e.action)
+    .add()
+    // Another field
+    .append(new KeyedCodec<>("ItemId", Codec.STRING),
+        (e, v) -> e.itemId = v,
+        e -> e.itemId)
+    .add()
+    .build();
+
+    private String action;
+    private String itemId;
+
+    public MyEventData() {}  // Required no-arg constructor
+}
+```
+
+The field names in the codec **must match** the keys in `EventData.append()`.
+
+---
+
+## Troubleshooting
+
+### "Failed to load CustomUI documents"
+
+**Cause**: Syntax error in your `.ui` file.
+
+**Solutions**:
+1. Make sure all text values are quoted: `Text: "Hello";` not `Text: Hello;`
+2. Check all properties end with semicolon
+3. Verify color format: `#ffffff` or `#fff`
+4. Ensure Common.ui import is correct: `$C = "../Common.ui";`
+
+### "Failed to apply CustomUI event bindings"
+
+**Cause**: Element ID in Java doesn't match the `.ui` file.
+
+**Solutions**:
+1. Verify the element ID exists in your `.ui` file
+2. Check spelling: `#MyButton` in Java must match `#MyButton` in `.ui`
+3. For Common.ui components, the ID goes after the component: `$C.@TextButton #MyButton`
+
+### Player disconnects when opening page
+
+**Cause**: The `.ui` file has a parse error or doesn't exist.
+
+**Solutions**:
+1. Check the file path matches: `"YourPlugin/MyPage.ui"` corresponds to `Common/UI/Custom/YourPlugin/MyPage.ui`
+2. Review UI file syntax carefully
+3. Start with a minimal working example and add complexity gradually
+
+### UI opens but buttons don't work
+
+**Cause**: Event bindings not set up correctly.
+
+**Solutions**:
+1. Ensure `evt.addEventBinding()` is called in `build()`
+2. Verify the selector matches the element ID: `"#MyButton"`
+3. Check that `handleDataEvent()` handles the action value
+
+---
+
+## Complete Common.ui Reference
+
+This section documents **all** components and styles available in the game's `Common.ui` file.
+
+### Style Constants
+
+```
+@PrimaryButtonHeight = 44;
+@SmallButtonHeight = 32;
+@BigButtonHeight = 48;
+@ButtonPadding = 24;
+@DefaultButtonMinWidth = 172;
+@ButtonBorder = 12;
+@DropdownBoxHeight = 32;
+@TitleHeight = 38;
+@InnerPaddingValue = 8;
+@FullPaddingValue = 17;  // @InnerPaddingValue + 9
+```
+
+### Button Components
+
+| Component | Parameters | Description |
+|-----------|------------|-------------|
+| `@TextButton` | `@Text`, `@Anchor`, `@Sounds` | Primary button (blue) with text |
+| `@SecondaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Secondary button (gray) with text |
+| `@TertiaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Tertiary button with text |
+| `@CancelTextButton` | `@Text`, `@Anchor`, `@Sounds` | Destructive/cancel button (red) |
+| `@SmallSecondaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Small secondary button |
+| `@SmallTertiaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Small tertiary button |
+| `@Button` | `@Anchor`, `@Sounds` | Square button without text |
+| `@SecondaryButton` | `@Anchor`, `@Sounds`, `@Width` | Square secondary button |
+| `@TertiaryButton` | `@Anchor`, `@Sounds`, `@Width` | Square tertiary button |
+| `@CancelButton` | `@Anchor`, `@Sounds`, `@Width` | Square cancel button |
+| `@CloseButton` | - | Pre-positioned close button (32x32) |
+
+**Usage:**
+```
+$C.@TextButton #MyButton {
+  @Text = "Click Me";
+  Anchor: (Width: 150, Height: 44);
+}
+
+$C.@SecondaryTextButton #CancelBtn {
+  @Text = "Cancel";
+  Anchor: (Width: 100, Height: 44);
+}
+```
+
+### Input Components
+
+| Component | Parameters | Description |
+|-----------|------------|-------------|
+| `@TextField` | `@Anchor` | Text input field (height: 38) |
+| `@NumberField` | `@Anchor` | Numeric-only input field (height: 38) |
+| `@DropdownBox` | `@Anchor` | Dropdown selector (default 330x32) |
+| `@CheckBox` | - | Checkbox only (22x22) |
+| `@CheckBoxWithLabel` | `@Text`, `@Checked` | Checkbox with label text |
+
+**TextField Properties:**
+- `PlaceholderText` - Placeholder text
+- `FlexWeight` - Flexible width
+- `Value` - Current text value
+
+**NumberField Properties:**
+- `Value` - Numeric value
+- `PlaceholderText` - Placeholder text
+
+**CheckBoxWithLabel Properties:**
+- `@Text` - Label text
+- `@Checked` - Initial state (true/false)
+
+**Usage:**
+```
+$C.@TextField #NameInput {
+  FlexWeight: 1;
+  PlaceholderText: "Enter name...";
+}
+
+$C.@NumberField #AmountInput {
+  Anchor: (Width: 100);
+  Value: 50;
+}
+
+$C.@CheckBoxWithLabel #EnableOption {
+  @Text = "Enable feature";
+  @Checked = true;
+  Anchor: (Height: 28);
+}
+
+$C.@DropdownBox #MyDropdown {
+  Anchor: (Width: 200, Height: 32);
+}
+```
+
+### Container Components
+
+| Component | Parameters | Description |
+|-----------|------------|-------------|
+| `@Container` | `@ContentPadding`, `@CloseButton` | Styled container with title area |
+| `@DecoratedContainer` | `@ContentPadding`, `@CloseButton` | Container with decorative borders |
+| `@Panel` | - | Simple panel with border |
+| `@PageOverlay` | - | Semi-transparent background overlay |
+
+**Container Structure:**
+- `#Title` - Title area (height: 38)
+- `#Content` - Content area with padding
+- `#CloseButton` - Optional close button
+
+**Usage:**
+```
+$C.@Container {
+  @CloseButton = true;
+  Anchor: (Width: 400, Height: 300);
+
+  // Title goes in #Title
+  // Content goes in #Content
+}
+```
+
+### Layout Components
+
+| Component | Parameters | Description |
+|-----------|------------|-------------|
+| `@ContentSeparator` | `@Anchor` | Horizontal line separator (height: 1) |
+| `@VerticalSeparator` | - | Vertical separator (width: 6) |
+| `@HeaderSeparator` | - | Header section separator (5x34) |
+| `@PanelSeparatorFancy` | `@Anchor` | Decorative panel separator |
+| `@ActionButtonContainer` | - | Container for action buttons |
+| `@ActionButtonSeparator` | - | Space between action buttons (width: 35) |
+
+**Usage:**
+```
+$C.@ContentSeparator { Anchor: (Height: 1); }
+
+Group { Anchor: (Height: 16); }  // Vertical spacer
+
+$C.@VerticalSeparator {}
+```
+
+### Text Components
+
+| Component | Parameters | Description |
+|-----------|------------|-------------|
+| `@Title` | `@Text`, `@Alignment` | Styled title label |
+| `@Subtitle` | `@Text` | Styled subtitle label |
+| `@TitleLabel` | - | Large centered title (FontSize: 40) |
+| `@PanelTitle` | `@Text`, `@Alignment` | Panel section title |
+
+**Usage:**
+```
+$C.@Title {
+  @Text = "My Title";
+  @Alignment = Center;
+  Anchor: (Height: 38);
+}
+
+$C.@Subtitle {
+  @Text = "Subtitle text";
+}
+```
+
+### Utility Components
+
+| Component | Parameters | Description |
+|-----------|------------|-------------|
+| `@DefaultSpinner` | `@Anchor` | Loading spinner animation (32x32) |
+| `@HeaderSearch` | `@MarginRight` | Search input with icon |
+| `@BackButton` | - | Pre-positioned back button |
+
+**Usage:**
+```
+$C.@DefaultSpinner {
+  Anchor: (Width: 32, Height: 32);
+}
+```
+
+### Available Styles
+
+#### Button Styles
+
+| Style | Description |
+|-------|-------------|
+| `@DefaultTextButtonStyle` | Primary button style |
+| `@SecondaryTextButtonStyle` | Secondary button style |
+| `@TertiaryTextButtonStyle` | Tertiary button style |
+| `@CancelTextButtonStyle` | Destructive/cancel button style |
+| `@SmallDefaultTextButtonStyle` | Small primary button style |
+| `@SmallSecondaryTextButtonStyle` | Small secondary button style |
+| `@DefaultButtonStyle` | Button without text |
+| `@SecondaryButtonStyle` | Secondary button without text |
+| `@TertiaryButtonStyle` | Tertiary button without text |
+| `@CancelButtonStyle` | Cancel button without text |
+
+#### Label Styles
+
+| Style | Properties |
+|-------|------------|
+| `@DefaultLabelStyle` | FontSize: 16, TextColor: #96a9be |
+| `@DefaultButtonLabelStyle` | FontSize: 17, TextColor: #bfcdd5, Bold, Uppercase, Center |
+| `@TitleStyle` | FontSize: 15, Bold, Uppercase, TextColor: #b4c8c9, Secondary font |
+| `@SubtitleStyle` | FontSize: 15, Uppercase, TextColor: #96a9be |
+| `@PopupTitleStyle` | FontSize: 38, Bold, Uppercase, Center, LetterSpacing: 2 |
+
+#### Input Styles
+
+| Style | Description |
+|-------|-------------|
+| `@DefaultInputFieldStyle` | Default text input style |
+| `@DefaultInputFieldPlaceholderStyle` | Placeholder text style (TextColor: #6e7da1) |
+| `@InputBoxBackground` | Input field background |
+| `@InputBoxHoveredBackground` | Input field hover state |
+| `@InputBoxSelectedBackground` | Input field selected state |
+
+#### Other Styles
+
+| Style | Description |
+|-------|-------------|
+| `@DefaultScrollbarStyle` | Scrollbar styling |
+| `@DefaultCheckBoxStyle` | Checkbox styling |
+| `@DefaultDropdownBoxStyle` | Dropdown styling |
+| `@DefaultSliderStyle` | Slider styling |
+| `@DefaultTextTooltipStyle` | Tooltip styling |
+| `@DefaultColorPickerStyle` | Color picker styling |
+
+### Color Constants
+
+```
+@DisabledColor = #797b7c;
+```
+
+### LabelStyle Properties
+
+When creating custom `LabelStyle`:
+
+```
+LabelStyle(
+  FontSize: 16,
+  TextColor: #ffffff,
+  RenderBold: true,
+  RenderUppercase: true,
+  HorizontalAlignment: Center,  // Start, Center, End
+  VerticalAlignment: Center,    // Top, Center, Bottom
+  FontName: "Default",          // or "Secondary"
+  LetterSpacing: 0,
+  Wrap: true                    // Text wrapping
+)
+```
+
+### TextButtonStyle Structure
+
+```
+@MyButtonStyle = TextButtonStyle(
+  Default: (
+    Background: PatchStyle(TexturePath: "path.png", Border: 12),
+    LabelStyle: @SomeLabelStyle
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "hovered.png", Border: 12),
+    LabelStyle: @SomeLabelStyle
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "pressed.png", Border: 12),
+    LabelStyle: @SomeLabelStyle
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "disabled.png", Border: 12),
+    LabelStyle: @DisabledLabelStyle
+  ),
+  Sounds: @ButtonSounds
+);
+```
+
+### PatchStyle (9-slice backgrounds)
+
+```
+PatchStyle(
+  TexturePath: "Common/MyTexture.png",
+  Border: 12,                    // All sides equal
+  // OR
+  HorizontalBorder: 80,          // Left/right borders
+  VerticalBorder: 12             // Top/bottom borders
+)
+```
+
+### Anchor Properties
+
+```
+Anchor: (
+  Width: 100,
+  Height: 50,
+  Top: 10,
+  Bottom: 10,
+  Left: 10,
+  Right: 10,
+  Horizontal: 10,  // Left + Right
+  Vertical: 10     // Top + Bottom
+);
+```
+
+### Padding Properties
+
+```
+Padding: (
+  Full: 20,           // All sides
+  Horizontal: 10,     // Left + Right
+  Vertical: 10,       // Top + Bottom
+  Top: 10,
+  Bottom: 10,
+  Left: 10,
+  Right: 10
+);
+```
+
+---
+
+## Required Imports
+
+```java
+// Core UI
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
+import com.hypixel.hytale.server.core.ui.builder.EventData;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+
+// Codec
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+
+// ECS
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+// Player & Commands
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.Message;
+
+// Notifications
+import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 ```

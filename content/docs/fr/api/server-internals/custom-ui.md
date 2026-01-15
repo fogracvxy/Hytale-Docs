@@ -1,251 +1,170 @@
 ---
 id: custom-ui
-title: Systeme UI Personnalise
+title: Systeme d'UI Personnalisee
 sidebar_label: UI Personnalisee
 sidebar_position: 7
-description: Guide complet pour creer des interfaces joueur interactives dans les plugins Hytale
+description: Guide pas a pas pour creer des pages UI personnalisees avec le DSL Hytale
 ---
 
-# Systeme UI Personnalise
+# Systeme d'UI Personnalisee
 
-:::info Teste et Verifie
-Cette documentation a ete testee avec un plugin fonctionnel. Les exemples sont confirmes comme fonctionnels.
-:::
+Ce guide vous apprend a creer des pages UI personnalisees pour les plugins Hytale. Vous apprendrez la syntaxe des fichiers UI, les composants disponibles et comment creer des pages interactives.
 
-## Imports Requis
+## Fonctionnement des UI Personnalisees
+
+Hytale utilise une **architecture client-serveur** pour les UI personnalisees :
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           CLIENT                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  resources/Common/UI/Custom/VotrePlugin/                     │   │
+│  │  └── VotrePage.ui  (charge quand le joueur se connecte)      │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+                              ▲                    │
+                              │ Commandes          │ Evenements
+                              │ (definir valeurs)  │ (clics boutons)
+                              │                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                           SERVEUR                                    │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  InteractiveCustomUIPage                                      │   │
+│  │  - build(): charger layout, definir valeurs, lier evenements │   │
+│  │  - handleDataEvent(): reagir aux interactions utilisateur    │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Points cles :**
+- Les fichiers `.ui` sont **telecharges sur le client** quand le joueur se connecte
+- Le serveur **ne peut pas creer de fichiers UI dynamiquement** - ils doivent exister au prealable
+- Toute erreur de syntaxe dans un fichier `.ui` **deconnectera le joueur**
+- Le serveur envoie des **commandes** pour manipuler les elements UI
+- Le client renvoie des **evenements** quand le joueur interagit
+
+---
+
+## Tutoriel : Creer votre premiere UI personnalisee
+
+### Etape 1 : Structure du projet
+
+Votre plugin a besoin de ces fichiers :
+
+```
+votre-plugin/
+├── build.gradle
+├── src/main/
+│   ├── java/com/votrenom/plugin/
+│   │   ├── VotrePlugin.java
+│   │   ├── commands/
+│   │   │   └── OuvrirUICommand.java
+│   │   └── ui/
+│   │       └── MaPage.java
+│   └── resources/
+│       ├── manifest.json
+│       └── Common/
+│           └── UI/
+│               └── Custom/
+│                   └── VotrePlugin/
+│                       └── MaPage.ui
+```
+
+### Etape 2 : Configurer manifest.json
+
+Votre manifest doit inclure `IncludesAssetPack: true` :
+
+```json
+{
+  "Identifier": "votre-plugin",
+  "Name": "Votre Plugin",
+  "Version": "1.0.0",
+  "EntryPoint": "com.votrenom.plugin.VotrePlugin",
+  "IncludesAssetPack": true
+}
+```
+
+### Etape 3 : Creer le fichier UI
+
+Creez `src/main/resources/Common/UI/Custom/VotrePlugin/MaPage.ui` :
+
+```
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Width: 400, Height: 300);
+  Background: #141c26(0.95);
+  LayoutMode: Top;
+  Padding: (Full: 20);
+
+  Label {
+    Text: "Bonjour le monde !";
+    Anchor: (Height: 40);
+    Style: (FontSize: 24, TextColor: #ffffff, HorizontalAlignment: Center, RenderBold: true);
+  }
+
+  Group { Anchor: (Height: 20); }
+
+  $C.@TextButton #MonBouton {
+    @Text = "Cliquez-moi";
+    Anchor: (Width: 150, Height: 44);
+  }
+}
+```
+
+### Etape 4 : Creer le gestionnaire Java
+
+Creez `src/main/java/com/votrenom/plugin/ui/MaPage.java` :
 
 ```java
-// === Core UI Page ===
-import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
-import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
-import com.hypixel.hytale.server.core.ui.builder.EventData;
-import com.hypixel.hytale.server.core.ui.Value;
-import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
-import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+package com.votrenom.plugin.ui;
 
-// === Codec (pour event data) ===
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-
-// === Composants ECS ===
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.ui.builder.EventData;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-// === Player & Commande ===
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.Message;
-
-// === Dropdown (optionnel) ===
-import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
-import com.hypixel.hytale.server.core.ui.LocalizableString;
-
-// === Notifications (optionnel) ===
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.server.core.Message;
 
-// === Gestion des Pages ===
-import com.hypixel.hytale.protocol.packets.interface_.Page;
-```
+import javax.annotation.Nonnull;
 
-## Vue d'ensemble
+public class MaPage extends InteractiveCustomUIPage<MaPage.EventData> {
 
-Le systeme UI personnalise permet aux plugins de creer des interfaces joueur interactives. Le systeme utilise une **architecture client-serveur** :
+    // Chemin relatif a Common/UI/Custom/
+    public static final String LAYOUT = "VotrePlugin/MaPage.ui";
 
-- **Les fichiers de layout (`.ui`)** sont stockes sur le **client** - les plugins ne peuvent pas les creer
-- **Le serveur envoie des commandes** pour manipuler les elements de ces layouts
-- **Les evenements remontent** du client vers le serveur quand les joueurs interagissent
+    private final PlayerRef playerRef;
 
-```
-┌─────────────────────┐                    ┌─────────────────────┐
-│   Plugin Serveur    │                    │       Client        │
-│                     │                    │                     │
-│  InteractiveCustom  │───── Commandes ───>│  Fichiers .ui       │
-│    UIPage           │                    │  (Pages/*.ui)       │
-│  UICommandBuilder   │<───── Evenements ──│                     │
-│  UIEventBuilder     │                    │                     │
-└─────────────────────┘                    └─────────────────────┘
-```
-
-:::danger Critique : Les fichiers de layout sont cote client
-**Les fichiers de layout (`.ui`) sont des assets CLIENT.** Si vous referencez un layout qui n'existe pas sur le client, vous obtiendrez :
-```
-Could not find document Pages/MyPage.ui for Custom UI Append command
-```
-Le client sera deconnecte. **Utilisez uniquement des layouts garantis d'exister.**
-:::
-
-## Fichiers de Layout Disponibles
-
-Tous les fichiers de layout ne sont pas disponibles sur chaque client. Utilisez ces layouts **garantis surs** :
-
-### Layouts Core Serveur (Toujours Disponibles)
-
-| Layout | Utilise Par | Selecteurs Cles |
-|--------|-------------|-----------------|
-| `Pages/PluginListPage.ui` | Commande `/plugins` | `#PluginList`, `#PluginName`, `#PluginDescription` |
-| `Pages/PluginListButton.ui` | Elements de liste | `#Button`, `#CheckBox` |
-| `Pages/CommandListPage.ui` | Commande `/commands` | `#CommandList`, `#SubcommandCards` |
-| `Pages/BasicTextButton.ui` | Diverses pages | `LabelStyle`, `SelectedLabelStyle` |
-| `Common/TextButton.ui` | Composant bouton | `LabelStyle`, `SelectedLabelStyle` |
-
-### Layouts Adventure/Builtin (Peuvent Ne Pas Etre Disponibles)
-
-Ces layouts peuvent ne fonctionner que lorsque des packs de contenu specifiques sont charges :
-
-| Layout | Module | Selecteurs Cles |
-|--------|--------|-----------------|
-| `Pages/DialogPage.ui` | Adventure Objectives | `#EntityName`, `#Dialog`, `#CloseButton` |
-| `Pages/ShopPage.ui` | Adventure Shop | `#ElementList` |
-| `Pages/ShopElementButton.ui` | Elements boutique | `#Icon`, `#Name`, `#Description`, `#Cost` |
-| `Pages/BarterPage.ui` | Adventure Barter | `#TradeGrid`, `#TradeButton` |
-| `Pages/BarterTradeRow.ui` | Elements troc | `#OutputSlot`, `#InputSlot` |
-| `Pages/Memories/*.ui` | Adventure Memories | `#IconList`, `#RecordButton` |
-
-### Layouts Outils de Construction
-
-| Layout | Utilise Par | Selecteurs Cles |
-|--------|-------------|-----------------|
-| `Pages/EntitySpawnPage.ui` | Spawn NPC | `#NPCList`, `#ModelList`, `#ScaleSlider` |
-| `Pages/PrefabListPage.ui` | Navigateur prefab | `#FileList` |
-| `Pages/ParticleSpawnPage.ui` | Test particules | `#ParticleSystemList` |
-| `Pages/ImageImportPage.ui` | Import image | Elements navigateur |
-
-### Layouts Portail/Teleporteur
-
-| Layout | Utilise Par | Selecteurs Cles |
-|--------|-------------|-----------------|
-| `Pages/PortalDeviceSummon.ui` | Invocation portail | `#Artwork`, `#Pills`, `#SummonButton` |
-| `Pages/Teleporter.ui` | Config teleporteur | `#WorldDropdown`, `#WarpDropdown` |
-| `Pages/WarpListPage.ui` | Liste warps | `#WarpList` |
-
-**Recommandation** : Utilisez `Pages/PluginListPage.ui` ou `Pages/EntitySpawnPage.ui` comme layout de base - ils sont garantis de fonctionner.
-
-## Elements UI Testes
-
-Ces elements ont ete **testes et verifies fonctionnels** dans des plugins :
-
-### Elements EntitySpawnPage.ui
-
-| Element | Selecteur | Type | Proprietes |
-|---------|-----------|------|------------|
-| **Champ Recherche** | `#SearchInput` | Champ de saisie | `.Value`, `.PlaceholderText` |
-| **Slider Scale** | `#ScaleSlider` | Slider | `.Value` (float 0-1) |
-| **Slider Rotation** | `#RotationOffset` | Slider | `.Value` (float) |
-| **Champ Count** | `#Count` | Champ numerique | `.Value` |
-| **Boutons Onglet** | `#TabNPC`, `#TabItems`, `#TabModel` | Boutons | `.Style` |
-| **Bouton Spawn** | `#Spawn` | Bouton | Evenement Activating |
-| **Bouton Clear** | `#ClearMaterial` | Bouton | Evenement Activating |
-| **Slot Item** | `#ItemMaterialSlot` | Slot drag-drop | Evenement Dropped |
-
-### Elements PluginListPage.ui
-
-| Element | Selecteur | Type | Proprietes |
-|---------|-----------|------|------------|
-| **Nom Plugin** | `#PluginName` | Texte | `.Text` |
-| **ID Plugin** | `#PluginIdentifier` | Texte | `.Text` |
-| **Version Plugin** | `#PluginVersion` | Texte | `.Text`, `.Visible` |
-| **Description** | `#PluginDescription` | Texte | `.Text` |
-| **Checkbox Option** | `#DescriptiveOnlyOption` | Conteneur | `.Visible` |
-| **Liste Plugins** | `#PluginList` | Conteneur Liste | `.clear()`, `.append()` |
-
-### Elements PluginListButton.ui (pour les items de liste)
-
-| Element | Selecteur | Type | Proprietes |
-|---------|-----------|------|------------|
-| **Bouton** | `#Button` | Bouton | `.Text`, `.Style`, evenement Activating |
-| **Checkbox** | `#CheckBox` | Checkbox | `.Value` (boolean), `.Visible`, evenement ValueChanged |
-
-### Elements TeleporterSettingsPage.ui (Dropdowns)
-
-| Element | Selecteur | Type | Proprietes |
-|---------|-----------|------|------------|
-| **Dropdown Monde** | `#WorldDropdown` | Dropdown | `.Entries`, `.Value` |
-| **Dropdown Warp** | `#WarpDropdown` | Dropdown | `.Entries`, `.Value` |
-
-### Exemple de Test Fonctionnel
-
-Ce code teste tous les types d'elements UI principaux avec `EntitySpawnPage.ui` :
-
-```java
-public class UIComponentTestPage extends InteractiveCustomUIPage<UIComponentTestPage.TestEventData> {
-
-    public static final String LAYOUT = "Pages/EntitySpawnPage.ui";
-
-    private static final Value<String> TAB_STYLE_ACTIVE = Value.ref("Common.ui", "DefaultTextButtonStyle");
-    private static final Value<String> TAB_STYLE_INACTIVE = Value.ref("Common.ui", "SecondaryTextButtonStyle");
-
-    public UIComponentTestPage(@Nonnull PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CanDismiss, TestEventData.CODEC);
+    public MaPage(@Nonnull PlayerRef playerRef) {
+        super(playerRef, CustomPageLifetime.CanDismiss, EventData.CODEC);
+        this.playerRef = playerRef;
     }
 
     @Override
     public void build(
             @Nonnull Ref<EntityStore> ref,
-            @Nonnull UICommandBuilder commandBuilder,
-            @Nonnull UIEventBuilder eventBuilder,
+            @Nonnull UICommandBuilder cmd,
+            @Nonnull UIEventBuilder evt,
             @Nonnull Store<EntityStore> store
     ) {
-        commandBuilder.append(LAYOUT);
+        // Charger le layout
+        cmd.append(LAYOUT);
 
-        // Placeholder du champ de saisie
-        commandBuilder.set("#SearchInput.PlaceholderText", "Tapez ici pour tester");
-
-        // Valeur initiale du slider
-        commandBuilder.set("#ScaleSlider.Value", 0.5f);
-
-        // Styles des boutons onglet
-        commandBuilder.set("#TabNPC.Style", TAB_STYLE_ACTIVE);
-        commandBuilder.set("#TabItems.Style", TAB_STYLE_INACTIVE);
-        commandBuilder.set("#TabModel.Style", TAB_STYLE_INACTIVE);
-
-        // Evenement changement champ de saisie (capture la valeur avec @)
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.ValueChanged,
-            "#SearchInput",
-            new EventData().append("Action", "InputChanged").append("@Value", "#SearchInput.Value"),
-            false
-        );
-
-        // Evenement changement slider
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.ValueChanged,
-            "#ScaleSlider",
-            new EventData().append("Action", "SliderChanged").append("@Value", "#ScaleSlider.Value"),
-            false
-        );
-
-        // Evenements boutons onglet
-        eventBuilder.addEventBinding(
+        // Lier l'evenement de clic du bouton
+        evt.addEventBinding(
             CustomUIEventBindingType.Activating,
-            "#TabNPC",
-            new EventData().append("Action", "TabClick").append("Tab", "NPC"),
-            false
-        );
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#TabItems",
-            new EventData().append("Action", "TabClick").append("Tab", "Items"),
-            false
-        );
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#TabModel",
-            new EventData().append("Action", "TabClick").append("Tab", "Model"),
-            false
-        );
-
-        // Evenement bouton spawn
-        eventBuilder.addEventBinding(
-            CustomUIEventBindingType.Activating,
-            "#Spawn",
-            new EventData().append("Action", "SpawnClick"),
+            "#MonBouton",
+            new EventData().append("Action", "clic"),
             false
         );
     }
@@ -254,337 +173,73 @@ public class UIComponentTestPage extends InteractiveCustomUIPage<UIComponentTest
     public void handleDataEvent(
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,
-            @Nonnull TestEventData data
+            @Nonnull EventData data
     ) {
-        UICommandBuilder commandBuilder = new UICommandBuilder();
-
-        if ("InputChanged".equals(data.action)) {
-            commandBuilder.set("#SearchInput.PlaceholderText", "Vous avez tape: " + data.value);
-        }
-        else if ("SliderChanged".equals(data.action)) {
-            commandBuilder.set("#SearchInput.PlaceholderText", "Slider: " + data.value);
-        }
-        else if ("TabClick".equals(data.action)) {
-            // Mettre a jour les styles des onglets
-            commandBuilder.set("#TabNPC.Style", "NPC".equals(data.tab) ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE);
-            commandBuilder.set("#TabItems.Style", "Items".equals(data.tab) ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE);
-            commandBuilder.set("#TabModel.Style", "Model".equals(data.tab) ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE);
-        }
-        else if ("SpawnClick".equals(data.action)) {
-            commandBuilder.set("#SearchInput.PlaceholderText", "Bouton Spawn clique!");
-        }
-
-        this.sendUpdate(commandBuilder, false);
-    }
-
-    public static class TestEventData {
-        public static final BuilderCodec<TestEventData> CODEC = BuilderCodec.builder(
-                TestEventData.class, TestEventData::new
-        )
-        .append(new KeyedCodec<>("Action", Codec.STRING), (e, s) -> e.action = s, e -> e.action)
-        .add()
-        .append(new KeyedCodec<>("Tab", Codec.STRING), (e, s) -> e.tab = s, e -> e.tab)
-        .add()
-        .append(new KeyedCodec<>("Value", Codec.STRING), (e, s) -> e.value = s, e -> e.value)
-        .add()
-        .build();
-
-        private String action;
-        private String tab;
-        private String value;
-
-        public TestEventData() {}
-    }
-}
-```
-
-### Exemple Dropdown (TeleporterSettingsPage)
-
-```java
-import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
-import com.hypixel.hytale.server.core.message.LocalizableString;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
-// Dans votre methode build() :
-commandBuilder.append("Pages/Teleporter.ui");
-
-// Creer les entrees du dropdown
-ObjectArrayList<DropdownEntryInfo> options = new ObjectArrayList<>();
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 1"), "opt1"));
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 2"), "opt2"));
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 3"), "opt3"));
-
-// Definir les entrees et la valeur selectionnee
-commandBuilder.set("#WorldDropdown.Entries", options);
-commandBuilder.set("#WorldDropdown.Value", "opt1");
-
-// Ecouter les changements de selection
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.ValueChanged,
-    "#WorldDropdown",
-    new EventData().append("Action", "DropdownChanged").append("@Value", "#WorldDropdown.Value"),
-    false
-);
-```
-
-## Reference des Proprietes UI
-
-Voici toutes les proprietes qui peuvent etre definies sur les elements UI via `commandBuilder.set()` :
-
-### Proprietes de Texte
-
-| Propriete | Type | Description | Exemple |
-|-----------|------|-------------|---------|
-| `.Text` | String/Message | Contenu textuel | `set("#Title.Text", "Bonjour")` |
-| `.TextSpans` | Message | Texte riche avec formatage | `set("#Name.TextSpans", Message.raw("Gras"))` |
-| `.PlaceholderText` | String/Message | Texte indicatif du champ | `set("#Input.PlaceholderText", "Entrez un nom...")` |
-
-### Visibilite et Etat
-
-| Propriete | Type | Description | Exemple |
-|-----------|------|-------------|---------|
-| `.Visible` | boolean | Afficher/masquer element | `set("#Panel.Visible", false)` |
-| `.Disabled` | boolean | Activer/desactiver interaction | `set("#Button.Disabled", true)` |
-
-### Valeurs et Donnees
-
-| Propriete | Type | Description | Exemple |
-|-----------|------|-------------|---------|
-| `.Value` | String/float/int | Valeur input, position slider | `set("#Slider.Value", 0.5f)` |
-| `.Entries` | DropdownEntryInfo[] | Options dropdown | `set("#Dropdown.Entries", options)` |
-| `.Slots` | ItemGridSlot[] | Slots inventaire | `set("#Grid.Slots", slots)` |
-| `.ItemId` | String | Item a afficher | `set("#Icon.ItemId", itemId)` |
-
-### Style et Apparence
-
-| Propriete | Type | Description | Exemple |
-|-----------|------|-------------|---------|
-| `.Style` | `Value<String>` | Reference de style visuel | `set("#Tab.Style", TAB_ACTIVE_STYLE)` |
-| `.Color` | String (hex) | Valeur couleur | `set("#Tint.Color", "#5B9E28")` |
-| `.Background` | String (chemin asset) | Image de fond | `set("#Artwork.Background", "Pages/Portals/splash.png")` |
-| `.AssetPath` | String (chemin asset) | Chemin asset/icone | `set("#Icon.AssetPath", iconPath)` |
-
-### Objets Complexes (via setObject)
-
-Ces proprietes necessitent `commandBuilder.setObject()` :
-
-| Type | Description | Exemple |
-|------|-------------|---------|
-| `LocalizableString` | Texte traduisible | `setObject("#Name.Text", LocalizableString.fromMessageId("key"))` |
-| `ItemStack` | Item avec quantite | `setObject("#Slot.Item", itemStack)` |
-| `ItemGridSlot` | Slot inventaire | `setObject("#Grid.Slots", slots)` |
-| `PatchStyle` | Style texture/patch | `setObject("#Panel.Style", patchStyle)` |
-| `DropdownEntryInfo` | Option dropdown | Utilise dans arrays pour `.Entries` |
-
-### Exemples Selecteur + Propriete
-
-```java
-// Propriete element basique
-commandBuilder.set("#PluginName.Text", "Mon Plugin");
-
-// Propriete element imbrique
-commandBuilder.set("#MainPage #Title.Text", "Bienvenue");
-
-// Propriete element tableau
-commandBuilder.set("#PluginList[0] #Button.Text", "Premier Element");
-
-// Input avec plusieurs proprietes
-commandBuilder.set("#SearchInput.Value", "");
-commandBuilder.set("#SearchInput.PlaceholderText", "Rechercher...");
-
-// Configuration dropdown
-List<DropdownEntryInfo> options = new ArrayList<>();
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 1"), "opt1"));
-options.add(new DropdownEntryInfo(LocalizableString.fromString("Option 2"), "opt2"));
-commandBuilder.set("#Dropdown.Entries", options);
-commandBuilder.set("#Dropdown.Value", "opt1");
-```
-
-## Exigences de Threading
-
-:::warning Critique : World Thread
-Les operations UI **doivent s'executer sur le world thread**. Ne pas le faire cause :
-```
-Assert not in thread: Expected WorldThread but was ForkJoinPool.commonPool-worker-X
-```
-:::
-
-### Solution 1 : Etendre AbstractPlayerCommand (Recommande)
-
-La facon la plus simple d'assurer un threading correct est d'etendre `AbstractPlayerCommand` :
-
-```java
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
-
-public class MyUICommand extends AbstractPlayerCommand {
-
-    public MyUICommand() {
-        super("myui", "Ouvre mon UI personnalisee");
-    }
-
-    @Override
-    protected void execute(
-        @Nonnull CommandContext context,
-        @Nonnull Store<EntityStore> store,
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull PlayerRef playerRef,
-        @Nonnull World world
-    ) {
-        // Deja sur le world thread - sur d'ouvrir l'UI
-        Player player = store.getComponent(ref, Player.getComponentType());
-        MyCustomPage page = new MyCustomPage(playerRef);
-        player.getPageManager().openCustomPage(ref, store, page);
-    }
-}
-```
-
-### Solution 2 : Planifier sur le World Thread
-
-Si vous n'utilisez pas `AbstractPlayerCommand`, planifiez l'execution sur le world thread :
-
-```java
-World world = store.getExternalData().getWorld();
-world.execute(() -> {
-    // Sur de faire des operations UI ici
-    Player player = store.getComponent(ref, Player.getComponentType());
-    player.getPageManager().openCustomPage(ref, store, page);
-});
-```
-
-## Creer une Page UI Personnalisee
-
-### Etape 1 : Etendre InteractiveCustomUIPage
-
-```java
-import com.hypixel.hytale.codec.Codec;
-import com.hypixel.hytale.codec.KeyedCodec;
-import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
-import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.protocol.packets.interface_.Page;
-import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.ui.Value;
-import com.hypixel.hytale.server.core.ui.builder.EventData;
-import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
-import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-public class MyDashboardPage extends InteractiveCustomUIPage<MyDashboardPage.MyEventData> {
-
-    // Utiliser un layout SUR qui existe sur tous les clients
-    public static final String LAYOUT = "Pages/PluginListPage.ui";
-
-    public MyDashboardPage(@Nonnull PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CanDismiss, MyEventData.CODEC);
-    }
-
-    @Override
-    public void build(
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull UICommandBuilder commandBuilder,
-        @Nonnull UIEventBuilder eventBuilder,
-        @Nonnull Store<EntityStore> store
-    ) {
-        // Charger le layout
-        commandBuilder.append(LAYOUT);
-
-        // Cacher les elements dont on n'a pas besoin
-        commandBuilder.set("#DescriptiveOnlyOption.Visible", false);
-
-        // Definir le contenu du panneau d'info
-        commandBuilder.set("#PluginName.Text", "Mon Tableau de Bord");
-        commandBuilder.set("#PluginIdentifier.Text", "Statut: En ligne");
-        commandBuilder.set("#PluginVersion.Text", "v1.0.0");
-        commandBuilder.set("#PluginDescription.Text", "Bienvenue sur mon tableau de bord!");
-
-        // Vider et remplir la liste
-        commandBuilder.clear("#PluginList");
-
-        // Ajouter des elements a la liste
-        String[] items = {"Option A", "Option B", "Option C"};
-        for (int i = 0; i < items.length; i++) {
-            String selector = "#PluginList[" + i + "]";
-
-            // Ajouter un bouton depuis le template
-            commandBuilder.append("#PluginList", "Pages/PluginListButton.ui");
-
-            // Definir le texte du bouton
-            commandBuilder.set(selector + " #Button.Text", items[i]);
-
-            // Cacher la checkbox (on l'utilise juste pour l'affichage)
-            commandBuilder.set(selector + " #CheckBox.Visible", false);
-
-            // Enregistrer l'evenement de clic avec des donnees
-            eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                selector + " #Button",
-                new EventData().append("Item", items[i]).append("Index", String.valueOf(i)),
-                false
+        if ("clic".equals(data.action)) {
+            NotificationUtil.sendNotification(
+                playerRef.getPacketHandler(),
+                Message.raw("Bouton clique !"),
+                Message.raw("Vous avez clique sur le bouton."),
+                NotificationStyle.Success
             );
         }
     }
 
-    @Override
-    public void handleDataEvent(
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull Store<EntityStore> store,
-        @Nonnull MyEventData data
-    ) {
-        if (data.item != null) {
-            // Gerer la selection d'element
-            UICommandBuilder commandBuilder = new UICommandBuilder();
-            commandBuilder.set("#PluginDescription.Text", "Vous avez selectionne: " + data.item);
-            this.sendUpdate(commandBuilder, false);
-        }
-    }
-
-    // Classe de donnees d'evenement - doit avoir un BuilderCodec
-    public static class MyEventData {
-        public static final BuilderCodec<MyEventData> CODEC = BuilderCodec.builder(
-            MyEventData.class, MyEventData::new
+    // Classe de donnees d'evenement avec codec
+    public static class EventData {
+        public static final BuilderCodec<EventData> CODEC = BuilderCodec.builder(
+                EventData.class, EventData::new
         )
-        .append(new KeyedCodec<>("Item", Codec.STRING), (e, v) -> e.item = v, e -> e.item)
-        .add()
-        .append(new KeyedCodec<>("Index", Codec.STRING), (e, v) -> e.index = v, e -> e.index)
+        .append(new KeyedCodec<>("Action", Codec.STRING), (e, v) -> e.action = v, e -> e.action)
         .add()
         .build();
 
-        private String item;
-        private String index;
+        private String action;
 
-        public MyEventData() {}
+        public EventData() {}
     }
 }
 ```
 
-### Etape 2 : Creer la Commande
+### Etape 5 : Creer la commande
+
+Creez `src/main/java/com/votrenom/plugin/commands/OuvrirUICommand.java` :
 
 ```java
+package com.votrenom.plugin.commands;
+
+import com.votrenom.plugin.ui.MaPage;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-public class DashboardCommand extends AbstractPlayerCommand {
+import javax.annotation.Nonnull;
 
-    public DashboardCommand() {
-        super("dashboard", "Ouvre l'UI du tableau de bord");
+public class OuvrirUICommand extends AbstractPlayerCommand {
+
+    public OuvrirUICommand() {
+        super("monui", "Ouvre l'UI personnalisee");
     }
 
     @Override
     protected boolean canGeneratePermission() {
-        return false; // Pas de permission requise
+        return false;
     }
 
     @Override
     protected void execute(
-        @Nonnull CommandContext context,
-        @Nonnull Store<EntityStore> store,
-        @Nonnull Ref<EntityStore> ref,
-        @Nonnull PlayerRef playerRef,
-        @Nonnull World world
+            @Nonnull CommandContext context,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull World world
     ) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
@@ -592,359 +247,946 @@ public class DashboardCommand extends AbstractPlayerCommand {
             return;
         }
 
-        MyDashboardPage page = new MyDashboardPage(playerRef);
+        MaPage page = new MaPage(playerRef);
         player.getPageManager().openCustomPage(ref, store, page);
-        context.sendMessage(Message.raw("Tableau de bord ouvert!"));
     }
 }
 ```
 
-### Etape 3 : Enregistrer dans le Plugin
+### Etape 6 : Enregistrer dans le plugin
 
 ```java
-public class MyPlugin extends JavaPlugin {
+package com.votrenom.plugin;
+
+import com.votrenom.plugin.commands.OuvrirUICommand;
+import com.hytaledocs.server.plugin.JavaPlugin;
+
+public class VotrePlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        CommandRegistry commandRegistry = getCommandRegistry();
-        commandRegistry.register(new DashboardCommand());
+        getCommandRegistry().register(new OuvrirUICommand());
+        getLogger().info("Plugin active !");
     }
 }
 ```
 
-## Reference UICommandBuilder
+### Etape 7 : Compiler et tester
 
-Le `UICommandBuilder` envoie des commandes pour manipuler les elements UI.
-
-### Charger des Layouts
-
-```java
-// Charger un fichier layout (DOIT exister sur le client)
-commandBuilder.append("Pages/PluginListPage.ui");
-
-// Ajouter un layout a un conteneur
-commandBuilder.append("#ListContainer", "Pages/PluginListButton.ui");
+```bash
+./gradlew build
 ```
 
-### Definir des Valeurs
+Copiez le JAR dans le dossier `plugins/` de votre serveur, redemarrez et executez `/monui`.
 
-```java
-// Definir le contenu textuel
-commandBuilder.set("#Title.Text", "Bonjour le monde");
-commandBuilder.set("#Title.Text", Message.raw("Bonjour le monde"));
-commandBuilder.set("#Title.Text", Message.translation("ma.cle.traduction"));
+---
 
-// Definir des proprietes booleennes
-commandBuilder.set("#Panel.Visible", true);
-commandBuilder.set("#Button.Disabled", false);
+## Reference de syntaxe des fichiers UI
 
-// Definir des valeurs numeriques
-commandBuilder.set("#HealthBar.Value", 0.75f);
+Hytale utilise un **DSL personnalise** (Domain Specific Language) pour les fichiers UI. Ce n'est **PAS** du XAML, XML ou tout autre format standard.
 
-// Definir des styles avec Value.ref
-commandBuilder.set("#Button.Style", Value.ref("Pages/BasicTextButton.ui", "SelectedLabelStyle"));
+### Structure de base
+
+```
+// Les commentaires commencent par //
+
+// Importer Common.ui pour les composants reutilisables
+$C = "../Common.ui";
+
+// Definir des styles personnalises (optionnel)
+@MonStyle = LabelStyle(FontSize: 16, TextColor: #ffffff);
+
+// Element racine
+Group {
+  // Proprietes
+  Anchor: (Width: 400, Height: 300);
+  Background: #1a1a2e;
+
+  // Elements enfants
+  Label {
+    Text: "Bonjour";
+    Style: @MonStyle;
+  }
+}
 ```
 
-### Gerer les Elements
+### Regles de syntaxe critiques
 
-```java
-// Vider tous les enfants d'un conteneur
-commandBuilder.clear("#PluginList");
+| Regle | Correct | Incorrect |
+|-------|---------|-----------|
+| Les textes doivent etre entre guillemets | `Text: "Bonjour";` | `Text: Bonjour;` |
+| Les proprietes finissent par point-virgule | `Anchor: (Width: 100);` | `Anchor: (Width: 100)` |
+| Les couleurs en format hex | `#ffffff` ou `#fff` | `white` ou `rgb(255,255,255)` |
+| Alpha dans les couleurs | `#141c26(0.95)` | `#141c26cc` |
+| Les IDs d'elements commencent par # | `Label #Titre { }` | `Label Titre { }` |
 
-// Supprimer un element specifique
-commandBuilder.remove("#OldItem");
+### Proprietes de layout
 
-// Mettre une valeur a null
-commandBuilder.setNull("#OptionalField");
+| Propriete | Description | Exemple |
+|-----------|-------------|---------|
+| `Anchor` | Taille et position | `Anchor: (Width: 200, Height: 50);` |
+| `Background` | Couleur de fond | `Background: #1a1a2e;` |
+| `LayoutMode` | Arrangement des enfants | `LayoutMode: Top;` ou `Center;` ou `Left;` |
+| `Padding` | Espacement interne | `Padding: (Full: 20);` ou `(Left: 10, Right: 10);` |
+| `FlexWeight` | Taille flexible | `FlexWeight: 1;` |
+
+### Valeurs de LayoutMode
+
+| Mode | Description |
+|------|-------------|
+| `Top` | Empiler les enfants verticalement depuis le haut |
+| `Left` | Empiler les enfants horizontalement depuis la gauche |
+| `Center` | Centrer les enfants |
+
+### Elements de base
+
+#### Label (Affichage de texte)
+
+```
+Label {
+  Text: "Mon texte";
+  Anchor: (Height: 30);
+  Style: (FontSize: 16, TextColor: #ffffff, HorizontalAlignment: Center);
+}
 ```
 
-### UI Inline (Necessite un Conteneur)
+#### Label avec ID
 
-```java
-// Ajouter du markup UI inline a un conteneur existant
-commandBuilder.appendInline("#Container", "Label { Text: Pas d'elements; Style: (Alignment: Center); }");
+```
+Label #Titre {
+  Text: "Titre par defaut";
+  Anchor: (Height: 40);
+  Style: (FontSize: 24, TextColor: #ffffff, RenderBold: true);
+}
 ```
 
-:::warning Limitations de appendInline
-`appendInline()` necessite un **selecteur vers un conteneur existant**. Vous ne pouvez pas creer une page complete avec uniquement du markup inline - vous devez d'abord charger un fichier layout.
-:::
+#### Group (Conteneur)
 
-## Syntaxe des Selecteurs
+```
+Group {
+  Anchor: (Height: 100);
+  LayoutMode: Left;
+  Background: #2a2a3e;
 
-Les elements sont cibles avec des selecteurs de style CSS :
+  // Les enfants vont ici
+}
+```
 
-| Syntaxe | Exemple | Description |
-|---------|---------|-------------|
-| `#ID` | `#Button` | Element par ID |
-| `#ID[n]` | `#List[0]` | Element de tableau par index |
-| `#ID.Property` | `#Button.Text` | Propriete d'element |
-| `#Parent #Child` | `#Panel #Title` | Element imbrique |
-| Combine | `#List[2] #Button.Text` | Propriete enfant d'un element de tableau |
+#### Espaceur
 
-## Reference UIEventBuilder
+```
+// Espaceur vertical
+Group { Anchor: (Height: 20); }
 
-Enregistre des bindings d'evenements pour gerer les interactions joueur.
+// Espaceur horizontal (dans LayoutMode: Left)
+Group { Anchor: (Width: 20); }
 
-### Types d'Evenements
+// Ligne de separation
+Group { Anchor: (Height: 1); Background: #333333; }
+```
 
-| Type | Declenchement |
-|------|---------------|
-| `Activating` | Element clique ou Enter presse |
-| `RightClicking` | Bouton droit de souris clique |
+#### TextButton (Style personnalise)
+
+```
+@MonStyleBouton = TextButtonStyle(
+  Default: (Background: #3a7bd5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: #4a8be5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: #2a6bc5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+TextButton #MonBouton {
+  Text: "Cliquez-moi";
+  Anchor: (Width: 120, Height: 44);
+  Style: @MonStyleBouton;
+}
+```
+
+---
+
+## Composants Common.ui
+
+Le jeu fournit des composants reutilisables dans `Common.ui`. Importez-les avec :
+
+```
+$C = "../Common.ui";
+```
+
+Puis utilisez-les avec la syntaxe `$C.@NomComposant`.
+
+### Composants disponibles
+
+| Composant | Description | Parametres |
+|-----------|-------------|------------|
+| `$C.@TextButton` | Bouton principal (bleu) | `@Text` |
+| `$C.@SecondaryTextButton` | Bouton secondaire (gris) | `@Text` |
+| `$C.@CancelTextButton` | Bouton annuler/danger (rouge) | `@Text` |
+| `$C.@TextField` | Champ de saisie texte | `PlaceholderText`, `FlexWeight` |
+| `$C.@NumberField` | Champ de saisie numerique | `Value`, `Anchor` |
+| `$C.@CheckBox` | Case a cocher seule | - |
+| `$C.@CheckBoxWithLabel` | Case a cocher avec texte | `@Text`, `@Checked` |
+| `$C.@DropdownBox` | Selecteur deroulant | `Anchor` |
+| `$C.@ContentSeparator` | Separateur horizontal | `Anchor` |
+| `$C.@Container` | Conteneur style | `Anchor` |
+| `$C.@DecoratedContainer` | Conteneur avec bordure | `Anchor` |
+| `$C.@DefaultSpinner` | Indicateur de chargement | `Anchor` |
+
+### Exemples de composants
+
+#### Boutons
+
+```
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 50);
+
+  $C.@TextButton #BtnSauver {
+    @Text = "Sauvegarder";
+    Anchor: (Width: 120, Height: 40);
+  }
+
+  Group { Anchor: (Width: 10); }
+
+  $C.@SecondaryTextButton #BtnAnnuler {
+    @Text = "Annuler";
+    Anchor: (Width: 100, Height: 40);
+  }
+
+  Group { Anchor: (Width: 10); }
+
+  $C.@CancelTextButton #BtnSupprimer {
+    @Text = "Supprimer";
+    Anchor: (Width: 100, Height: 40);
+  }
+}
+```
+
+#### Champ de texte
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+
+  Label {
+    Text: "Nom d'utilisateur";
+    Anchor: (Width: 140);
+    Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+  }
+
+  $C.@TextField #ChampNom {
+    FlexWeight: 1;
+    PlaceholderText: "Entrez le nom...";
+  }
+}
+```
+
+#### Champ numerique
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+
+  Label {
+    Text: "Quantite";
+    Anchor: (Width: 100);
+    Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+  }
+
+  $C.@NumberField #ChampQuantite {
+    Anchor: (Width: 80);
+    Value: 100;
+  }
+}
+```
+
+#### Cases a cocher
+
+```
+$C.@CheckBoxWithLabel #OptionActiver {
+  @Text = "Activer cette fonctionnalite";
+  @Checked = true;
+  Anchor: (Height: 28);
+}
+
+Group { Anchor: (Height: 8); }
+
+$C.@CheckBoxWithLabel #OptionDesactive {
+  @Text = "Desactive par defaut";
+  @Checked = false;
+  Anchor: (Height: 28);
+}
+```
+
+#### Menu deroulant
+
+```
+Group {
+  LayoutMode: Left;
+  Anchor: (Height: 44);
+
+  Label {
+    Text: "Selectionner:";
+    Anchor: (Width: 100);
+    Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+  }
+
+  $C.@DropdownBox #MonMenu {
+    Anchor: (Width: 200, Height: 36);
+  }
+}
+```
+
+---
+
+## Exemple complet : Page de parametres
+
+Voici une page de parametres complete utilisant plusieurs composants :
+
+### ParametresPage.ui
+
+```
+$C = "../Common.ui";
+
+@BoutonPrincipal = TextButtonStyle(
+  Default: (Background: #3a7bd5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: #4a8be5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: #2a6bc5, LabelStyle: (FontSize: 14, TextColor: #ffffff, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+@BoutonSecondaire = TextButtonStyle(
+  Default: (Background: #2b3542, LabelStyle: (FontSize: 14, TextColor: #96a9be, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Hovered: (Background: #3b4552, LabelStyle: (FontSize: 14, TextColor: #b6c9de, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center)),
+  Pressed: (Background: #1b2532, LabelStyle: (FontSize: 14, TextColor: #96a9be, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center))
+);
+
+Group {
+  Anchor: (Width: 450, Height: 400);
+  Background: #141c26(0.98);
+  LayoutMode: Top;
+  Padding: (Full: 20);
+
+  // Titre
+  Label {
+    Text: "Parametres";
+    Anchor: (Height: 40);
+    Style: (FontSize: 24, TextColor: #ffffff, HorizontalAlignment: Center, RenderBold: true);
+  }
+
+  // Separateur
+  Group { Anchor: (Height: 1); Background: #2b3542; }
+  Group { Anchor: (Height: 16); }
+
+  // Champ nom d'utilisateur
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 44);
+
+    Label {
+      Text: "Nom d'utilisateur";
+      Anchor: (Width: 140);
+      Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+    }
+
+    $C.@TextField #ChampNom {
+      FlexWeight: 1;
+      PlaceholderText: "Entrez le nom...";
+    }
+  }
+
+  Group { Anchor: (Height: 12); }
+
+  // Champ volume
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 44);
+
+    Label {
+      Text: "Volume";
+      Anchor: (Width: 140);
+      Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+    }
+
+    $C.@NumberField #ChampVolume {
+      Anchor: (Width: 80);
+      Value: 75;
+    }
+
+    Label {
+      Text: "%";
+      Anchor: (Width: 30);
+      Style: (FontSize: 14, TextColor: #96a9be, VerticalAlignment: Center);
+    }
+  }
+
+  Group { Anchor: (Height: 16); }
+
+  // Cases a cocher
+  $C.@CheckBoxWithLabel #OptionNotifications {
+    @Text = "Activer les notifications";
+    @Checked = true;
+    Anchor: (Height: 28);
+  }
+
+  Group { Anchor: (Height: 8); }
+
+  $C.@CheckBoxWithLabel #OptionSon {
+    @Text = "Activer les sons";
+    @Checked = true;
+    Anchor: (Height: 28);
+  }
+
+  Group { Anchor: (Height: 8); }
+
+  $C.@CheckBoxWithLabel #OptionSauvegardeAuto {
+    @Text = "Sauvegarde automatique";
+    @Checked = false;
+    Anchor: (Height: 28);
+  }
+
+  // Espaceur pour pousser les boutons en bas
+  Group { FlexWeight: 1; }
+
+  // Boutons
+  Group {
+    LayoutMode: Center;
+    Anchor: (Height: 50);
+
+    TextButton #BoutonSauver {
+      Text: "Sauvegarder";
+      Anchor: (Width: 120, Height: 44);
+      Style: @BoutonPrincipal;
+    }
+
+    Group { Anchor: (Width: 16); }
+
+    TextButton #BoutonFermer {
+      Text: "Fermer";
+      Anchor: (Width: 100, Height: 44);
+      Style: @BoutonSecondaire;
+    }
+  }
+
+  // Pied de page
+  Group { Anchor: (Height: 8); }
+  Label {
+    Text: "Appuyez sur ECHAP pour fermer";
+    Anchor: (Height: 16);
+    Style: (FontSize: 11, TextColor: #555555, HorizontalAlignment: Center);
+  }
+}
+```
+
+### ParametresPage.java
+
+```java
+package com.votreplugin.ui;
+
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.ui.builder.EventData;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.server.core.Message;
+
+import javax.annotation.Nonnull;
+
+public class ParametresPage extends InteractiveCustomUIPage<ParametresPage.ParametresEventData> {
+
+    public static final String LAYOUT = "VotrePlugin/ParametresPage.ui";
+
+    private final PlayerRef playerRef;
+
+    public ParametresPage(@Nonnull PlayerRef playerRef) {
+        super(playerRef, CustomPageLifetime.CanDismiss, ParametresEventData.CODEC);
+        this.playerRef = playerRef;
+    }
+
+    @Override
+    public void build(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull UICommandBuilder cmd,
+            @Nonnull UIEventBuilder evt,
+            @Nonnull Store<EntityStore> store
+    ) {
+        cmd.append(LAYOUT);
+
+        // Lier le bouton Sauvegarder
+        evt.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#BoutonSauver",
+            new EventData().append("Action", "sauver"),
+            false
+        );
+
+        // Lier le bouton Fermer
+        evt.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#BoutonFermer",
+            new EventData().append("Action", "fermer"),
+            false
+        );
+    }
+
+    @Override
+    public void handleDataEvent(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ParametresEventData data
+    ) {
+        if ("fermer".equals(data.action)) {
+            this.close();
+        } else if ("sauver".equals(data.action)) {
+            NotificationUtil.sendNotification(
+                playerRef.getPacketHandler(),
+                Message.raw("Parametres sauvegardes"),
+                Message.raw("Vos parametres ont ete sauvegardes."),
+                NotificationStyle.Success
+            );
+        }
+    }
+
+    public static class ParametresEventData {
+        public static final BuilderCodec<ParametresEventData> CODEC = BuilderCodec.builder(
+                ParametresEventData.class, ParametresEventData::new
+        )
+        .append(new KeyedCodec<>("Action", Codec.STRING), (e, v) -> e.action = v, e -> e.action)
+        .add()
+        .build();
+
+        private String action;
+
+        public ParametresEventData() {}
+    }
+}
+```
+
+---
+
+## Reference API cote serveur
+
+### InteractiveCustomUIPage
+
+Classe de base pour les pages UI interactives.
+
+```java
+public class MaPage extends InteractiveCustomUIPage<MesEventData> {
+
+    public MaPage(PlayerRef playerRef) {
+        super(
+            playerRef,                    // Reference du joueur
+            CustomPageLifetime.CanDismiss, // Comment la page peut etre fermee
+            MesEventData.CODEC             // Codec des donnees d'evenement
+        );
+    }
+
+    @Override
+    public void build(
+        Ref<EntityStore> ref,
+        UICommandBuilder cmd,
+        UIEventBuilder evt,
+        Store<EntityStore> store
+    ) {
+        // Appele quand la page s'ouvre
+    }
+
+    @Override
+    public void handleDataEvent(
+        Ref<EntityStore> ref,
+        Store<EntityStore> store,
+        MesEventData data
+    ) {
+        // Appele quand le joueur interagit
+    }
+}
+```
+
+### CustomPageLifetime
+
+| Valeur | Description |
+|--------|-------------|
+| `CantClose` | Ne peut pas etre fermee par l'utilisateur |
+| `CanDismiss` | Peut appuyer sur ECHAP pour fermer |
+| `CanDismissOrCloseThroughInteraction` | ECHAP ou clic sur bouton |
+
+### UICommandBuilder
+
+```java
+// Charger le layout
+cmd.append("VotrePlugin/MaPage.ui");
+
+// Definir le texte
+cmd.set("#Titre.Text", "Bonjour le monde");
+
+// Definir la visibilite
+cmd.set("#Panneau.Visible", false);
+
+// Definir une valeur numerique
+cmd.set("#Slider.Value", 0.5f);
+
+// Vider un conteneur
+cmd.clear("#ListeItems");
+
+// Ajouter a un conteneur
+cmd.append("#ListeItems", "VotrePlugin/ElementListe.ui");
+```
+
+### UIEventBuilder
+
+```java
+// Evenement simple de bouton
+evt.addEventBinding(
+    CustomUIEventBindingType.Activating,
+    "#MonBouton",
+    new EventData().append("Action", "clic"),
+    false  // locksInterface
+);
+
+// Capturer la valeur d'un input
+evt.addEventBinding(
+    CustomUIEventBindingType.Activating,
+    "#BoutonSoumettre",
+    new EventData()
+        .append("Action", "soumettre")
+        .append("@NomUtilisateur", "#ChampNom.Value"),  // Le prefixe @ capture la valeur
+    false
+);
+```
+
+### CustomUIEventBindingType
+
+| Type | Quand declenche |
+|------|-----------------|
+| `Activating` | Clic ou Entree |
+| `ValueChanged` | Changement de valeur (inputs, sliders) |
+| `RightClicking` | Clic droit |
 | `DoubleClicking` | Double clic |
-| `ValueChanged` | Valeur modifiee (inputs, sliders, checkboxes) |
-| `MouseEntered` | Souris entree dans l'element |
-| `MouseExited` | Souris sortie de l'element |
-| `FocusGained` | Element a obtenu le focus |
-| `FocusLost` | Element a perdu le focus |
+| `MouseEntered` | Souris entre dans l'element |
+| `MouseExited` | Souris quitte l'element |
+| `FocusGained` | L'element gagne le focus |
+| `FocusLost` | L'element perd le focus |
 
-### Enregistrer des Evenements
+### Mettre a jour l'UI
 
 ```java
-// Evenement simple (declenche handleDataEvent avec donnees vides)
-eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#CloseButton");
+@Override
+public void handleDataEvent(...) {
+    UICommandBuilder cmd = new UICommandBuilder();
+    cmd.set("#TexteStatut.Text", "Mis a jour !");
+    this.sendUpdate(cmd, false);
+}
+```
 
-// Evenement avec donnees personnalisees
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.Activating,
-    "#SaveButton",
-    new EventData().append("Action", "Save").append("Tab", "Settings")
-);
+### Fermer la page
 
-// Evenement non-bloquant (l'UI reste reactive)
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.ValueChanged,
-    "#Slider",
-    new EventData().append("Type", "Volume"),
-    false  // locksInterface = false
-);
+```java
+this.close();
+```
 
-// Capturer la valeur d'un element UI (prefixer la cle avec @)
-eventBuilder.addEventBinding(
-    CustomUIEventBindingType.Activating,
-    "#SearchButton",
-    EventData.of("@Query", "#SearchInput.Value")
+### NotificationUtil
+
+Pour des messages simples sans page complete :
+
+```java
+NotificationUtil.sendNotification(
+    playerRef.getPacketHandler(),
+    Message.raw("Titre"),
+    Message.raw("Message"),
+    NotificationStyle.Success  // ou Warning, Error, Default
 );
 ```
 
-## Codec EventData
+---
 
-Pour recevoir les donnees d'evenement, creez une classe avec un `BuilderCodec` :
+## Codec de donnees d'evenement
+
+Pour recevoir des donnees des evenements UI, creez une classe avec `BuilderCodec` :
 
 ```java
-public static class MyEventData {
-    public static final BuilderCodec<MyEventData> CODEC = BuilderCodec.builder(
-        MyEventData.class, MyEventData::new
+public static class MesEventData {
+    public static final BuilderCodec<MesEventData> CODEC = BuilderCodec.builder(
+            MesEventData.class, MesEventData::new
     )
     // Champ String
     .append(new KeyedCodec<>("Action", Codec.STRING),
-        (data, value) -> data.action = value,
-        data -> data.action)
+        (e, v) -> e.action = v,
+        e -> e.action)
     .add()
-    // Autre champ String
+    // Autre champ
     .append(new KeyedCodec<>("ItemId", Codec.STRING),
-        (data, value) -> data.itemId = value,
-        data -> data.itemId)
+        (e, v) -> e.itemId = v,
+        e -> e.itemId)
     .add()
     .build();
 
     private String action;
     private String itemId;
 
-    public MyEventData() {}
-
-    // Getters si necessaires
-    public String getAction() { return action; }
-    public String getItemId() { return itemId; }
+    public MesEventData() {}  // Constructeur sans argument requis
 }
 ```
 
-## Mettre a jour l'UI
+Les noms de champs dans le codec **doivent correspondre** aux cles dans `EventData.append()`.
 
-Pour mettre a jour l'UI apres le build initial, utilisez `sendUpdate()` :
+---
 
-```java
-@Override
-public void handleDataEvent(Ref<EntityStore> ref, Store<EntityStore> store, MyEventData data) {
-    // Creer un nouveau command builder pour la mise a jour
-    UICommandBuilder commandBuilder = new UICommandBuilder();
+## Reference complete Common.ui
 
-    // Faire des changements
-    commandBuilder.set("#StatusText.Text", "Mis a jour!");
-    commandBuilder.set("#Counter.Text", String.valueOf(++counter));
+Cette section documente **tous** les composants et styles disponibles dans le fichier `Common.ui` du jeu.
 
-    // Envoyer la mise a jour (false = ne pas reconstruire les evenements)
-    this.sendUpdate(commandBuilder, false);
-}
+### Constantes de style
+
+```
+@PrimaryButtonHeight = 44;
+@SmallButtonHeight = 32;
+@BigButtonHeight = 48;
+@ButtonPadding = 24;
+@DefaultButtonMinWidth = 172;
+@ButtonBorder = 12;
+@DropdownBoxHeight = 32;
+@TitleHeight = 38;
+@InnerPaddingValue = 8;
+@FullPaddingValue = 17;  // @InnerPaddingValue + 9
 ```
 
-## Fermer la Page
+### Composants bouton
 
-```java
-// Depuis handleDataEvent
-Player player = store.getComponent(ref, Player.getComponentType());
-player.getPageManager().setPage(ref, store, Page.None);
+| Composant | Parametres | Description |
+|-----------|------------|-------------|
+| `@TextButton` | `@Text`, `@Anchor`, `@Sounds` | Bouton principal (bleu) avec texte |
+| `@SecondaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Bouton secondaire (gris) avec texte |
+| `@TertiaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Bouton tertiaire avec texte |
+| `@CancelTextButton` | `@Text`, `@Anchor`, `@Sounds` | Bouton destructif/annuler (rouge) |
+| `@SmallSecondaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Petit bouton secondaire |
+| `@SmallTertiaryTextButton` | `@Text`, `@Anchor`, `@Sounds` | Petit bouton tertiaire |
+| `@Button` | `@Anchor`, `@Sounds` | Bouton carre sans texte |
+| `@SecondaryButton` | `@Anchor`, `@Sounds`, `@Width` | Bouton carre secondaire |
+| `@TertiaryButton` | `@Anchor`, `@Sounds`, `@Width` | Bouton carre tertiaire |
+| `@CancelButton` | `@Anchor`, `@Sounds`, `@Width` | Bouton carre annuler |
+| `@CloseButton` | - | Bouton fermer pre-positionne (32x32) |
 
-// Ou utiliser le helper close()
-this.close();
+### Composants input
+
+| Composant | Parametres | Description |
+|-----------|------------|-------------|
+| `@TextField` | `@Anchor` | Champ de saisie texte (hauteur: 38) |
+| `@NumberField` | `@Anchor` | Champ numerique uniquement (hauteur: 38) |
+| `@DropdownBox` | `@Anchor` | Selecteur deroulant (defaut 330x32) |
+| `@CheckBox` | - | Case a cocher seule (22x22) |
+| `@CheckBoxWithLabel` | `@Text`, `@Checked` | Case a cocher avec texte |
+
+### Composants conteneur
+
+| Composant | Parametres | Description |
+|-----------|------------|-------------|
+| `@Container` | `@ContentPadding`, `@CloseButton` | Conteneur style avec zone titre |
+| `@DecoratedContainer` | `@ContentPadding`, `@CloseButton` | Conteneur avec bordures decoratives |
+| `@Panel` | - | Panneau simple avec bordure |
+| `@PageOverlay` | - | Fond semi-transparent |
+
+### Composants layout
+
+| Composant | Parametres | Description |
+|-----------|------------|-------------|
+| `@ContentSeparator` | `@Anchor` | Separateur ligne horizontale (hauteur: 1) |
+| `@VerticalSeparator` | - | Separateur vertical (largeur: 6) |
+| `@HeaderSeparator` | - | Separateur de section header (5x34) |
+| `@PanelSeparatorFancy` | `@Anchor` | Separateur de panneau decoratif |
+
+### Composants texte
+
+| Composant | Parametres | Description |
+|-----------|------------|-------------|
+| `@Title` | `@Text`, `@Alignment` | Label titre style |
+| `@Subtitle` | `@Text` | Label sous-titre style |
+| `@TitleLabel` | - | Grand titre centre (FontSize: 40) |
+| `@PanelTitle` | `@Text`, `@Alignment` | Titre de section panneau |
+
+### Composants utilitaires
+
+| Composant | Parametres | Description |
+|-----------|------------|-------------|
+| `@DefaultSpinner` | `@Anchor` | Animation de chargement (32x32) |
+| `@HeaderSearch` | `@MarginRight` | Input de recherche avec icone |
+| `@BackButton` | - | Bouton retour pre-positionne |
+
+### Styles disponibles
+
+#### Styles de bouton
+
+| Style | Description |
+|-------|-------------|
+| `@DefaultTextButtonStyle` | Style bouton principal |
+| `@SecondaryTextButtonStyle` | Style bouton secondaire |
+| `@TertiaryTextButtonStyle` | Style bouton tertiaire |
+| `@CancelTextButtonStyle` | Style bouton destructif/annuler |
+| `@SmallDefaultTextButtonStyle` | Style petit bouton principal |
+| `@SmallSecondaryTextButtonStyle` | Style petit bouton secondaire |
+
+#### Styles de label
+
+| Style | Proprietes |
+|-------|------------|
+| `@DefaultLabelStyle` | FontSize: 16, TextColor: #96a9be |
+| `@DefaultButtonLabelStyle` | FontSize: 17, TextColor: #bfcdd5, Bold, Uppercase, Center |
+| `@TitleStyle` | FontSize: 15, Bold, Uppercase, TextColor: #b4c8c9, Police secondaire |
+| `@SubtitleStyle` | FontSize: 15, Uppercase, TextColor: #96a9be |
+| `@PopupTitleStyle` | FontSize: 38, Bold, Uppercase, Center, LetterSpacing: 2 |
+
+### Proprietes LabelStyle
+
+```
+LabelStyle(
+  FontSize: 16,
+  TextColor: #ffffff,
+  RenderBold: true,
+  RenderUppercase: true,
+  HorizontalAlignment: Center,  // Start, Center, End
+  VerticalAlignment: Center,    // Top, Center, Bottom
+  FontName: "Default",          // ou "Secondary"
+  LetterSpacing: 0,
+  Wrap: true                    // Retour a la ligne
+)
 ```
 
-## CustomPageLifetime
+### Structure TextButtonStyle
 
-Controle comment la page peut etre fermee :
-
-| Lifetime | Comportement |
-|----------|--------------|
-| `CantClose` | L'utilisateur ne peut pas fermer la page (doit etre fermee par le code) |
-| `CanDismiss` | L'utilisateur peut appuyer sur ESC pour fermer |
-| `CanDismissOrCloseThroughInteraction` | ESC ou interaction avec bouton de fermeture |
-
-## Alternative : NotificationUtil
-
-Pour des messages simples sans pages personnalisees, utilisez les notifications :
-
-```java
-import com.hypixel.hytale.server.core.util.NotificationUtil;
-import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
-
-NotificationUtil.sendNotification(
-    playerRef.getPacketHandler(),
-    Message.raw("Titre"),
-    Message.raw("Sous-titre"),
-    NotificationStyle.Success
+```
+@MonStyleBouton = TextButtonStyle(
+  Default: (
+    Background: PatchStyle(TexturePath: "chemin.png", Border: 12),
+    LabelStyle: @UnLabelStyle
+  ),
+  Hovered: (
+    Background: PatchStyle(TexturePath: "survol.png", Border: 12),
+    LabelStyle: @UnLabelStyle
+  ),
+  Pressed: (
+    Background: PatchStyle(TexturePath: "presse.png", Border: 12),
+    LabelStyle: @UnLabelStyle
+  ),
+  Disabled: (
+    Background: PatchStyle(TexturePath: "desactive.png", Border: 12),
+    LabelStyle: @LabelStyleDesactive
+  ),
+  Sounds: @SonsBouton
 );
 ```
 
-### Styles de Notification
+### Proprietes Anchor
 
-| Style | Apparence |
-|-------|-----------|
-| `Default` | Notification standard |
-| `Success` | Vert/positif |
-| `Warning` | Jaune/attention |
-| `Error` | Rouge/negatif |
-
-## Erreurs Courantes
-
-### 1. Utiliser des Fichiers Layout Inexistants
-
-```java
-// MAUVAIS - DialogPage.ui peut ne pas exister sur tous les clients
-commandBuilder.append("Pages/DialogPage.ui");
-
-// BON - PluginListPage.ui est toujours disponible
-commandBuilder.append("Pages/PluginListPage.ui");
+```
+Anchor: (
+  Width: 100,
+  Height: 50,
+  Top: 10,
+  Bottom: 10,
+  Left: 10,
+  Right: 10,
+  Horizontal: 10,  // Left + Right
+  Vertical: 10     // Top + Bottom
+);
 ```
 
-### 2. Ne Pas Executer sur le World Thread
+### Proprietes Padding
 
-```java
-// MAUVAIS - Etendre CommandBase ne garantit pas le world thread
-public class MyCommand extends CommandBase { ... }
-
-// BON - AbstractPlayerCommand gere le threading
-public class MyCommand extends AbstractPlayerCommand { ... }
+```
+Padding: (
+  Full: 20,           // Tous les cotes
+  Horizontal: 10,     // Left + Right
+  Vertical: 10,       // Top + Bottom
+  Top: 10,
+  Bottom: 10,
+  Left: 10,
+  Right: 10
+);
 ```
 
-### 3. Champs Codec Manquants
+---
+
+## Depannage
+
+### "Failed to load CustomUI documents"
+
+**Cause** : Erreur de syntaxe dans votre fichier `.ui`.
+
+**Solutions** :
+1. Assurez-vous que tous les textes sont entre guillemets : `Text: "Bonjour";` pas `Text: Bonjour;`
+2. Verifiez que toutes les proprietes finissent par point-virgule
+3. Verifiez le format des couleurs : `#ffffff` ou `#fff`
+4. Assurez-vous que l'import Common.ui est correct : `$C = "../Common.ui";`
+
+### "Failed to apply CustomUI event bindings"
+
+**Cause** : L'ID d'element dans Java ne correspond pas au fichier `.ui`.
+
+**Solutions** :
+1. Verifiez que l'ID d'element existe dans votre fichier `.ui`
+2. Verifiez l'orthographe : `#MonBouton` dans Java doit correspondre a `#MonBouton` dans `.ui`
+3. Pour les composants Common.ui, l'ID va apres le composant : `$C.@TextButton #MonBouton`
+
+### Le joueur se deconnecte a l'ouverture de la page
+
+**Cause** : Le fichier `.ui` a une erreur de parsing ou n'existe pas.
+
+**Solutions** :
+1. Verifiez que le chemin correspond : `"VotrePlugin/MaPage.ui"` correspond a `Common/UI/Custom/VotrePlugin/MaPage.ui`
+2. Revoyez attentivement la syntaxe du fichier UI
+3. Commencez avec un exemple minimal fonctionnel et ajoutez la complexite progressivement
+
+### L'UI s'ouvre mais les boutons ne fonctionnent pas
+
+**Cause** : Les liaisons d'evenements ne sont pas configurees correctement.
+
+**Solutions** :
+1. Assurez-vous que `evt.addEventBinding()` est appele dans `build()`
+2. Verifiez que le selecteur correspond a l'ID de l'element : `"#MonBouton"`
+3. Verifiez que `handleDataEvent()` gere la valeur de l'action
+
+---
+
+## Imports requis
 
 ```java
-// MAUVAIS - Champ "Action" envoye par l'UI mais pas dans le codec
-eventBuilder.addEventBinding(..., new EventData().append("Action", "Save"));
-// handleDataEvent recoit null pour les champs manquants
+// UI de base
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
+import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
+import com.hypixel.hytale.server.core.ui.builder.EventData;
+import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 
-// BON - Tous les champs declares dans le codec
-.append(new KeyedCodec<>("Action", Codec.STRING), ...)
+// Codec
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+
+// ECS
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+// Joueur & Commandes
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.Message;
+
+// Notifications
+import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 ```
-
-### 4. Utiliser appendInline Sans Layout de Base
-
-```java
-// MAUVAIS - Pas de layout de base charge d'abord
-commandBuilder.appendInline("", "<panel>...</panel>");
-
-// BON - Charger le layout d'abord, puis ajouter inline au conteneur
-commandBuilder.append("Pages/PluginListPage.ui");
-commandBuilder.appendInline("#SomeContainer", "Label { Text: Extra; }");
-```
-
-## Classes Source
-
-| Classe | Package |
-|--------|---------|
-| `CustomUIPage` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `BasicCustomUIPage` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `InteractiveCustomUIPage` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `UICommandBuilder` | `com.hypixel.hytale.server.core.ui.builder` |
-| `UIEventBuilder` | `com.hypixel.hytale.server.core.ui.builder` |
-| `EventData` | `com.hypixel.hytale.server.core.ui.builder` |
-| `PageManager` | `com.hypixel.hytale.server.core.entity.entities.player.pages` |
-| `AbstractPlayerCommand` | `com.hypixel.hytale.server.core.command.system.basecommands` |
-| `NotificationUtil` | `com.hypixel.hytale.server.core.util` |
-
-## Implementations de Pages Integrees
-
-Voici toutes les implementations CustomUIPage dans Hytale - utiles comme reference :
-
-### Pages Core Serveur
-
-| Classe | Layout | Objectif |
-|--------|--------|----------|
-| `PluginListPage` | `Pages/PluginListPage.ui` | Gestion plugins (`/plugins`) |
-| `CommandListPage` | `Pages/CommandListPage.ui` | Aide commandes (`/commands`) |
-| `RespawnPage` | `Pages/RespawnPage.ui` | Ecran mort/respawn |
-| `ItemRepairPage` | `Pages/ItemRepairPage.ui` | Interface reparation |
-
-### Pages Outils de Construction
-
-| Classe | Layout | Objectif |
-|--------|--------|----------|
-| `EntitySpawnPage` | `Pages/EntitySpawnPage.ui` | Spawn NPC/entites |
-| `ChangeModelPage` | `Pages/ChangeModelPage.ui` | Selection modele |
-| `ParticleSpawnPage` | `Pages/ParticleSpawnPage.ui` | Test particules |
-| `PrefabPage` | `Pages/PrefabListPage.ui` | Navigateur prefab |
-| `ImageImportPage` | `Pages/ImageImportPage.ui` | Import image |
-| `ObjImportPage` | `Pages/ObjImportPage.ui` | Import modele 3D |
-
-### Pages Adventure
-
-| Classe | Layout | Objectif |
-|--------|--------|----------|
-| `DialogPage` | `Pages/DialogPage.ui` | Dialogue NPC |
-| `ShopPage` | `Pages/ShopPage.ui` | Interface boutique |
-| `BarterPage` | `Pages/BarterPage.ui` | Interface echange |
-| `MemoriesPage` | `Pages/Memories/*.ui` | Suivi collectibles |
-
-### Pages Portail/Teleporteur
-
-| Classe | Layout | Objectif |
-|--------|--------|----------|
-| `PortalDeviceSummonPage` | `Pages/PortalDeviceSummon.ui` | Invocation portail |
-| `PortalDeviceActivePage` | `Pages/PortalDeviceActive.ui` | Affichage portail actif |
-| `TeleporterSettingsPage` | `Pages/Teleporter.ui` | Config teleporteur |
-| `WarpListPage` | `Pages/WarpListPage.ui` | Selection warp |
-
-## Reference Complete des Fichiers Layout
-
-Les 57 fichiers `.ui` trouves dans le code serveur :
-
-### Layouts Core
-- `Common.ui` - Styles et constantes globaux
-- `Common/TextButton.ui` - Composant bouton reutilisable
-
-### Repertoire Pages (55 fichiers)
-- `Pages/PluginListPage.ui`, `Pages/PluginListButton.ui`
-- `Pages/CommandListPage.ui`, `Pages/SubcommandCard.ui`, `Pages/VariantCard.ui`
-- `Pages/DialogPage.ui`, `Pages/ShopPage.ui`, `Pages/ShopElementButton.ui`
-- `Pages/BarterPage.ui`, `Pages/BarterTradeRow.ui`, `Pages/BarterGridSpacer.ui`
-- `Pages/EntitySpawnPage.ui`, `Pages/ChangeModelPage.ui`
-- `Pages/PrefabListPage.ui`, `Pages/PrefabSavePage.ui`
-- `Pages/PortalDeviceSummon.ui`, `Pages/PortalDeviceActive.ui`, `Pages/PortalDeviceError.ui`
-- `Pages/Teleporter.ui`, `Pages/WarpListPage.ui`, `Pages/WarpEntryButton.ui`
-- `Pages/RespawnPage.ui`, `Pages/DroppedItemSlot.ui`
-- `Pages/ItemRepairPage.ui`, `Pages/ItemRepairElement.ui`
-- Et 30+ autres fichiers pour les outils de construction, instances, etc.
-
-### Sous-repertoires
-- `Pages/Memories/` - 5 fichiers pour le systeme de souvenirs
-- `Pages/Portals/` - 2 fichiers pour les elements de portail
