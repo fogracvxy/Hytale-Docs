@@ -126,7 +126,7 @@ export function HeroSection() {
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground group-hover:text-primary transition-colors">
-                  Serveurs
+                  Servers
                 </p>
                 <p className="text-sm text-muted-foreground">{t("serversDesc")}</p>
               </div>
