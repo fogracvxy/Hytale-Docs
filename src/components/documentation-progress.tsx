@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { X, ChevronDown, ChevronUp, BookOpen, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -21,19 +21,14 @@ const STORAGE_KEY = "hytaledocs-progress-dismissed";
 
 export function DocumentationProgress() {
   const t = useTranslations("docProgress");
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !sessionStorage.getItem(STORAGE_KEY);
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const overallProgress = getOverallProgress();
-
-  useEffect(() => {
-    // Check if user has dismissed the banner in this session
-    const dismissed = sessionStorage.getItem(STORAGE_KEY);
-    if (!dismissed) {
-      setIsVisible(true);
-    }
-  }, []);
 
   const handleDismiss = () => {
     sessionStorage.setItem(STORAGE_KEY, "true");

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import {
@@ -74,9 +75,11 @@ export function MobileMenu() {
 
         <SheetHeader className="px-4 pb-3 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <img
+            <Image
               src="/logo-h.png"
               alt="Hytale"
+              width={28}
+              height={28}
               className="h-7 w-7 object-contain"
             />
             <SheetTitle className="text-lg font-bold text-left">

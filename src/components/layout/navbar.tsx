@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import {
@@ -13,8 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSelector } from "./language-selector";
-import { SearchDialog } from "./search-dialog";
 import { cn } from "@/lib/utils";
+
+const SearchDialog = dynamic(
+  () => import("./search-dialog").then((mod) => ({ default: mod.SearchDialog })),
+  { ssr: false }
+);
 
 export function Navbar() {
   const t = useTranslations("nav");
@@ -66,9 +72,11 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative flex h-8 w-8 items-center justify-center">
-              <img
+              <Image
                 src="/logo-h.png"
                 alt="Hytale"
+                width={32}
+                height={32}
                 className="h-8 w-8 object-contain transition-transform duration-200 group-hover:scale-110"
               />
             </div>

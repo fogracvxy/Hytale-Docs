@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FolderTree, Copy, Check, Download } from "lucide-react";
+import { ArrowLeft, Copy, Check } from "lucide-react";
 
 type ProjectType = "plugin" | "mod" | "full";
 

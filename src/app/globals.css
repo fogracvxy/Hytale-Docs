@@ -75,7 +75,7 @@
   --card-foreground: #1a2332;
   --popover: #ffffff;
   --popover-foreground: #1a2332;
-  --primary: #e8a849;
+  --primary: #d4942b;
   --primary-foreground: #1a2332;
   --secondary: #4a90a8;
   --secondary-foreground: #ffffff;
@@ -86,20 +86,20 @@
   --destructive: #c45c5c;
   --border: #d1d9e6;
   --input: #d1d9e6;
-  --ring: #e8a849;
-  --chart-1: #e8a849;
+  --ring: #d4942b;
+  --chart-1: #d4942b;
   --chart-2: #4a90a8;
   --chart-3: #4a9e6e;
   --chart-4: #8b5cf6;
   --chart-5: #c45c5c;
   --sidebar: #ffffff;
   --sidebar-foreground: #1a2332;
-  --sidebar-primary: #e8a849;
+  --sidebar-primary: #d4942b;
   --sidebar-primary-foreground: #1a2332;
   --sidebar-accent: #f0f4f8;
   --sidebar-accent-foreground: #1a2332;
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #e8a849;
+  --sidebar-ring: #d4942b;
 }
 
 /* Dark mode - GitHub-inspired with Hytale accent */

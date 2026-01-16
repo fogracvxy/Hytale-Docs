@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, X, ExternalLink } from "lucide-react";
 
@@ -8,15 +8,10 @@ const STORAGE_KEY = "hytaledocs-disclaimer-dismissed";
 
 export function DocsDisclaimer() {
   const t = useTranslations("docsDisclaimer");
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    // Check if user has dismissed the banner in this session
-    const dismissed = sessionStorage.getItem(STORAGE_KEY);
-    if (!dismissed) {
-      setIsVisible(true);
-    }
-  }, []);
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !sessionStorage.getItem(STORAGE_KEY);
+  });
 
   const handleDismiss = () => {
     sessionStorage.setItem(STORAGE_KEY, "true");

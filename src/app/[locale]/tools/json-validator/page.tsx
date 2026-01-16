@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileJson, CheckCircle, XCircle, AlertCircle, Copy } from "lucide-react";
+import { ArrowLeft, FileJson, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 
 type SchemaType = "block" | "item" | "npc" | "manifest";
 

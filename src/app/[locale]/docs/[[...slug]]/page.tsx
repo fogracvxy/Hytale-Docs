@@ -112,7 +112,7 @@ export default async function DocPage({ params }: DocPageProps) {
   return (
     <TocProvider items={tocItems}>
       <div className="flex gap-8">
-        <article className="max-w-4xl flex-1 min-w-0 py-6 lg:py-8">
+        <article id="main-content" className="max-w-4xl flex-1 min-w-0 py-6 lg:py-8">
         {/* Structured Data */}
         <BreadcrumbJsonLd items={breadcrumbItems} />
         <ArticleJsonLd

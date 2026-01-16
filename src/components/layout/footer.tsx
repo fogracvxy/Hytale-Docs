@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Github, MessageCircle, Twitter } from "lucide-react";
+import { Github, Twitter } from "lucide-react";
 import { FooterAd } from "@/components/ads";
 import { useCookieConsent } from "@/contexts/cookie-consent-context";
 
@@ -42,9 +43,11 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <img
+              <Image
                 src="/logo-h.png"
                 alt="Hytale"
+                width={32}
+                height={32}
                 className="h-8 w-8 object-contain"
               />
               <span className="text-xl font-bold">

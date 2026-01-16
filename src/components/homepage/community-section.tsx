@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Github, ExternalLink } from "lucide-react";
+import { Github, ExternalLink } from "lucide-react";
 
 export function CommunitySection() {
   const t = useTranslations("community");
