@@ -15,13 +15,7 @@
       "src": "/logo-h.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/logo-h.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -30,14 +24,14 @@
       "short_name": "Docs",
       "description": "Browse the documentation",
       "url": "/en/docs",
-      "icons": [{ "src": "/logo-h.png", "sizes": "129x186" }]
+      "icons": [{ "src": "/logo-h.png", "sizes": "512x512" }]
     },
     {
       "name": "API Reference",
       "short_name": "API",
       "description": "Explore the API documentation",
       "url": "/en/docs/api",
-      "icons": [{ "src": "/logo-h.png", "sizes": "129x186" }]
+      "icons": [{ "src": "/logo-h.png", "sizes": "512x512" }]
     }
   ],
   "related_applications": [],
