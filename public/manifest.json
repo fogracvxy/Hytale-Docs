@@ -12,7 +12,7 @@
   "categories": ["education", "games", "utilities"],
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/logo-h.png",
       "sizes": "129x186",
       "type": "image/png",
       "purpose": "any"
@@ -30,14 +30,14 @@
       "short_name": "Docs",
       "description": "Browse the documentation",
       "url": "/en/docs",
-      "icons": [{ "src": "/icon.png", "sizes": "129x186" }]
+      "icons": [{ "src": "/logo-h.png", "sizes": "129x186" }]
     },
     {
       "name": "API Reference",
       "short_name": "API",
       "description": "Explore the API documentation",
       "url": "/en/docs/api",
-      "icons": [{ "src": "/icon.png", "sizes": "129x186" }]
+      "icons": [{ "src": "/logo-h.png", "sizes": "129x186" }]
     }
   ],
   "related_applications": [],
