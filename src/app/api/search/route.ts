@@ -42,7 +42,7 @@ function getCacheKey(query: string, locale: string): string {
   return `${locale}:${query.toLowerCase().trim()}`;
 }
 
-function getAllDocs(locale: string = "fr"): SearchResult[] {
+function getAllDocs(locale: string = "en"): SearchResult[] {
   // Check cache first
   const cached = docsCache.get(locale);
   if (isCacheValid(cached)) {
@@ -136,7 +136,7 @@ function getAllDocs(locale: string = "fr"): SearchResult[] {
   return results;
 }
 
-function searchDocs(query: string, locale: string = "fr"): SearchResult[] {
+function searchDocs(query: string, locale: string = "en"): SearchResult[] {
   // Check search cache first
   const cacheKey = getCacheKey(query, locale);
   const cached = searchCache.get(cacheKey);
@@ -211,7 +211,7 @@ function searchDocs(query: string, locale: string = "fr"): SearchResult[] {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get("q");
-  const locale = searchParams.get("locale") || "fr";
+  const locale = searchParams.get("locale") || "en";
 
   if (!query || query.trim().length === 0) {
     return NextResponse.json(

@@ -17,11 +17,11 @@ export interface Doc {
   content: string;
 }
 
-function getDocsDirectory(locale: string = "fr"): string {
+function getDocsDirectory(locale: string = "en"): string {
   return path.join(contentDirectory, locale);
 }
 
-export function getDocBySlug(slug: string[], locale: string = "fr"): Doc | null {
+export function getDocBySlug(slug: string[], locale: string = "en"): Doc | null {
   const docsDirectory = getDocsDirectory(locale);
   const slugPath = slug.join("/");
 
@@ -44,9 +44,9 @@ export function getDocBySlug(slug: string[], locale: string = "fr"): Doc | null 
   }
 
   if (!filePath) {
-    // Fallback to French if not found in current locale
-    if (locale !== "fr") {
-      return getDocBySlug(slug, "fr");
+    // Fallback to English if not found in current locale
+    if (locale !== "en") {
+      return getDocBySlug(slug, "en");
     }
     return null;
   }
@@ -66,7 +66,7 @@ export function getDocBySlug(slug: string[], locale: string = "fr"): Doc | null 
   };
 }
 
-export function getAllDocSlugs(locale: string = "fr"): string[][] {
+export function getAllDocSlugs(locale: string = "en"): string[][] {
   const docsDirectory = getDocsDirectory(locale);
   const slugs: string[][] = [];
 
@@ -102,7 +102,7 @@ export function getAllDocSlugs(locale: string = "fr"): string[][] {
 
 export function getDocNavigation(
   currentSlug: string[],
-  locale: string = "fr"
+  locale: string = "en"
 ): {
   prev: { title: string; href: string } | null;
   next: { title: string; href: string } | null;

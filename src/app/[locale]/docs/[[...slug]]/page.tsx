@@ -48,9 +48,9 @@ export async function generateMetadata({
   }
 
   const slugPath = (slug || ["intro"]).join("/");
-  const currentUrl = locale === "en"
-    ? `${BASE_URL}/docs/${slugPath}`
-    : `${BASE_URL}/${locale}/docs/${slugPath}`;
+  const currentUrl = locale !== "en"
+    ? `${BASE_URL}/${locale}/docs/${slugPath}`
+    : `${BASE_URL}/docs/${slugPath}`;
 
   return {
     title: doc.meta.title,
