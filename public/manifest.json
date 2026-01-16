@@ -12,50 +12,16 @@
   "categories": ["education", "games", "utilities"],
   "icons": [
     {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
+      "src": "/icon.png",
+      "sizes": "129x186",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
+      "src": "/logo-h.png",
+      "sizes": "129x186",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-maskable-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "HytaleDocs Desktop"
-    },
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "HytaleDocs Mobile"
     }
   ],
   "shortcuts": [
@@ -64,14 +30,14 @@
       "short_name": "Docs",
       "description": "Browse the documentation",
       "url": "/en/docs",
-      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon.png", "sizes": "129x186" }]
     },
     {
       "name": "API Reference",
       "short_name": "API",
       "description": "Explore the API documentation",
       "url": "/en/docs/api",
-      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon.png", "sizes": "129x186" }]
     }
   ],
   "related_applications": [],

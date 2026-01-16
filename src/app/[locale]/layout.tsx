@@ -97,11 +97,11 @@ export async function generateMetadata({
     },
     icons: {
       icon: [
-        { url: "/icon-512x512.png", type: "image/png", sizes: "512x512" },
-        { url: "/icon-192x192.png", type: "image/png", sizes: "192x192" },
+        { url: "/icon.png", type: "image/png" },
+        { url: "/img/favicon.ico" },
       ],
-      apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
-      shortcut: "/icon-192x192.png",
+      apple: [{ url: "/icon.png", type: "image/png" }],
+      shortcut: "/img/favicon.ico",
     },
     manifest: "/manifest.json",
     appleWebApp: {
