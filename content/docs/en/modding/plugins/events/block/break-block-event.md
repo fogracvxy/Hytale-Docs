@@ -6,6 +6,8 @@ sidebar_label: BreakBlockEvent
 
 # BreakBlockEvent
 
+> **Last updated:** January 17, 2026 - Added practical examples and internal implementation details.
+
 Fired when a block is about to be broken (destroyed) in the world. This event allows plugins to intercept and cancel block breaking, modify the target block, or perform custom logic when blocks are destroyed.
 
 ## Event Information
@@ -145,6 +147,170 @@ public class MyPlugin extends JavaPlugin {
 - ECS events are **not** registered via `EventBus.register()` - that approach will not work for these events.
 - Each ECS event type requires its own `EntityEventSystem` class.
 
+## Practical Examples
+
+### Getting Block Location
+
+To find where the block was broken:
+
+```java
+@Override
+public void handle(..., @Nonnull BreakBlockEvent event) {
+    Vector3i pos = event.getTargetBlock();
+
+    int x = pos.getX();
+    int y = pos.getY();
+    int z = pos.getZ();
+
+    System.out.println("Block broken at X=" + x + " Y=" + y + " Z=" + z);
+}
+```
+
+### Getting Block Type Information
+
+To know which block was broken:
+
+```java
+@Override
+public void handle(..., @Nonnull BreakBlockEvent event) {
+    BlockType blockType = event.getBlockType();
+
+    // Get the block identifier (e.g., "hytale:stone", "hytale:oak_log")
+    String blockId = blockType.toString();
+
+    // Or get the asset key
+    AssetKey<BlockType> assetKey = blockType.getAssetKey();
+
+    System.out.println("Broken block: " + blockId);
+}
+```
+
+### Checking the Tool Used
+
+To see what item the player used to break the block:
+
+```java
+@Override
+public void handle(..., @Nonnull BreakBlockEvent event) {
+    ItemStack tool = event.getItemInHand();
+
+    if (tool == null) {
+        System.out.println("Block broken with bare hands");
+    } else {
+        // Get tool type
+        ItemType itemType = tool.getType();
+        System.out.println("Tool used: " + itemType.toString());
+
+        // Check durability if applicable
+        // tool.getDurability(), tool.getMaxDurability(), etc.
+    }
+}
+```
+
+### Complete Example: Block Break Logger
+
+A full example that logs all block breaks with details:
+
+```java
+public class BlockBreakLoggerSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
+
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+
+    public BlockBreakLoggerSystem() {
+        super(BreakBlockEvent.class);
+    }
+
+    @Override
+    public void handle(
+            int index,
+            @Nonnull ArchetypeChunk<EntityStore> archetypeChunk,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull CommandBuffer<EntityStore> commandBuffer,
+            @Nonnull BreakBlockEvent event
+    ) {
+        // Get block position
+        Vector3i pos = event.getTargetBlock();
+
+        // Get block type
+        BlockType blockType = event.getBlockType();
+
+        // Get tool (may be null)
+        ItemStack tool = event.getItemInHand();
+        String toolName = (tool != null) ? tool.getType().toString() : "hand";
+
+        // Log the break
+        LOGGER.at(Level.INFO).log(
+            "Block broken: %s at [%d, %d, %d] with %s",
+            blockType,
+            pos.getX(), pos.getY(), pos.getZ(),
+            toolName
+        );
+    }
+
+    @Nullable
+    @Override
+    public Query<EntityStore> getQuery() {
+        return Archetype.empty();
+    }
+}
+```
+
+### Example: Protect Specific Block Types
+
+Prevent certain blocks from being broken:
+
+```java
+public class BlockProtectionSystem extends EntityEventSystem<EntityStore, BreakBlockEvent> {
+
+    // Set of protected block IDs
+    private static final Set<String> PROTECTED_BLOCKS = Set.of(
+        "hytale:bedrock",
+        "hytale:spawner",
+        "hytale:barrier"
+    );
+
+    public BlockProtectionSystem() {
+        super(BreakBlockEvent.class);
+    }
+
+    @Override
+    public void handle(..., @Nonnull BreakBlockEvent event) {
+        String blockId = event.getBlockType().toString();
+
+        if (PROTECTED_BLOCKS.contains(blockId)) {
+            // Cancel the event - block won't be broken
+            event.setCancelled(true);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Query<EntityStore> getQuery() {
+        return Archetype.empty();
+    }
+}
+```
+
+### Example: Redirect Block Break
+
+Change which block gets broken (e.g., break block above instead):
+
+```java
+@Override
+public void handle(..., @Nonnull BreakBlockEvent event) {
+    Vector3i originalPos = event.getTargetBlock();
+
+    // Redirect to block above
+    Vector3i newPos = new Vector3i(
+        originalPos.getX(),
+        originalPos.getY() + 1,  // One block higher
+        originalPos.getZ()
+    );
+
+    event.setTargetBlock(newPos);
+}
+```
+
 ## When This Event Fires
 
 The `BreakBlockEvent` is fired when:
@@ -173,6 +339,66 @@ This is useful for:
 - Permission-based building restrictions
 - Custom game modes where certain blocks cannot be broken
 - Anti-griefing measures
+
+## Internal Details
+
+> This section provides implementation details from the decompiled source code for advanced developers.
+
+### Event Processing Chain
+
+When a block is broken, the following sequence occurs:
+
+```
+BlockHarvestUtils.performBlockBreak()
+    │
+    ├─► BreakBlockEvent created and invoked via entityStore.invoke()
+    │
+    ├─► If cancelled: block section invalidated, return early
+    │
+    ├─► BlackboardSystems.BreakBlockEventSystem handles the event
+    │
+    ├─► Blackboard.onEntityBreakBlock() processes game logic
+    │
+    └─► BlockEventView.onEntityBreakBlock() notifies NPCs
+```
+
+### Where the Event is Fired
+
+The event is created in `BlockHarvestUtils.performBlockBreak()`:
+
+```java
+// BlockHarvestUtils.java, line 572
+BreakBlockEvent event = new BreakBlockEvent(heldItemStack, blockPosition, targetBlockTypeKey);
+entityStore.invoke(ref, event);
+```
+
+### Cancellation Implementation
+
+When cancelled, the internal handling looks like this:
+
+```java
+// BlockHarvestUtils.java, lines 574-581
+if (event.isCancelled()) {
+    BlockChunk blockChunkComponent = chunkStore.getComponent(chunkReference, BlockChunk.getComponentType());
+    BlockSection blockSection = blockChunkComponent.getSectionAtBlockY(blockPosition.getY());
+    blockSection.invalidateBlock(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
+    return; // Block break is aborted
+}
+```
+
+### Class Hierarchy
+
+```
+EcsEvent (base class for all ECS events)
+    └─► CancellableEcsEvent (adds isCancelled/setCancelled)
+            └─► BreakBlockEvent
+```
+
+### Important Notes
+
+- **BlockType is immutable**: The `blockType` field is `final` and cannot be changed after event creation. Only `targetBlock` can be modified via `setTargetBlock()`.
+- **Event timing**: The event fires AFTER block damage reaches 100% but BEFORE the block is removed and drops are generated.
+- **NPC awareness**: The event is used by the NPC blackboard system to make NPCs aware of block breaking in their vicinity.
 
 ## Related Events
 
