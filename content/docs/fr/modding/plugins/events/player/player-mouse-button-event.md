@@ -6,6 +6,8 @@ sidebar_label: PlayerMouseButtonEvent
 
 # PlayerMouseButtonEvent
 
+> **Attention :** Cet événement n'est actuellement **PAS FONCTIONNEL** dans la version actuelle de Hytale. Bien que le code serveur existe et que les listeners puissent être enregistrés, le client n'envoie pas les données `mouseButton` requises dans les paquets réseau. Cet événement ne se déclenchera jamais. Voir [Résultats des tests](#résultats-des-tests) pour plus de détails.
+
 Déclenché lorsqu'un joueur appuie ou relache un bouton de la souris. C'est un événement annulable qui fournit des informations détaillées sur les entrees de la souris, incluant le bouton appuye, la position a l'ecran et les blocs ou entites cibles.
 
 ## Informations sur l'événement
@@ -14,7 +16,7 @@ Déclenché lorsqu'un joueur appuie ou relache un bouton de la souris. C'est un 
 |-----------|--------|
 | **Nom complet de la classe** | `com.hypixel.hytale.server.core.event.events.player.PlayerMouseButtonEvent` |
 | **Classe parente** | `PlayerEvent<Void>` |
-| **Annulable** | Oui |
+| **Annulable** | Oui (mais non implémenté - voir notes) |
 | **Asynchrone** | Non |
 | **Fichier source** | `decompiled/com/hypixel/hytale/server/core/event/events/player/PlayerMouseButtonEvent.java:15` |
 
@@ -148,6 +150,84 @@ L'objet `MouseButtonEvent` contient des informations détaillées sur l'entree d
 
 Le champ `screenPoint` fournit les coordonnees a l'ecran ou le clic s'est produit, utile pour les systemes UI personnalises.
 
+## Résultats des tests
+
+> **Testé :** 17 janvier 2026 - Vérifié avec le plugin doc-test
+
+**Statut : NON FONCTIONNEL**
+
+Les tests ont révélé que cet événement **ne se déclenche jamais** dans la version actuelle de Hytale :
+
+1. **Enregistrement du listener :** Fonctionne correctement - le listener est enregistré dans l'EventBus
+2. **Paquets client :** Le client Hytale **n'envoie pas** les données `mouseButton` dans le paquet réseau `MouseInteraction`
+3. **Code serveur :** Le serveur vérifie `if (packet.mouseButton != null)` avant de dispatcher l'événement - cette condition n'est jamais remplie
+
+### Pourquoi ça ne fonctionne pas
+
+Le code de dispatch dans `InteractionModule.java:866-884` :
+
+```java
+if (packet.mouseButton != null) {  // Toujours false !
+    IEventDispatcher<PlayerMouseButtonEvent, PlayerMouseButtonEvent> dispatcher =
+        HytaleServer.get().getEventBus().dispatchFor(PlayerMouseButtonEvent.class);
+    if (dispatcher.hasListener()) {
+        dispatcher.dispatch(new PlayerMouseButtonEvent(...));
+    }
+}
+```
+
+Le paquet `MouseInteraction` a `mouseButton` et `mouseMotion` comme champs nullable. Actuellement, le client remplit uniquement `mouseMotion` pour le suivi du mouvement de la souris, mais n'envoie jamais les données `mouseButton` pour les événements de clic.
+
+### Annulation non implémentée
+
+Même si l'événement se déclenchait, l'annulation n'aurait **aucun effet**. Le code serveur dispatch l'événement mais ignore le résultat :
+
+```java
+// L'événement est dispatché mais le résultat est ignoré
+dispatcher.dispatch(new PlayerMouseButtonEvent(...));
+// Ceci s'exécute toujours, peu importe l'annulation :
+cameraManagerComponent.handleMouseButtonState(packet.mouseButton.mouseButtonType, ...);
+```
+
+## Alternatives
+
+Puisque cet événement ne fonctionne pas, envisagez d'utiliser :
+- **[DamageBlockEvent](../block/damage-block-event.md)** - Se déclenche en maintenant le clic gauche sur un bloc
+- **[BreakBlockEvent](../block/break-block-event.md)** - Se déclenche quand un bloc est cassé
+- **[PlaceBlockEvent](../block/place-block-event.md)** - Se déclenche lors du placement d'un bloc
+- **[UseBlockPreEvent / UseBlockPostEvent](../block/use-block-pre-event.md)** - Pour les interactions avec les blocs (clic droit)
+
+## Détails internes
+
+### Lieu de dispatch de l'événement
+
+**Fichier :** `InteractionModule.java:866-886`
+
+L'événement serait dispatché lors de la réception d'un paquet `MouseInteraction` avec un champ `mouseButton` non-null.
+
+### Structure de MouseButtonEvent
+
+```java
+public class MouseButtonEvent {
+    public MouseButtonType mouseButtonType;  // Left, Middle, Right, X1, X2
+    public MouseButtonState state;           // Pressed, Released
+    public byte clicks;                      // Nombre de clics
+}
+```
+
+### Hiérarchie de classes
+
+```
+PlayerMouseButtonEvent
+├── extends: PlayerEvent<Void>
+│   └── extends: IEvent<Void>
+└── implements: ICancellable
+```
+
 ## Référence source
 
 `decompiled/com/hypixel/hytale/server/core/event/events/player/PlayerMouseButtonEvent.java:15`
+
+---
+
+> **Dernière mise à jour :** 17 janvier 2026 - Testé et vérifié comme non fonctionnel. Ajout des résultats de test et des alternatives.
