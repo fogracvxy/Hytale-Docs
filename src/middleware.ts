@@ -16,7 +16,7 @@ export default function middleware(request: NextRequest) {
   if (!pathnameHasLocale && pathname === '/') {
     const preferredLanguage = request.cookies.get('preferredLanguage')?.value;
     
-    if (preferredLanguage && routing.locales.includes(preferredLanguage as any)) {
+    if (preferredLanguage && (routing.locales as readonly string[]).includes(preferredLanguage)) {
       // Redirect to the preferred language
       const url = request.nextUrl.clone();
       url.pathname = `/${preferredLanguage}`;

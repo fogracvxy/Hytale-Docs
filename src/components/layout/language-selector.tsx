@@ -31,7 +31,7 @@ export function LanguageSelector() {
         (preferredLanguage === "en" || preferredLanguage === "fr")
       ) {
         // Set cookie for server-side access
-        document.cookie = `preferredLanguage=${preferredLanguage}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `preferredLanguage=${preferredLanguage}; path=/; max-age=31536000; SameSite=Lax; Secure`;
 
         // If current locale doesn't match preference, redirect
         if (locale !== preferredLanguage) {
@@ -41,14 +41,14 @@ export function LanguageSelector() {
         }
       }
     }
-  }, []);
+  }, [locale, pathname, router]);
 
   const handleLanguageChange = (newLocale: string) => {
     // Save to localStorage and cookie
     if (typeof window !== "undefined") {
       localStorage.setItem("preferredLanguage", newLocale);
       // Also set as cookie for server-side access
-      document.cookie = `preferredLanguage=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `preferredLanguage=${newLocale}; path=/; max-age=31536000; SameSite=Lax; Secure`;
     }
     router.replace(pathname, { locale: newLocale as "fr" | "en" });
   };
