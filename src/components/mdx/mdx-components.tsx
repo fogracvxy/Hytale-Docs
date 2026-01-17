@@ -2,6 +2,7 @@ import type { MDXComponents } from "mdx/types";
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Link as LinkIcon } from "lucide-react";
 import { InfoBox } from "./info-box";
 import { FeatureCard } from "./feature-card";
 import { ApiEndpoint } from "./api-endpoint";
@@ -11,6 +12,40 @@ import { DocCard } from "./doc-card";
 import { Mermaid } from "./mermaid";
 import { FileTree } from "./file-tree";
 import { cn } from "@/lib/utils";
+
+// Heading component with anchor link on hover
+interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  level: 2 | 3 | 4;
+}
+
+const headingStyles = {
+  2: "mt-10 scroll-m-20 border-b border-border pb-2 text-2xl font-semibold tracking-tight first:mt-0",
+  3: "mt-8 scroll-m-20 text-xl font-semibold tracking-tight",
+  4: "mt-6 scroll-m-20 text-lg font-semibold tracking-tight",
+};
+
+function Heading({ level, className, id, children, ...props }: HeadingProps) {
+  const Tag = `h${level}` as const;
+
+  return (
+    <Tag
+      id={id}
+      className={cn("group flex items-center gap-2", headingStyles[level], className)}
+      {...props}
+    >
+      <span>{children}</span>
+      {id && (
+        <a
+          href={`#${id}`}
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label={`Link to ${typeof children === "string" ? children : "section"}`}
+        >
+          <LinkIcon className="h-4 w-4 text-muted-foreground hover:text-primary" />
+        </a>
+      )}
+    </Tag>
+  );
+}
 
 // Extract text content from React children (handles nested elements)
 function extractTextFromChildren(children: React.ReactNode): string {
@@ -97,33 +132,9 @@ export const mdxComponents: MDXComponents = {
   // HTML element overrides
   // Hide h1 from MDX content - the page title is already rendered by the page component
   h1: () => null,
-  h2: ({ className, ...props }) => (
-    <h2
-      className={cn(
-        "mt-10 scroll-m-20 border-b border-border pb-2 text-2xl font-semibold tracking-tight first:mt-0",
-        className
-      )}
-      {...props}
-    />
-  ),
-  h3: ({ className, ...props }) => (
-    <h3
-      className={cn(
-        "mt-8 scroll-m-20 text-xl font-semibold tracking-tight",
-        className
-      )}
-      {...props}
-    />
-  ),
-  h4: ({ className, ...props }) => (
-    <h4
-      className={cn(
-        "mt-6 scroll-m-20 text-lg font-semibold tracking-tight",
-        className
-      )}
-      {...props}
-    />
-  ),
+  h2: (props) => <Heading level={2} {...props} />,
+  h3: (props) => <Heading level={3} {...props} />,
+  h4: (props) => <Heading level={4} {...props} />,
   p: ({ className, ...props }) => (
     <p
       className={cn("leading-7 [&:not(:first-child)]:mt-4", className)}
