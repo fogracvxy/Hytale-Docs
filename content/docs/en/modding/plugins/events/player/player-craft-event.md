@@ -133,6 +133,80 @@ Since this event is not cancellable, you cannot prevent crafting through this ev
 
 The deprecation annotation includes `forRemoval = true`, indicating this event will be removed in a future version. Plan your migration accordingly.
 
+## Testing
+
+:::tip Tested
+**January 17, 2026** - Verified with doc-test plugin. All documented methods work correctly.
+:::
+
+To test this event:
+1. Run `/doctest test-player-craft-event`
+2. Open a crafting table or use inventory 2x2 crafting grid
+3. Craft any item (e.g., a crude pickaxe from rubble, fibre, and sticks)
+4. The event should fire and display details in chat
+
+## Internal Details
+
+### CraftingRecipe Structure
+
+The `getCraftedRecipe()` method returns a `CraftingRecipe` object with the following properties (observed from testing):
+
+```java
+CraftingRecipe {
+    input: List<MaterialQuantity>     // Required materials
+    primaryOutput: MaterialQuantity   // Main output item
+    extraOutputs: List<MaterialQuantity>  // Additional outputs
+    outputQuantity: int               // Number of items produced
+    benchRequirement: List<BenchRequirement>  // Required crafting station
+    timeSeconds: float                // Crafting duration (e.g., 1.0)
+    knowledgeRequired: boolean        // Whether recipe knowledge is needed
+    requiredMemoriesLevel: int        // Memory level requirement
+}
+```
+
+Each `MaterialQuantity` contains:
+- `itemId`: Specific item ID (e.g., `"Tool_Pickaxe_Crude"`, `"Ingredient_Fibre"`)
+- `resourceTypeId`: Resource type (e.g., `"Rubble"`) - used when itemId is null
+- `tag`: Optional item tag
+- `quantity`: Number of items
+- `metadata`: Optional metadata
+
+### Where the Event is Fired
+
+The event is dispatched in `CraftingManager.craftItem()` method:
+
+**File:** `com/hypixel/hytale/builtin/crafting/component/CraftingManager.java:185-190`
+
+```java
+IEventDispatcher<PlayerCraftEvent, PlayerCraftEvent> dispatcher = HytaleServer.get()
+    .getEventBus()
+    .dispatchFor(PlayerCraftEvent.class, world.getName());
+if (dispatcher.hasListener()) {
+    dispatcher.dispatch(new PlayerCraftEvent(ref, playerComponent, recipe, quantity));
+}
+```
+
+### Event Processing Chain
+
+1. `CraftRecipeEvent.Pre` fires (cancellable) - can prevent crafting
+2. Materials and bench are validated
+3. `CraftRecipeEvent.Post` fires (cancellable) - can cancel after validation
+4. If not cancelled, `giveOutput()` gives items to player
+5. **`PlayerCraftEvent` fires** (informational, non-cancellable)
+
+### Class Hierarchy
+
+```
+PlayerCraftEvent
+  └── extends PlayerEvent<String>
+        └── implements IEvent<String>
+              └── extends IBaseEvent<String>
+```
+
 ## Source Reference
 
 `decompiled/com/hypixel/hytale/server/core/event/events/player/PlayerCraftEvent.java:12`
+
+---
+
+> **Last updated:** January 17, 2026 - Tested and verified. Added internal details and CraftingRecipe structure.

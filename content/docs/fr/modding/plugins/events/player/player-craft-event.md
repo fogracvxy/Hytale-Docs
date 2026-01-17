@@ -133,6 +133,80 @@ Comme cet événement n'est pas annulable, vous ne pouvez pas empêcher la fabri
 
 L'annotation de deprecation inclut `forRemoval = true`, indiquant que cet événement sera supprime dans une version future. Planifiez votre migration en consequence.
 
+## Test
+
+:::tip Testé
+**17 janvier 2026** - Vérifié avec le plugin doc-test. Toutes les méthodes documentées fonctionnent correctement.
+:::
+
+Pour tester cet événement :
+1. Exécutez `/doctest test-player-craft-event`
+2. Ouvrez une table de craft ou utilisez la grille de craft 2x2 de l'inventaire
+3. Fabriquez n'importe quel objet (ex: une pioche rudimentaire avec des gravas, fibres et bâtons)
+4. L'événement devrait se déclencher et afficher les détails dans le chat
+
+## Détails internes
+
+### Structure de CraftingRecipe
+
+La méthode `getCraftedRecipe()` retourne un objet `CraftingRecipe` avec les propriétés suivantes (observées lors des tests) :
+
+```java
+CraftingRecipe {
+    input: List<MaterialQuantity>     // Matériaux requis
+    primaryOutput: MaterialQuantity   // Objet de sortie principal
+    extraOutputs: List<MaterialQuantity>  // Sorties additionnelles
+    outputQuantity: int               // Nombre d'objets produits
+    benchRequirement: List<BenchRequirement>  // Station de craft requise
+    timeSeconds: float                // Durée de fabrication (ex: 1.0)
+    knowledgeRequired: boolean        // Si la connaissance de la recette est nécessaire
+    requiredMemoriesLevel: int        // Niveau de mémoire requis
+}
+```
+
+Chaque `MaterialQuantity` contient :
+- `itemId` : ID d'objet spécifique (ex: `"Tool_Pickaxe_Crude"`, `"Ingredient_Fibre"`)
+- `resourceTypeId` : Type de ressource (ex: `"Rubble"`) - utilisé quand itemId est null
+- `tag` : Tag d'objet optionnel
+- `quantity` : Nombre d'objets
+- `metadata` : Métadonnées optionnelles
+
+### Où l'événement est déclenché
+
+L'événement est dispatché dans la méthode `CraftingManager.craftItem()` :
+
+**Fichier :** `com/hypixel/hytale/builtin/crafting/component/CraftingManager.java:185-190`
+
+```java
+IEventDispatcher<PlayerCraftEvent, PlayerCraftEvent> dispatcher = HytaleServer.get()
+    .getEventBus()
+    .dispatchFor(PlayerCraftEvent.class, world.getName());
+if (dispatcher.hasListener()) {
+    dispatcher.dispatch(new PlayerCraftEvent(ref, playerComponent, recipe, quantity));
+}
+```
+
+### Chaîne de traitement des événements
+
+1. `CraftRecipeEvent.Pre` se déclenche (annulable) - peut empêcher le craft
+2. Les matériaux et le banc sont validés
+3. `CraftRecipeEvent.Post` se déclenche (annulable) - peut annuler après validation
+4. Si non annulé, `giveOutput()` donne les objets au joueur
+5. **`PlayerCraftEvent` se déclenche** (informationnel, non annulable)
+
+### Hiérarchie de classes
+
+```
+PlayerCraftEvent
+  └── extends PlayerEvent<String>
+        └── implements IEvent<String>
+              └── extends IBaseEvent<String>
+```
+
 ## Référence source
 
 `decompiled/com/hypixel/hytale/server/core/event/events/player/PlayerCraftEvent.java:12`
+
+---
+
+> **Dernière mise à jour :** 17 janvier 2026 - Testé et vérifié. Ajout des détails internes et de la structure CraftingRecipe.
