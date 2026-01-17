@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { ChevronRight, BadgeCheck } from "lucide-react";
+import { ChevronRight, BadgeCheck, CircleOff } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -103,6 +103,20 @@ function SidebarLink({
             </TooltipTrigger>
             <TooltipContent side="right" className="text-xs">
               {t("verified")}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      {item.nonFunctional && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <CircleOff className="h-3.5 w-3.5 shrink-0 text-destructive" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="text-xs max-w-48">
+              {t("nonFunctional")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

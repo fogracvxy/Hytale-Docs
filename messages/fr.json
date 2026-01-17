@@ -209,7 +209,8 @@
     "hytaleVsMinecraft": "Hytale vs Minecraft",
     "knownIssues": "Dépannage",
     "performanceOptimization": "Guide Performance",
-    "verified": "Testé & Vérifié"
+    "verified": "Testé & Vérifié",
+    "nonFunctional": "Non fonctionnel : Cet événement existe mais n'est jamais déclenché par le serveur"
   },
   "metadata": {
     "title": "HytaleDocs",

@@ -4,6 +4,8 @@ export interface SidebarItem {
   items?: SidebarItem[];
   /** Mark as verified/tested with a real plugin */
   verified?: boolean;
+  /** Mark as non-functional (event exists but never fires) */
+  nonFunctional?: boolean;
 }
 
 export const sidebarConfig: SidebarItem[] = [
@@ -125,11 +127,11 @@ export const sidebarConfig: SidebarItem[] = [
                   { titleKey: "playerSetupConnectEvent", href: "/docs/modding/plugins/events/player/player-setup-connect-event", verified: true },
                   { titleKey: "playerSetupDisconnectEvent", href: "/docs/modding/plugins/events/player/player-setup-disconnect-event", verified: true },
                   { titleKey: "playerReadyEvent", href: "/docs/modding/plugins/events/player/player-ready-event", verified: true },
-                  { titleKey: "playerMouseButtonEvent", href: "/docs/modding/plugins/events/player/player-mouse-button-event" },
-                  { titleKey: "playerMouseMotionEvent", href: "/docs/modding/plugins/events/player/player-mouse-motion-event" },
+                  { titleKey: "playerMouseButtonEvent", href: "/docs/modding/plugins/events/player/player-mouse-button-event", nonFunctional: true },
+                  { titleKey: "playerMouseMotionEvent", href: "/docs/modding/plugins/events/player/player-mouse-motion-event", nonFunctional: true },
                   { titleKey: "addPlayerToWorldEvent", href: "/docs/modding/plugins/events/player/add-player-to-world-event", verified: true },
                   { titleKey: "drainPlayerFromWorldEvent", href: "/docs/modding/plugins/events/player/drain-player-from-world-event", verified: true },
-                  { titleKey: "playerInteractEvent", href: "/docs/modding/plugins/events/player/player-interact-event" },
+                  { titleKey: "playerInteractEvent", href: "/docs/modding/plugins/events/player/player-interact-event", nonFunctional: true },
                   { titleKey: "playerCraftEvent", href: "/docs/modding/plugins/events/player/player-craft-event", verified: true },
                   { titleKey: "changeGameModeEvent", href: "/docs/modding/plugins/events/player/change-game-mode-event" },
                 ],
