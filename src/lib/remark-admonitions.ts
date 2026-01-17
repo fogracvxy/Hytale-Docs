@@ -94,29 +94,56 @@ export function remarkAdmonitions() {
 
       for (let i = startIndex; i <= endIndex; i++) {
         const node = parent.children[i];
-        if (node.type === "paragraph" && node.children?.[0]?.type === "text") {
-          let text = (node.children[0] as Text).value;
 
-          if (i === startIndex) {
-            // Remove the opening :::type line
-            const lines = text.split("\n");
-            const contentLines = lines.slice(1); // Skip first line (:::type Title)
-            text = contentLines.join("\n").trim();
-          }
+        if (i === startIndex) {
+          // For the opening paragraph, we need to remove the :::type line
+          // but preserve all other children (including bold, links, etc.)
+          if (node.type === "paragraph" && node.children?.length > 0) {
+            const firstChild = node.children[0];
+            if (firstChild?.type === "text") {
+              const text = (firstChild as Text).value;
+              const lines = text.split("\n");
+              // Keep the remaining text without trimming to preserve spacing before bold/links
+              const remainingText = lines.slice(1).join("\n");
 
-          if (i === endIndex) {
-            // Remove the closing :::
-            text = text.replace(/\n?:::$/, "").replace(/^:::$/, "").trim();
-          }
+              if (remainingText.trim() || node.children.length > 1) {
+                // Create new paragraph with remaining content
+                const newChildren = remainingText
+                  ? [{ type: "text", value: remainingText }, ...node.children.slice(1)]
+                  : node.children.slice(1);
 
-          if (text) {
-            // Create a new paragraph with the cleaned text
-            contentNodes.push({
-              type: "paragraph",
-              children: [{ type: "text", value: text }],
-            });
+                if (newChildren.length > 0) {
+                  contentNodes.push({
+                    type: "paragraph",
+                    children: newChildren,
+                  });
+                }
+              }
+            }
           }
-        } else if (i !== startIndex && i !== endIndex) {
+        } else if (i === endIndex) {
+          // For the closing paragraph, remove the ::: but keep other content
+          if (node.type === "paragraph" && node.children?.length > 0) {
+            const lastChild = node.children[node.children.length - 1];
+            if (lastChild?.type === "text") {
+              const text = (lastChild as Text).value;
+              const cleanedText = text.replace(/\n?:::$/, "").replace(/^:::$/, "").trim();
+
+              if (cleanedText || node.children.length > 1) {
+                const newChildren = cleanedText
+                  ? [...node.children.slice(0, -1), { type: "text", value: cleanedText }]
+                  : node.children.slice(0, -1);
+
+                if (newChildren.length > 0 && !(newChildren.length === 1 && (newChildren[0] as Text).value === "")) {
+                  contentNodes.push({
+                    type: "paragraph",
+                    children: newChildren,
+                  });
+                }
+              }
+            }
+          }
+        } else {
           // Keep intermediate nodes as-is
           contentNodes.push(node);
         }
