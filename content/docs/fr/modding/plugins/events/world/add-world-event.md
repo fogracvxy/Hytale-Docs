@@ -122,16 +122,18 @@ eventBus.registerGlobal(AddWorldEvent.class, event -> {
 
 **Important :** Utiliser `register()` au lieu de `registerGlobal()` ne fonctionnera pas pour cet événement car il a un type de clé non-Void.
 
-## Quand cet événement se déclenché
+## Quand cet événement se déclenche
 
-L'événement `AddWorldEvent` est dispatche lorsque :
+L'événement `AddWorldEvent` est dispatché lorsque :
 
-1. Un nouveau monde est en cours d'enregistrement aupres du systeme d'univers du serveur
-2. Pendant le demarrage du serveur lorsque les mondes configures sont charges
-3. Lorsque des plugins creent et ajoutent programmatiquement de nouveaux mondes
-4. Lorsque la generation dynamique de mondes cree une nouvelle instance de monde
+1. Un nouveau monde est en cours d'enregistrement auprès du système d'univers du serveur
+2. Pendant le démarrage du serveur lorsque les mondes configurés sont chargés
+3. Lorsque des plugins créent et ajoutent programmatiquement de nouveaux mondes (via `Universe.addWorld()`)
+4. Lorsque la génération dynamique de mondes crée une nouvelle instance de monde
 
-L'événement se déclenché **avant** que le monde soit complètement ajoute a l'univers, permettant aux handlers d'annuler l'operation si necessaire.
+L'événement se déclenche **avant** que le monde soit complètement ajouté à l'univers, permettant aux handlers d'annuler l'opération si nécessaire.
+
+> **Important :** Au moment où cet événement se déclenche, le monde n'est **pas encore complètement initialisé**. L'objet `World` existe mais son `EntityStore` n'est pas encore disponible. Cela signifie que des méthodes comme `world.toString()` peuvent lever une `NullPointerException`. Utilisez `world.getName()` pour accéder de manière sûre au nom du monde.
 
 ## Comportement de l'annulation
 
@@ -146,8 +148,67 @@ Lorsque l'événement est annule :
 - [StartWorldEvent](./start-world-event.md) - Déclenché lorsqu'un monde demarre apres avoir ete ajoute
 - [AllWorldsLoadedEvent](./all-worlds-loaded-event.md) - Déclenché lorsque tous les mondes configures ont ete charges
 
+## Détails internes
+
+### Où l'événement est déclenché
+
+L'événement est dispatché dans `Universe.makeWorld()` à la ligne 444 :
+
+```java
+// Dans Universe.java (méthode makeWorld)
+World world = new World(name, savePath, worldConfig);
+AddWorldEvent event = HytaleServer.get().getEventBus()
+    .dispatchFor(AddWorldEvent.class, name)
+    .dispatch(new AddWorldEvent(world));
+
+if (!event.isCancelled() && !HytaleServer.get().isShuttingDown()) {
+    // Le monde est ajouté aux maps de l'univers
+    this.worlds.putIfAbsent(name.toLowerCase(), world);
+    this.worldsByUuid.putIfAbsent(worldConfig.getUuid(), world);
+} else {
+    throw new WorldLoadCancelledException();
+}
+```
+
+### Implémentation de l'annulation
+
+Lorsque l'événement est annulé (`setCancelled(true)`) :
+1. Le monde n'est **pas** ajouté à la map `Universe.worlds`
+2. Le monde n'est **pas** ajouté à la map `Universe.worldsByUuid`
+3. Une `WorldLoadCancelledException` est levée
+4. La chaîne `CompletableFuture` échoue avec cette exception
+
+### Ordre de dispatch des événements
+
+1. `AddWorldEvent` - Quand le monde est en cours de création (annulable)
+2. Initialisation du monde (init, paths, worldgen)
+3. `StartWorldEvent` - Quand le monde démarre
+
+## Test
+
+> **Testé :** 18 janvier 2026 - Vérifié avec le plugin doc-test
+
+Pour tester cet événement :
+
+1. Exécutez `/doctest test-add-world-event`
+2. La commande va créer un monde de test temporaire
+3. Les détails de l'événement seront affichés dans la console du serveur
+4. Vérifiez le message "AddWorldEvent fired!"
+
+**Résultats du test :**
+- `getWorld()` - Fonctionne correctement, retourne l'objet World
+- `getWorld().getName()` - Fonctionne correctement, retourne le nom du monde
+- `isCancelled()` - Fonctionne correctement, retourne l'état d'annulation
+- `setCancelled(boolean)` - Fonctionne correctement, peut annuler l'ajout du monde
+- `world.toString()` - Peut échouer (EntityStore pas encore initialisé)
+
 ## Référence source
 
-- **Definition de l'événement :** `decompiled/com/hypixel/hytale/server/core/universe/world/events/AddWorldEvent.java`
+- **Définition de l'événement :** `decompiled/com/hypixel/hytale/server/core/universe/world/events/AddWorldEvent.java`
 - **Classe parente :** `decompiled/com/hypixel/hytale/server/core/universe/world/events/WorldEvent.java`
 - **Interface Cancellable :** `decompiled/com/hypixel/hytale/event/ICancellable.java`
+- **Lieu de déclenchement :** `decompiled/com/hypixel/hytale/server/core/universe/Universe.java:444`
+
+---
+
+> **Dernière mise à jour :** 18 janvier 2026 - Testé et vérifié. Ajout des détails internes et de la section test.
