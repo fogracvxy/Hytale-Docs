@@ -8,6 +8,8 @@ sidebar_label: WorldPathChangedEvent
 
 Fired when the world path configuration changes. This event is useful for tracking navigation path updates and world structure changes that affect how entities navigate through the world.
 
+> **Internal Event:** This is an internal server event that fires only when `WorldPathConfig.putPath()` is called by the pathfinding system. It cannot be triggered manually through gameplay actions.
+
 ## Event Information
 
 | Property | Value |
@@ -98,15 +100,26 @@ public class PathfindingPlugin extends PluginBase {
 
 ## When This Event Fires
 
-The `WorldPathChangedEvent` is fired when:
+The `WorldPathChangedEvent` is fired **exclusively** from `WorldPathConfig.putPath()` when a new `WorldPath` is added or an existing one is updated in the world's path configuration.
 
-1. **Path configuration updates** - When world navigation paths are modified
-2. **World structure changes** - When changes to the world affect pathfinding routes
-3. **Dynamic path recalculation** - When the game recalculates available paths
+```java
+// From WorldPathConfig.java
+public WorldPath putPath(@Nonnull WorldPath worldPath) {
+   Objects.requireNonNull(worldPath);
+   IEventDispatcher<WorldPathChangedEvent, WorldPathChangedEvent> dispatcher =
+      HytaleServer.get().getEventBus().dispatchFor(WorldPathChangedEvent.class);
+   if (dispatcher.hasListener()) {
+      dispatcher.dispatch(new WorldPathChangedEvent(worldPath));
+   }
+   return this.paths.put(worldPath.getName(), worldPath);
+}
+```
 
-The event fires **after** the path change has been applied, allowing handlers to:
+**Important:** This event only fires if there is at least one registered listener (`dispatcher.hasListener()`).
+
+The event fires **before** the path is stored in the configuration map, allowing handlers to:
+- Inspect the new/updated path
 - Update cached pathfinding data
-- Notify affected entities
 - Log navigation changes
 - Trigger dependent systems
 
@@ -126,6 +139,47 @@ The `WorldPath` object represents navigation path information in the world, whic
 - **Debugging**: Track path changes for troubleshooting
 - **Analytics**: Monitor world navigation updates
 
+## Internal Details
+
+### Known Listener
+
+The `NPCPlugin` listens to this event to track path changes:
+
+```java
+// From NPCPlugin.java
+protected void onPathChange(WorldPathChangedEvent event) {
+   this.pathChangeRevision.getAndIncrement();
+}
+```
+
+This increments a revision counter used to invalidate NPC pathfinding caches when world paths change.
+
+### WorldPath Structure
+
+The `WorldPath` class contains:
+- `UUID id` - Unique identifier for the path
+- `String name` - Name of the path
+- `List<Transform> waypoints` - List of waypoint positions
+
+## Testing Limitations
+
+> **Verified:** January 18, 2026 - Structural verification only
+
+This event **cannot be manually triggered** through gameplay. It is an internal server event that only fires when:
+- The server's pathfinding system adds or updates navigation paths
+- A plugin programmatically calls `WorldPathConfig.putPath()`
+
+To test this event, you would need to:
+1. Register a listener for `WorldPathChangedEvent`
+2. Wait for the server's internal pathfinding system to update paths, OR
+3. Programmatically create and add a `WorldPath` to the configuration
+
+```java
+// Programmatic testing (requires access to WorldPathConfig)
+WorldPath testPath = new WorldPath("test-path", waypointsList);
+worldPathConfig.putPath(testPath); // This will fire the event
+```
+
 ## Related Events
 
 - [AddWorldEvent](./add-world-event) - Fired when a world is added
@@ -133,4 +187,5 @@ The `WorldPath` object represents navigation path information in the world, whic
 
 ## Source Reference
 
-`decompiled/com/hypixel/hytale/server/core/universe/world/path/WorldPathChangedEvent.java`
+- Event class: `com/hypixel/hytale/server/core/universe/world/path/WorldPathChangedEvent.java`
+- Trigger location: `com/hypixel/hytale/server/core/universe/world/path/WorldPathConfig.java` (line 51)
