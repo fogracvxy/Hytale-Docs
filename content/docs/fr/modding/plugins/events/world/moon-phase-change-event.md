@@ -7,6 +7,8 @@ description: Evenement déclenché lorsque la phase lunaire change dans le monde
 
 # MoonPhaseChangeEvent
 
+> **Testé :** 18 janvier 2026 - Vérifié avec le plugin doc-test
+
 L'événement `MoonPhaseChangeEvent` est déclenché lorsque la phase lunaire change dans le monde. C'est un événement ECS (Entity Component System) qui etend `EcsEvent`, fournissant des informations sur la nouvelle phase lunaire. Cet événement n'est pas annulable.
 
 ## Informations sur l'événement
@@ -243,7 +245,90 @@ ecsEventManager.register(MoonPhaseChangeEvent.class, event -> {
 });
 ```
 
+## Détails internes
+
+### Où l'événement est déclenché
+
+Le `MoonPhaseChangeEvent` est déclenché depuis `WorldTimeResource.setMoonPhase()` :
+
+```java
+// Depuis WorldTimeResource.java (lignes 122-129)
+public void setMoonPhase(int moonPhase, @Nonnull ComponentAccessor<EntityStore> componentAccessor) {
+   if (moonPhase != this.moonPhase) {
+      MoonPhaseChangeEvent event = new MoonPhaseChangeEvent(moonPhase);
+      componentAccessor.invoke(event);
+   }
+   this.moonPhase = moonPhase;
+}
+```
+
+L'événement n'est déclenché que lorsque la nouvelle phase diffère de la phase actuelle.
+
+### Chaîne de traitement de l'événement
+
+1. `WorldTimeResource.tick()` est appelé à chaque tick du jeu
+2. Si le temps n'est pas en pause, `updateMoonPhase()` est appelé
+3. `updateMoonPhase()` calcule la nouvelle phase en fonction de la progression du jour
+4. `setMoonPhase()` est appelé, ce qui déclenche l'événement si la phase a changé
+
+### Hiérarchie de classes
+
+```
+MoonPhaseChangeEvent
+    └── extends EcsEvent
+            └── extends Object
+```
+
+### Écouter avec WorldEventSystem
+
+C'est un **événement au niveau du monde**, pas un événement au niveau des entités. Pour l'écouter, utilisez `WorldEventSystem` :
+
+```java
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.system.WorldEventSystem;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.universe.world.events.ecs.MoonPhaseChangeEvent;
+
+public class MoonPhaseChangeSystem extends WorldEventSystem<EntityStore, MoonPhaseChangeEvent> {
+
+    public MoonPhaseChangeSystem() {
+        super(MoonPhaseChangeEvent.class);
+    }
+
+    @Override
+    public void handle(
+            @Nonnull Store<EntityStore> store,
+            @Nonnull CommandBuffer<EntityStore> commandBuffer,
+            @Nonnull MoonPhaseChangeEvent event
+    ) {
+        int newPhase = event.getNewMoonPhase();
+        // Gérer le changement de phase lunaire
+    }
+}
+```
+
+Enregistrez le système dans votre plugin :
+
+```java
+getEntityStoreRegistry().registerSystem(new MoonPhaseChangeSystem());
+```
+
+## Test
+
+Pour tester cet événement avec le plugin doc-test :
+
+1. Exécutez `/doctest test-moon-phase-change-event`
+2. La commande affichera la phase lunaire actuelle
+3. Elle changera automatiquement vers la phase suivante
+4. L'événement se déclenche et affiche les détails de la nouvelle phase
+
 ## Référence source
 
-- **Definition de l'événement :** `decompiled/com/hypixel/hytale/server/core/universe/world/events/ecs/MoonPhaseChangeEvent.java`
+- **Définition de l'événement :** `decompiled/com/hypixel/hytale/server/core/universe/world/events/ecs/MoonPhaseChangeEvent.java`
 - **Base EcsEvent :** `decompiled/com/hypixel/hytale/component/system/EcsEvent.java`
+- **Lieu de déclenchement :** `decompiled/com/hypixel/hytale/server/core/modules/time/WorldTimeResource.java:122`
+
+---
+
+> **Dernière mise à jour :** 18 janvier 2026 - Testé et vérifié. Ajout des détails internes et de l'exemple WorldEventSystem.
