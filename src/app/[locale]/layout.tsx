@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsentProvider } from "@/contexts/cookie-consent-context";
 import { CookieConsent } from "@/components/cookie-consent";
 import { CookiePreferencesDialog } from "@/components/cookie-preferences";
-import { AdblockDetector } from "@/components/ads";
+import { AdblockDetector, AdScriptLoader } from "@/components/ads";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/json-ld";
 import { ServiceWorkerRegister, UpdateNotification, InstallPrompt, OpenAppPrompt } from "@/components/pwa";
 import { PWAProvider } from "@/contexts/pwa-context";
@@ -20,11 +20,15 @@ const BASE_URL = "https://hytale-docs.com";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 export function generateStaticParams() {
@@ -167,13 +171,19 @@ export default async function LocaleLayout({
         <meta name="theme-color" content="#f59e0b" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
         <meta name="mobile-web-app-capable" content="yes" />
-        {/* Google AdSense */}
+
+        {/* Preconnect to third-party origins for performance */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://www.googletagservices.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagservices.com" />
+        <link rel="preconnect" href="https://adservice.google.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://adservice.google.com" />
+        <link rel="preconnect" href="https://umami.3de-scs.tech" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://umami.3de-scs.tech" />
+
+        {/* Google AdSense - Account verification meta tag only, script loaded lazily */}
         <meta name="google-adsense-account" content="ca-pub-4389631952462736" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4389631952462736"
-          crossOrigin="anonymous"
-        />
         {/* Umami Analytics */}
         <Script
           defer
@@ -222,6 +232,7 @@ export default async function LocaleLayout({
               </PWAProvider>
             </CookieConsentProvider>
             <AdblockDetector />
+            <AdScriptLoader />
           </NextIntlClientProvider>
           <ServiceWorkerRegister />
         </ThemeProvider>

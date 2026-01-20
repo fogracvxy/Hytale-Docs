@@ -111,6 +111,9 @@ export function getDocNavigation(
   const currentPath = currentSlug.join("/");
   const currentIndex = allSlugs.findIndex((s) => s.join("/") === currentPath);
 
+  // Build locale prefix for non-English locales
+  const localePrefix = locale !== "en" ? `/${locale}` : "";
+
   let prev = null;
   let next = null;
 
@@ -120,7 +123,7 @@ export function getDocNavigation(
     if (prevDoc) {
       prev = {
         title: prevDoc.meta.title,
-        href: `/docs/${prevSlug.join("/")}`,
+        href: `${localePrefix}/docs/${prevSlug.join("/")}`,
       };
     }
   }
@@ -131,7 +134,7 @@ export function getDocNavigation(
     if (nextDoc) {
       next = {
         title: nextDoc.meta.title,
-        href: `/docs/${nextSlug.join("/")}`,
+        href: `${localePrefix}/docs/${nextSlug.join("/")}`,
       };
     }
   }

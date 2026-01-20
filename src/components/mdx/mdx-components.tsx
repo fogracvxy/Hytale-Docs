@@ -13,6 +13,35 @@ import { Mermaid } from "./mermaid";
 import { FileTree } from "./file-tree";
 import { cn } from "@/lib/utils";
 
+/**
+ * Prepends locale prefix to internal links that don't already have one.
+ * External links (http/https) and links already starting with locale are unchanged.
+ */
+function getLocalizedHref(href: string, locale: string): string {
+  // Don't modify external links
+  if (href.startsWith("http://") || href.startsWith("https://")) {
+    return href;
+  }
+
+  // Don't modify anchor-only links
+  if (href.startsWith("#")) {
+    return href;
+  }
+
+  // Don't modify if already has locale prefix
+  if (href.startsWith(`/${locale}/`) || href === `/${locale}`) {
+    return href;
+  }
+
+  // Don't add prefix for English (default locale)
+  if (locale === "en") {
+    return href;
+  }
+
+  // Add locale prefix for other locales
+  return `/${locale}${href.startsWith("/") ? href : `/${href}`}`;
+}
+
 // Heading component with anchor link on hover
 interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level: 2 | 3 | 4;
@@ -241,6 +270,7 @@ export const mdxComponents: MDXComponents = {
     }
     return <code className={className} {...props} />;
   },
+  // Default anchor handler (for English locale or when locale is not specified)
   a: ({ className, href, ...props }) => {
     const isExternal = href?.startsWith("http");
     if (isExternal) {
@@ -310,3 +340,48 @@ export const mdxComponents: MDXComponents = {
     );
   },
 };
+
+/**
+ * Creates locale-aware MDX components.
+ * Internal links will be automatically prefixed with the locale (for non-English locales).
+ */
+export function createLocalizedMdxComponents(locale: string): MDXComponents {
+  // For English, return the default components unchanged
+  if (locale === "en") {
+    return mdxComponents;
+  }
+
+  // For other locales, override the anchor component to add locale prefix
+  return {
+    ...mdxComponents,
+    a: ({ className, href, ...props }) => {
+      const isExternal = href?.startsWith("http");
+      if (isExternal) {
+        return (
+          <a
+            href={href}
+            className={cn(
+              "font-medium text-primary underline underline-offset-4 hover:text-primary/80",
+              className
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            {...props}
+          />
+        );
+      }
+      // Localize internal links
+      const localizedHref = getLocalizedHref(href || "#", locale);
+      return (
+        <Link
+          href={localizedHref}
+          className={cn(
+            "font-medium text-primary underline underline-offset-4 hover:text-primary/80",
+            className
+          )}
+          {...props}
+        />
+      );
+    },
+  };
+}

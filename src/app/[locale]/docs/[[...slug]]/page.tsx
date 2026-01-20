@@ -8,7 +8,7 @@ import rehypeSlug from "rehype-slug";
 import rehypePrismPlus from "rehype-prism-plus";
 import { getTranslations } from "next-intl/server";
 import { getDocBySlug, getAllDocSlugs, getDocNavigation } from "@/lib/docs";
-import { mdxComponents } from "@/components/mdx";
+import { createLocalizedMdxComponents } from "@/components/mdx";
 import { remarkAdmonitions } from "@/lib/remark-admonitions";
 import { ArticleAd } from "@/components/ads";
 import { BreadcrumbJsonLd, ArticleJsonLd } from "@/components/seo/json-ld";
@@ -112,6 +112,9 @@ export default async function DocPage({ params }: DocPageProps) {
   // Extract headings for table of contents
   const tocItems = extractHeadings(doc.content);
 
+  // Create locale-aware MDX components
+  const localizedMdxComponents = createLocalizedMdxComponents(locale);
+
   const articleUrl = locale === "en"
     ? `${BASE_URL}/docs/${actualSlug.join("/")}`
     : `${BASE_URL}/${locale}/docs/${actualSlug.join("/")}`;
@@ -157,7 +160,7 @@ export default async function DocPage({ params }: DocPageProps) {
         <div className="prose prose-slate dark:prose-invert max-w-none">
           <MDXRemote
             source={doc.content}
-            components={mdxComponents}
+            components={localizedMdxComponents}
             options={{
               mdxOptions: {
                 remarkPlugins: [remarkGfm, remarkAdmonitions],

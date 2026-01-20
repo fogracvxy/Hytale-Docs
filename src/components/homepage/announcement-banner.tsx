@@ -3,25 +3,29 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ArrowRight, Server, X, Puzzle } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 type BannerType = "serverInternals" | "intellijPlugin";
 
 export function AnnouncementBanner() {
   const t = useTranslations("announcement");
   const [isVisible, setIsVisible] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+  // Default to serverInternals for SSR, then randomize on client
+  const [bannerType, setBannerType] = useState<BannerType>("serverInternals");
 
-  // Randomly choose banner type on mount (50/50)
-  const bannerType = useMemo<BannerType>(() =>
-    Math.random() < 0.5 ? "serverInternals" : "intellijPlugin"
-  , []);
+  // Set mounted state and randomize banner type on client-side only
+  useEffect(() => {
+    setIsMounted(true);
+    setBannerType(Math.random() < 0.5 ? "serverInternals" : "intellijPlugin");
+  }, []);
 
   if (!isVisible) return null;
 
   const isIntelliJ = bannerType === "intellijPlugin";
 
   return (
-    <div className={`relative bg-gradient-to-r ${
+    <div suppressHydrationWarning className={`relative bg-gradient-to-r ${
       isIntelliJ
         ? "from-violet-500/10 via-violet-500/20 to-violet-500/10 border-b border-violet-500/20"
         : "from-amber-500/10 via-amber-500/20 to-amber-500/10 border-b border-amber-500/20"

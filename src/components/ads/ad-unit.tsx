@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useAdsenseReady } from "./ad-script-loader";
 
 interface AdUnitProps {
   slot?: string;
@@ -27,18 +28,73 @@ const AD_SLOTS = {
 // Change to false once AdSense is approved
 const SHOW_PLACEHOLDERS = true;
 
-export function AdUnit({ slot, format = "auto", className = "" }: AdUnitProps) {
-  const adRef = React.useRef<HTMLModElement>(null);
-  const [isLoaded, setIsLoaded] = React.useState(false);
+/**
+ * Hook to observe when an element enters the viewport.
+ * Returns true once the element has been visible.
+ */
+function useIntersectionObserver(
+  ref: React.RefObject<Element | null>,
+  options?: IntersectionObserverInit
+): boolean {
+  const [isVisible, setIsVisible] = React.useState(false);
 
   React.useEffect(() => {
-    // Only load if we have a slot ID
-    if (!slot) return;
+    const element = ref.current;
+    if (!element || isVisible) return;
+
+    // Check if IntersectionObserver is supported
+    if (!("IntersectionObserver" in window)) {
+      // Fallback: load immediately if no IntersectionObserver support
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            // Once visible, stop observing
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "200px", // Start loading 200px before entering viewport
+        threshold: 0,
+        ...options,
+      }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [ref, isVisible, options]);
+
+  return isVisible;
+}
+
+export function AdUnit({ slot, format = "auto", className = "" }: AdUnitProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const adRef = React.useRef<HTMLModElement>(null);
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [adPushed, setAdPushed] = React.useState(false);
+
+  const isAdsenseReady = useAdsenseReady();
+  const isVisible = useIntersectionObserver(containerRef);
+
+  React.useEffect(() => {
+    // Only load if we have a slot ID, adsense is ready, element is visible, and ad hasn't been pushed yet
+    if (!slot || !isAdsenseReady || !isVisible || adPushed) return;
 
     const timer = setTimeout(() => {
       try {
         if (typeof window !== "undefined" && window.adsbygoogle && adRef.current) {
           window.adsbygoogle.push({});
+          setAdPushed(true);
           setIsLoaded(true);
         }
       } catch (err) {
@@ -47,22 +103,24 @@ export function AdUnit({ slot, format = "auto", className = "" }: AdUnitProps) {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [slot]);
+  }, [slot, isAdsenseReady, isVisible, adPushed]);
 
   // Don't render if no slot ID configured
   if (!slot) return null;
 
   return (
-    <div className={`ad-container overflow-hidden ${className}`}>
-      <ins
-        ref={adRef}
-        className="adsbygoogle"
-        style={{ display: "block", minHeight: isLoaded ? "auto" : "0" }}
-        data-ad-client={PUBLISHER_ID}
-        data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive="true"
-      />
+    <div ref={containerRef} className={`ad-container overflow-hidden ${className}`}>
+      {isVisible && (
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: "block", minHeight: isLoaded ? "auto" : "0" }}
+          data-ad-client={PUBLISHER_ID}
+          data-ad-slot={slot}
+          data-ad-format={format}
+          data-full-width-responsive="true"
+        />
+      )}
     </div>
   );
 }
@@ -111,15 +169,23 @@ export function ArticleAd() {
   );
 }
 
-// Special in-article ad format
+// Special in-article ad format with lazy loading
 function InArticleAd() {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const adRef = React.useRef<HTMLModElement>(null);
+  const [adPushed, setAdPushed] = React.useState(false);
+
+  const isAdsenseReady = useAdsenseReady();
+  const isVisible = useIntersectionObserver(containerRef);
 
   React.useEffect(() => {
+    if (!isAdsenseReady || !isVisible || adPushed) return;
+
     const timer = setTimeout(() => {
       try {
         if (typeof window !== "undefined" && window.adsbygoogle && adRef.current) {
           window.adsbygoogle.push({});
+          setAdPushed(true);
         }
       } catch (err) {
         console.error("AdSense error:", err);
@@ -127,18 +193,22 @@ function InArticleAd() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAdsenseReady, isVisible, adPushed]);
 
   return (
-    <ins
-      ref={adRef}
-      className="adsbygoogle"
-      style={{ display: "block", textAlign: "center" }}
-      data-ad-layout="in-article"
-      data-ad-format="fluid"
-      data-ad-client={PUBLISHER_ID}
-      data-ad-slot={AD_SLOTS.article}
-    />
+    <div ref={containerRef}>
+      {isVisible && (
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: "block", textAlign: "center" }}
+          data-ad-layout="in-article"
+          data-ad-format="fluid"
+          data-ad-client={PUBLISHER_ID}
+          data-ad-slot={AD_SLOTS.article}
+        />
+      )}
+    </div>
   );
 }
 

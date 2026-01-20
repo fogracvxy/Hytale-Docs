@@ -6,4 +6,4 @@ export { CodeBlock } from "./code-block";
 export { DocCard, DocCardGrid } from "./doc-card";
 export { Mermaid } from "./mermaid";
 export { FileTree } from "./file-tree";
-export { mdxComponents } from "./mdx-components";
+export { mdxComponents, createLocalizedMdxComponents } from "./mdx-components";

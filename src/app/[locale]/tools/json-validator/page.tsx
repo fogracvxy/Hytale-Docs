@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileJson, CheckCircle, XCircle, AlertCircle } from "lucide-react";
@@ -570,12 +570,12 @@ export default function JsonValidatorPage() {
           >
             Modding Documentation
           </a>
-          <a
+          <Link
             href="/docs/modding/data-assets/overview"
             className="text-xs px-3 py-1 rounded-full bg-muted text-muted-foreground hover:text-primary transition-colors"
           >
             Data Assets Guide
-          </a>
+          </Link>
         </div>
       </div>
     </div>
