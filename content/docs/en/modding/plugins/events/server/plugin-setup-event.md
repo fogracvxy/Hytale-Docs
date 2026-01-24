@@ -191,7 +191,7 @@ public class APIConsumerPlugin extends PluginBase {
 The `PluginSetupEvent` fires during the server plugin initialization phase:
 
 1. After the server boot process begins
-2. After [BootEvent](./boot-event.md) has been dispatched
+2. After [BootEvent](./boot-event) has been dispatched
 3. When each individual plugin is being initialized
 4. Before plugins are fully enabled and operational
 5. Before worlds are loaded
@@ -229,8 +229,8 @@ eventBus.registerUnhandled(PluginSetupEvent.class, fallbackHandler);
 
 | Event | Description |
 |-------|-------------|
-| [BootEvent](./boot-event.md) | Fired when the server begins booting |
-| [ShutdownEvent](./shutdown-event.md) | Fired when the server begins shutting down |
+| [BootEvent](./boot-event) | Fired when the server begins booting |
+| [ShutdownEvent](./shutdown-event) | Fired when the server begins shutting down |
 | [AllWorldsLoadedEvent](/docs/en/modding/plugins/events/world/all-worlds-loaded-event) | Fired after all worlds have been loaded |
 
 ## Source Reference

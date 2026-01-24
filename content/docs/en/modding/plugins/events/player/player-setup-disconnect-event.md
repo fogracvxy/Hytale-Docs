@@ -96,13 +96,13 @@ eventBus.register(PlayerSetupDisconnectEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerSetupConnectEvent](./player-setup-connect-event.md) - Fired during successful connection setup
-- [PlayerConnectEvent](./player-connect-event.md) - Fired when a player fully connects
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Fired when a connected player disconnects
+- [PlayerSetupConnectEvent](./player-setup-connect-event) - Fired during successful connection setup
+- [PlayerConnectEvent](./player-connect-event) - Fired when a player fully connects
+- [PlayerDisconnectEvent](./player-disconnect-event) - Fired when a connected player disconnects
 
 ## Notes
 
-This event is specifically for disconnections that occur during the setup phase. It is NOT fired when fully connected players disconnect - use [PlayerDisconnectEvent](./player-disconnect-event.md) for that.
+This event is specifically for disconnections that occur during the setup phase. It is NOT fired when fully connected players disconnect - use [PlayerDisconnectEvent](./player-disconnect-event) for that.
 
 Common disconnect reasons during setup include:
 - Authentication failures

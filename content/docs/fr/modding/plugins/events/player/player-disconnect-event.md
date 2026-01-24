@@ -188,9 +188,9 @@ All documented methods work correctly!
 
 ## Événements lies
 
-- [PlayerConnectEvent](./player-connect-event.md) - Déclenché quand un joueur se connecte
-- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event.md) - Déclenché pendant la phase de deconnexion anticipee
-- [DrainPlayerFromWorldEvent](./drain-player-from-world-event.md) - Déclenché lors du retrait d'un joueur d'un monde
+- [PlayerConnectEvent](./player-connect-event) - Déclenché quand un joueur se connecte
+- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event) - Déclenché pendant la phase de deconnexion anticipee
+- [DrainPlayerFromWorldEvent](./drain-player-from-world-event) - Déclenché lors du retrait d'un joueur d'un monde
 
 ## Référence source
 

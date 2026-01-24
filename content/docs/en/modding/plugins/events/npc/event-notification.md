@@ -139,10 +139,10 @@ This allows pack/flock behaviors where an entire group can respond to events aff
 
 ## Related Types
 
-- [EntityEventNotification](./entity-event-notification.md) - Extended notification for entity events
-- [EntityEventView](./entity-event-view.md) - View that processes entity events
-- [BlockEventView](./block-event-view.md) - View that processes block events
-- [EventView](./event-view.md) - Base class that manages notifications
+- [EntityEventNotification](./entity-event-notification) - Extended notification for entity events
+- [EntityEventView](./entity-event-view) - View that processes entity events
+- [BlockEventView](./block-event-view) - View that processes block events
+- [EventView](./event-view) - Base class that manages notifications
 
 ## Source Reference
 

@@ -189,9 +189,9 @@ Lorsque l'événement est annule :
 
 ## Événements associes
 
-- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event.md) - Déclenché lorsqu'un chunk est en cours de chargement
-- [ChunkUnloadEvent](./chunk-unload-event.md) - Déclenché lorsqu'un chunk est en cours de dechargement
-- [MoonPhaseChangeEvent](./moon-phase-change-event.md) - Déclenché lorsque la phase lunaire change
+- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event) - Déclenché lorsqu'un chunk est en cours de chargement
+- [ChunkUnloadEvent](./chunk-unload-event) - Déclenché lorsqu'un chunk est en cours de dechargement
+- [MoonPhaseChangeEvent](./moon-phase-change-event) - Déclenché lorsque la phase lunaire change
 
 ## Cas d'utilisation courants
 

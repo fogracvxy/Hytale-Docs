@@ -82,8 +82,8 @@ eventBus.register(EventPriority.NORMAL, PrefabPlaceEntityEvent.class, event -> {
 
 ## Related Events
 
-- [PrefabPasteEvent](./prefab-paste-event.md) - Fired when a prefab structure is being pasted into the world
-- [EntityRemoveEvent](../entity/entity-remove-event.md) - Fired when an entity is removed from the world
+- [PrefabPasteEvent](./prefab-paste-event) - Fired when a prefab structure is being pasted into the world
+- [EntityRemoveEvent](../entity/entity-remove-event) - Fired when an entity is removed from the world
 
 ## Source Reference
 

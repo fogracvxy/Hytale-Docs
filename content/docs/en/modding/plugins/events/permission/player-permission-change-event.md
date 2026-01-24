@@ -424,8 +424,8 @@ IEvent<Void>
 
 | Event | Description |
 |-------|-------------|
-| [GroupPermissionChangeEvent](./group-permission-change-event.md) | Fired when a permission group's permissions change |
-| [PlayerGroupEvent](./player-group-event.md) | Alternative event for player group membership changes |
+| [GroupPermissionChangeEvent](./group-permission-change-event) | Fired when a permission group's permissions change |
+| [PlayerGroupEvent](./player-group-event) | Alternative event for player group membership changes |
 | [PlayerConnectEvent](/docs/en/modding/plugins/events/player/player-connect-event) | Useful for loading player permissions on connect |
 
 ## Source Reference

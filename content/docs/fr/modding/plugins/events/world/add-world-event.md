@@ -144,9 +144,9 @@ Lorsque l'événement est annule :
 
 ## Événements associes
 
-- [RemoveWorldEvent](./remove-world-event.md) - Déclenché lorsqu'un monde est en cours de suppression
-- [StartWorldEvent](./start-world-event.md) - Déclenché lorsqu'un monde demarre apres avoir ete ajoute
-- [AllWorldsLoadedEvent](./all-worlds-loaded-event.md) - Déclenché lorsque tous les mondes configures ont ete charges
+- [RemoveWorldEvent](./remove-world-event) - Déclenché lorsqu'un monde est en cours de suppression
+- [StartWorldEvent](./start-world-event) - Déclenché lorsqu'un monde demarre apres avoir ete ajoute
+- [AllWorldsLoadedEvent](./all-worlds-loaded-event) - Déclenché lorsque tous les mondes configures ont ete charges
 
 ## Détails internes
 

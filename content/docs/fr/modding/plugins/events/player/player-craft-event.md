@@ -7,7 +7,7 @@ sidebar_label: PlayerCraftEvent
 # PlayerCraftEvent
 
 :::warning Obsolete
-Cet événement est obsolete et marque pour suppression. Envisagez d'utiliser [CraftRecipeEvent](../ecs/craft-recipe-event.md) dans le systeme d'événements ECS a la place.
+Cet événement est obsolete et marque pour suppression. Envisagez d'utiliser [CraftRecipeEvent](../ecs/craft-recipe-event) dans le systeme d'événements ECS a la place.
 :::
 
 Déclenché lorsqu'un joueur fabrique un objet. Cet événement fournit des informations sur la recette en cours de fabrication et la quantite d'objets produits.
@@ -124,8 +124,8 @@ eventBus.register(PlayerCraftEvent.class, event -> {
 
 ## Événements lies
 
-- [CraftRecipeEvent](../ecs/craft-recipe-event.md) - L'événement de fabrication base sur ECS de remplacement
-- [LivingEntityInventoryChangeEvent](../entity/living-entity-inventory-change-event.md) - Pour suivre les changements d'inventaire
+- [CraftRecipeEvent](../ecs/craft-recipe-event) - L'événement de fabrication base sur ECS de remplacement
+- [LivingEntityInventoryChangeEvent](../entity/living-entity-inventory-change-event) - Pour suivre les changements d'inventaire
 
 ## Notes
 

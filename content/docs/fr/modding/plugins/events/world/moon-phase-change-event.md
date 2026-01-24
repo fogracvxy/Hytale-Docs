@@ -180,9 +180,9 @@ Les phases lunaires peuvent affecter divers systemes de gameplay :
 
 ## Événements associes
 
-- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event.md) - Déclenché lorsqu'un chunk est en cours de chargement
-- [ChunkSaveEvent](./chunk-save-event.md) - Déclenché lorsqu'un chunk est en cours de sauvegarde
-- [ChunkUnloadEvent](./chunk-unload-event.md) - Déclenché lorsqu'un chunk est en cours de dechargement
+- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event) - Déclenché lorsqu'un chunk est en cours de chargement
+- [ChunkSaveEvent](./chunk-save-event) - Déclenché lorsqu'un chunk est en cours de sauvegarde
+- [ChunkUnloadEvent](./chunk-unload-event) - Déclenché lorsqu'un chunk est en cours de dechargement
 
 ## Cas d'utilisation courants
 

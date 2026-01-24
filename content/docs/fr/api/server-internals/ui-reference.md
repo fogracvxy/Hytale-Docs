@@ -8,7 +8,7 @@ description: Reference complete du systeme UI Hytale - syntaxe DSL, composants C
 
 # Reference du Systeme UI
 
-Ceci est la reference technique complete du systeme UI de Hytale. Pour un guide tutoriel, voir [Systeme d'UI Personnalisee](./custom-ui.md).
+Ceci est la reference technique complete du systeme UI de Hytale. Pour un guide tutoriel, voir [Systeme d'UI Personnalisee](./custom-ui).
 
 ---
 

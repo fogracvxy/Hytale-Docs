@@ -185,10 +185,10 @@ getServer().getEventBus().register(
 
 ## Related Events
 
-- **[DropItemEvent](./drop-item-event.md)** - Fires when an item is dropped (opposite action)
-- **[SwitchActiveSlotEvent](./switch-active-slot-event.md)** - Fires when switching hotbar slots
+- **[DropItemEvent](./drop-item-event)** - Fires when an item is dropped (opposite action)
+- **[SwitchActiveSlotEvent](./switch-active-slot-event)** - Fires when switching hotbar slots
 - **LivingEntityInventoryChangeEvent** - Fires on any inventory change
-- **[CraftRecipeEvent](./craft-recipe-event.md)** - Fires when items are created via crafting
+- **[CraftRecipeEvent](./craft-recipe-event)** - Fires when items are created via crafting
 
 ## Source Reference
 

@@ -7,7 +7,7 @@ sidebar_label: PlayerInteractEvent
 # PlayerInteractEvent
 
 :::danger Événement non fonctionnel
-**Cet événement est obsolète ET n'est jamais déclenché par le serveur.** La classe de l'événement existe mais rien dans le code du serveur ne le crée ou ne le dispatche. Toute la gestion des interactions a été déplacée vers [PlayerMouseButtonEvent](./player-mouse-button-event.md).
+**Cet événement est obsolète ET n'est jamais déclenché par le serveur.** La classe de l'événement existe mais rien dans le code du serveur ne le crée ou ne le dispatche. Toute la gestion des interactions a été déplacée vers [PlayerMouseButtonEvent](./player-mouse-button-event).
 
 N'utilisez pas cet événement dans de nouveaux plugins - il ne se déclenchera jamais.
 :::
@@ -112,16 +112,16 @@ eventBus.register(PlayerInteractEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerMouseButtonEvent](./player-mouse-button-event.md) - Remplacement moderne pour les interactions basees sur la souris
-- [PlayerMouseMotionEvent](./player-mouse-motion-event.md) - Pour suivre le mouvement de la souris
-- [BreakBlockEvent](../ecs/break-block-event.md) - Spécifiquement pour la destruction de blocs
-- [PlaceBlockEvent](../ecs/place-block-event.md) - Spécifiquement pour le placement de blocs
-- [UseBlockEvent](../ecs/use-block-event.md) - Pour les interactions d'utilisation de blocs
+- [PlayerMouseButtonEvent](./player-mouse-button-event) - Remplacement moderne pour les interactions basees sur la souris
+- [PlayerMouseMotionEvent](./player-mouse-motion-event) - Pour suivre le mouvement de la souris
+- [BreakBlockEvent](../ecs/break-block-event) - Spécifiquement pour la destruction de blocs
+- [PlaceBlockEvent](../ecs/place-block-event) - Spécifiquement pour le placement de blocs
+- [UseBlockEvent](../ecs/use-block-event) - Pour les interactions d'utilisation de blocs
 
 ## Avis de migration
 
 :::tip Migration requise
-Cet événement est **non fonctionnel** - vous devez migrer vers [PlayerMouseButtonEvent](./player-mouse-button-event.md) immédiatement. Le `PlayerMouseButtonEvent` est créé dans `InteractionModule.java:872` et fournit des informations sur les boutons de la souris incluant le type de bouton, l'état et le nombre de clics.
+Cet événement est **non fonctionnel** - vous devez migrer vers [PlayerMouseButtonEvent](./player-mouse-button-event) immédiatement. Le `PlayerMouseButtonEvent` est créé dans `InteractionModule.java:872` et fournit des informations sur les boutons de la souris incluant le type de bouton, l'état et le nombre de clics.
 :::
 
 ## Résultats des tests

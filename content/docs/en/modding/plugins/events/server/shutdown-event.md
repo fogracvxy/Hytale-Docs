@@ -218,8 +218,8 @@ The shutdown sequence follows this order:
 
 | Event | Description |
 |-------|-------------|
-| [BootEvent](./boot-event.md) | Fired when the server starts booting |
-| [PluginSetupEvent](./plugin-setup-event.md) | Fired when an individual plugin is being set up |
+| [BootEvent](./boot-event) | Fired when the server starts booting |
+| [PluginSetupEvent](./plugin-setup-event) | Fired when an individual plugin is being set up |
 | [RemoveWorldEvent](/docs/en/modding/plugins/events/world/remove-world-event) | Fired when individual worlds are removed |
 
 ## Source Reference

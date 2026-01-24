@@ -188,9 +188,9 @@ When the event is cancelled:
 
 ## Related Events
 
-- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event.md) - Fired when a chunk is being loaded
-- [ChunkUnloadEvent](./chunk-unload-event.md) - Fired when a chunk is being unloaded
-- [MoonPhaseChangeEvent](./moon-phase-change-event.md) - Fired when the moon phase changes
+- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event) - Fired when a chunk is being loaded
+- [ChunkUnloadEvent](./chunk-unload-event) - Fired when a chunk is being unloaded
+- [MoonPhaseChangeEvent](./moon-phase-change-event) - Fired when the moon phase changes
 
 ## Common Use Cases
 

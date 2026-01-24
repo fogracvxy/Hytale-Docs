@@ -123,10 +123,10 @@ public void onEntityAttacked(Ref<EntityStore> victim, Ref<EntityStore> attacker,
 
 ## Types lies
 
-- [EntityEventType](./entity-event-type.md) - Enumeration des types d'evenements d'entite
-- [EntityEventNotification](./entity-event-notification.md) - Donnees de notification d'evenement
-- [BlockEventView](./block-event-view.md) - Vue similaire pour les evenements de bloc
-- [EventView](./event-view.md) - Classe de base pour les vues d'evenements
+- [EntityEventType](./entity-event-type) - Enumeration des types d'evenements d'entite
+- [EntityEventNotification](./entity-event-notification) - Donnees de notification d'evenement
+- [BlockEventView](./block-event-view) - Vue similaire pour les evenements de bloc
+- [EventView](./event-view) - Classe de base pour les vues d'evenements
 
 ## Reference source
 

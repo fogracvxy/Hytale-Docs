@@ -114,9 +114,9 @@ Le cycle de vie typique du demarrage du serveur impliquant les événements de m
 
 ## Événements associes
 
-- [AddWorldEvent](./add-world-event.md) - Déclenché pour chaque monde en cours d'ajout
-- [StartWorldEvent](./start-world-event.md) - Déclenché lorsque chaque monde demarre
-- [RemoveWorldEvent](./remove-world-event.md) - Déclenché lorsqu'un monde est en cours de suppression
+- [AddWorldEvent](./add-world-event) - Déclenché pour chaque monde en cours d'ajout
+- [StartWorldEvent](./start-world-event) - Déclenché lorsque chaque monde demarre
+- [RemoveWorldEvent](./remove-world-event) - Déclenché lorsqu'un monde est en cours de suppression
 - [BootEvent](/docs/modding/plugins/events/server/boot-event) - Déclenché lorsque le serveur commence a demarrer
 
 ## Cas d'utilisation courants

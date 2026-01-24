@@ -191,7 +191,7 @@ public class APIConsumerPlugin extends PluginBase {
 Le `PluginSetupEvent` est déclenché pendant la phase d'initialisation des plugins du serveur :
 
 1. Apres le debut du processus de demarrage du serveur
-2. Apres la distribution de [BootEvent](./boot-event.md)
+2. Apres la distribution de [BootEvent](./boot-event)
 3. Lorsque chaque plugin individuel est en cours d'initialisation
 4. Avant que les plugins soient complètement actives et operationnels
 5. Avant le chargement des mondes
@@ -229,8 +229,8 @@ eventBus.registerUnhandled(PluginSetupEvent.class, fallbackHandler);
 
 | Evenement | Description |
 |-----------|-------------|
-| [BootEvent](./boot-event.md) | Déclenché lorsque le serveur commence a demarrer |
-| [ShutdownEvent](./shutdown-event.md) | Déclenché lorsque le serveur commence a s'arreter |
+| [BootEvent](./boot-event) | Déclenché lorsque le serveur commence a demarrer |
+| [ShutdownEvent](./shutdown-event) | Déclenché lorsque le serveur commence a s'arreter |
 | [AllWorldsLoadedEvent](/docs/fr/modding/plugins/events/world/all-worlds-loaded-event) | Déclenché apres le chargement de tous les mondes |
 
 ## Référence source

@@ -123,8 +123,8 @@ eventBus.register(PlayerMouseMotionEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerMouseButtonEvent](./player-mouse-button-event.md) - Pour les événements de clic de souris
-- [PlayerInteractEvent](./player-interact-event.md) - Evenement d'interaction obsolete
+- [PlayerMouseButtonEvent](./player-mouse-button-event) - Pour les événements de clic de souris
+- [PlayerInteractEvent](./player-interact-event) - Evenement d'interaction obsolete
 
 ## Notes
 

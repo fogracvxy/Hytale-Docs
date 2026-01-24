@@ -453,8 +453,8 @@ IEvent<Void>
 
 | Event | Description |
 |-------|-------------|
-| [PlayerPermissionChangeEvent](./player-permission-change-event.md) | Parent class for all player permission changes |
-| [GroupPermissionChangeEvent](./group-permission-change-event.md) | Fired when a group's permissions are modified |
+| [PlayerPermissionChangeEvent](./player-permission-change-event) | Parent class for all player permission changes |
+| [GroupPermissionChangeEvent](./group-permission-change-event) | Fired when a group's permissions are modified |
 | [PlayerConnectEvent](/docs/en/modding/plugins/events/player/player-connect-event) | Useful for initializing player permissions on connect |
 | [PlayerDisconnectEvent](/docs/en/modding/plugins/events/player/player-disconnect-event) | Useful for cleanup when players leave |
 

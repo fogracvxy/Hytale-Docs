@@ -119,15 +119,15 @@ public class BlockEventView extends EventView<...> {
 
 ## Types lies
 
-- [EntityEventType](./entity-event-type.md) - Enumeration similaire pour les evenements lies aux entites
-- [BlockEventView](./block-event-view.md) - Vue qui traite les evenements de bloc
-- [EventNotification](./event-notification.md) - Classe de donnees pour les notifications d'evenements
+- [EntityEventType](./entity-event-type) - Enumeration similaire pour les evenements lies aux entites
+- [BlockEventView](./block-event-view) - Vue qui traite les evenements de bloc
+- [EventNotification](./event-notification) - Classe de donnees pour les notifications d'evenements
 
 ## Evenements de bloc lies
 
-- [BreakBlockEvent](../block/break-block-event.md) - Evenement de plugin pour la destruction de bloc
-- [DamageBlockEvent](../block/damage-block-event.md) - Evenement de plugin pour les degats de bloc
-- [UseBlockEvent](../block/use-block-event.md) - Evenement de plugin pour les interactions de bloc
+- [BreakBlockEvent](../block/break-block-event) - Evenement de plugin pour la destruction de bloc
+- [DamageBlockEvent](../block/damage-block-event) - Evenement de plugin pour les degats de bloc
+- [UseBlockEvent](../block/use-block-event) - Evenement de plugin pour les interactions de bloc
 
 ## Reference source
 

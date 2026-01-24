@@ -97,8 +97,8 @@ Cela le rend ideal pour :
 
 | Événement | Description |
 |-----------|-------------|
-| [ShutdownEvent](./shutdown-event.md) | Declenche lorsque le serveur commence a s'arreter |
-| [PluginSetupEvent](./plugin-setup-event.md) | Declenche lors de la configuration d'un plugin individuel |
+| [ShutdownEvent](./shutdown-event) | Declenche lorsque le serveur commence a s'arreter |
+| [PluginSetupEvent](./plugin-setup-event) | Declenche lors de la configuration d'un plugin individuel |
 | [AllWorldsLoadedEvent](/docs/fr/modding/plugins/events/world/all-worlds-loaded-event) | Declenche apres le chargement complet de tous les mondes |
 
 ## Reference source

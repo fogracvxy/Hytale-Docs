@@ -96,13 +96,13 @@ eventBus.register(PlayerSetupDisconnectEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerSetupConnectEvent](./player-setup-connect-event.md) - Déclenché pendant une configuration de connexion reussie
-- [PlayerConnectEvent](./player-connect-event.md) - Déclenché quand un joueur se connecte complètement
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Déclenché quand un joueur connecte se deconnecte
+- [PlayerSetupConnectEvent](./player-setup-connect-event) - Déclenché pendant une configuration de connexion reussie
+- [PlayerConnectEvent](./player-connect-event) - Déclenché quand un joueur se connecte complètement
+- [PlayerDisconnectEvent](./player-disconnect-event) - Déclenché quand un joueur connecte se deconnecte
 
 ## Notes
 
-Cet evenement est spécifique aux deconnexions qui se produisent pendant la phase de configuration. Il n'est PAS déclenché quand des joueurs complètement connectes se deconnectent - utilisez [PlayerDisconnectEvent](./player-disconnect-event.md) pour cela.
+Cet evenement est spécifique aux deconnexions qui se produisent pendant la phase de configuration. Il n'est PAS déclenché quand des joueurs complètement connectes se deconnectent - utilisez [PlayerDisconnectEvent](./player-disconnect-event) pour cela.
 
 Les raisons courantes de deconnexion pendant la configuration incluent :
 - Echecs d'authentification

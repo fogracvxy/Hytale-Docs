@@ -8,7 +8,7 @@ description: Complete reference for Hytale's UI system - DSL syntax, Common.ui c
 
 # UI System Reference
 
-This is the complete technical reference for Hytale's UI system. For a tutorial-style guide, see [Custom UI System](./custom-ui.md).
+This is the complete technical reference for Hytale's UI system. For a tutorial-style guide, see [Custom UI System](./custom-ui).
 
 ---
 

@@ -124,9 +124,9 @@ eventBus.register(AssetStoreMonitorEvent.class, event -> {
 
 ## Related Events
 
-- [RegisterAssetStoreEvent](./register-asset-store-event.md) - Fired when an asset store is registered
-- [LoadedAssetsEvent](./loaded-assets-event.md) - Fired when assets are loaded
-- [RemovedAssetsEvent](./removed-assets-event.md) - Fired when assets are removed
+- [RegisterAssetStoreEvent](./register-asset-store-event) - Fired when an asset store is registered
+- [LoadedAssetsEvent](./loaded-assets-event) - Fired when assets are loaded
+- [RemovedAssetsEvent](./removed-assets-event) - Fired when assets are removed
 
 ## Source Reference
 

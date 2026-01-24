@@ -188,9 +188,9 @@ All documented methods work correctly!
 
 ## Related Events
 
-- [PlayerConnectEvent](./player-connect-event.md) - Fired when a player connects
-- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event.md) - Fired during early disconnection phase
-- [DrainPlayerFromWorldEvent](./drain-player-from-world-event.md) - Fired when removing a player from a world
+- [PlayerConnectEvent](./player-connect-event) - Fired when a player connects
+- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event) - Fired during early disconnection phase
+- [DrainPlayerFromWorldEvent](./drain-player-from-world-event) - Fired when removing a player from a world
 
 ## Source Reference
 

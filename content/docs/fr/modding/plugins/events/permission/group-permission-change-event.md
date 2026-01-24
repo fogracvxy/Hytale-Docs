@@ -478,8 +478,8 @@ IEvent<Void>
 
 | Événement | Description |
 |-----------|-------------|
-| [PlayerPermissionChangeEvent](./player-permission-change-event.md) | Déclenché lorsque les permissions individuelles d'un joueur changent |
-| [PlayerGroupEvent](./player-group-event.md) | Déclenché lorsque l'appartenance d'un joueur a un groupe change |
+| [PlayerPermissionChangeEvent](./player-permission-change-event) | Déclenché lorsque les permissions individuelles d'un joueur changent |
+| [PlayerGroupEvent](./player-group-event) | Déclenché lorsque l'appartenance d'un joueur a un groupe change |
 
 ## Référence source
 

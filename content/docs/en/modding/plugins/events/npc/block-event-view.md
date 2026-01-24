@@ -172,16 +172,16 @@ private void onPlayerInteraction(PlayerInteractEvent event) {
 
 ## Related Types
 
-- [BlockEventType](./block-event-type.md) - Enum of block event types
-- [EntityEventView](./entity-event-view.md) - Similar view for entity events
-- [EventNotification](./event-notification.md) - Event notification data
-- [EventView](./event-view.md) - Base class for event views
+- [BlockEventType](./block-event-type) - Enum of block event types
+- [EntityEventView](./entity-event-view) - Similar view for entity events
+- [EventNotification](./event-notification) - Event notification data
+- [EventView](./event-view) - Base class for event views
 
 ## Related Block Events
 
-- [BreakBlockEvent](../block/break-block-event.md) - Plugin event for block breaking
-- [DamageBlockEvent](../block/damage-block-event.md) - Plugin event for block damage
-- [UseBlockEvent](../block/use-block-event.md) - Plugin event for block interactions
+- [BreakBlockEvent](../block/break-block-event) - Plugin event for block breaking
+- [DamageBlockEvent](../block/damage-block-event) - Plugin event for block damage
+- [UseBlockEvent](../block/use-block-event) - Plugin event for block interactions
 
 ## Source Reference
 

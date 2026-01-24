@@ -179,9 +179,9 @@ Moon phases can affect various gameplay systems:
 
 ## Related Events
 
-- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event.md) - Fired when a chunk is being loaded
-- [ChunkSaveEvent](./chunk-save-event.md) - Fired when a chunk is being saved
-- [ChunkUnloadEvent](./chunk-unload-event.md) - Fired when a chunk is being unloaded
+- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event) - Fired when a chunk is being loaded
+- [ChunkSaveEvent](./chunk-save-event) - Fired when a chunk is being saved
+- [ChunkUnloadEvent](./chunk-unload-event) - Fired when a chunk is being unloaded
 
 ## Common Use Cases
 

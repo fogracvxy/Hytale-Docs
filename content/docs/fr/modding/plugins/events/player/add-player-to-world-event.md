@@ -102,10 +102,10 @@ eventBus.registerGlobal(AddPlayerToWorldEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerConnectEvent](./player-connect-event.md) - Déclenché quand le joueur se connecte au serveur
-- [DrainPlayerFromWorldEvent](./drain-player-from-world-event.md) - Déclenché quand le joueur est retire d'un monde
-- [PlayerReadyEvent](./player-ready-event.md) - Déclenché quand le client du joueur est complètement pret
-- [StartWorldEvent](../world/start-world-event.md) - Déclenché quand un monde demarre
+- [PlayerConnectEvent](./player-connect-event) - Déclenché quand le joueur se connecte au serveur
+- [DrainPlayerFromWorldEvent](./drain-player-from-world-event) - Déclenché quand le joueur est retire d'un monde
+- [PlayerReadyEvent](./player-ready-event) - Déclenché quand le client du joueur est complètement pret
+- [StartWorldEvent](../world/start-world-event) - Déclenché quand un monde demarre
 
 ## Ordre des événements
 

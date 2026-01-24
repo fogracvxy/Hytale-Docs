@@ -98,9 +98,9 @@ eventBus.registerGlobal(PlayerReadyEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerConnectEvent](./player-connect-event.md) - Fired earlier when player first connects
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Fired when player disconnects
-- [AddPlayerToWorldEvent](./add-player-to-world-event.md) - Fired when player is added to a world
+- [PlayerConnectEvent](./player-connect-event) - Fired earlier when player first connects
+- [PlayerDisconnectEvent](./player-disconnect-event) - Fired when player disconnects
+- [AddPlayerToWorldEvent](./add-player-to-world-event) - Fired when player is added to a world
 
 ## Event Order
 

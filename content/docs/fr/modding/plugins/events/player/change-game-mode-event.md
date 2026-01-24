@@ -204,9 +204,9 @@ getServer().getEventBus().register(
 
 ## Événements lies
 
-- **[DropItemEvent](./drop-item-event.md)** - Peut etre affecte par les restrictions de mode de jeu
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Le comportement de ramassage peut varier selon le mode
-- **[CraftRecipeEvent](./craft-recipe-event.md)** - La fabrication peut dépendre du mode
+- **[DropItemEvent](./drop-item-event)** - Peut etre affecte par les restrictions de mode de jeu
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Le comportement de ramassage peut varier selon le mode
+- **[CraftRecipeEvent](./craft-recipe-event)** - La fabrication peut dépendre du mode
 - **LivingEntityInventoryChangeEvent** - Changements d'inventaire déclenchés par les changements de mode
 
 ## Détails internes

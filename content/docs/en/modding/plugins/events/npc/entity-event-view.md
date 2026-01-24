@@ -150,10 +150,10 @@ private void onPlayerInteraction(PlayerInteractEvent event) {
 
 ## Related Types
 
-- [EntityEventType](./entity-event-type.md) - Enum of entity event types
-- [EntityEventNotification](./entity-event-notification.md) - Event notification data
-- [BlockEventView](./block-event-view.md) - Similar view for block events
-- [EventView](./event-view.md) - Base class for event views
+- [EntityEventType](./entity-event-type) - Enum of entity event types
+- [EntityEventNotification](./entity-event-notification) - Event notification data
+- [BlockEventView](./block-event-view) - Similar view for block events
+- [EventView](./event-view) - Base class for event views
 
 ## Source Reference
 

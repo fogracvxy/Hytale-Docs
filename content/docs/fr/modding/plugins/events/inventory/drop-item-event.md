@@ -249,9 +249,9 @@ getServer().getEventBus().register(
 
 ## Événements lies
 
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Déclenché lorsqu'un joueur ramasse un objet du monde
-- **[SwitchActiveSlotEvent](./switch-active-slot-event.md)** - Déclenché lors du changement de l'emplacement actif de la barre d'action
-- **[CraftRecipeEvent](./craft-recipe-event.md)** - Déclenché lors de la fabrication d'objets
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Déclenché lorsqu'un joueur ramasse un objet du monde
+- **[SwitchActiveSlotEvent](./switch-active-slot-event)** - Déclenché lors du changement de l'emplacement actif de la barre d'action
+- **[CraftRecipeEvent](./craft-recipe-event)** - Déclenché lors de la fabrication d'objets
 - **LivingEntityInventoryChangeEvent** - Déclenché lors de tout changement d'inventaire
 
 ## Référence source

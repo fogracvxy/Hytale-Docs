@@ -133,16 +133,16 @@ public void onBlockBroken(Ref<EntityStore> playerRef, BreakBlockEvent event) {
 
 ## Types lies
 
-- [BlockEventType](./block-event-type.md) - Enumeration des types d'evenements de bloc
-- [EntityEventView](./entity-event-view.md) - Vue similaire pour les evenements d'entite
-- [EventNotification](./event-notification.md) - Donnees de notification d'evenement
-- [EventView](./event-view.md) - Classe de base pour les vues d'evenements
+- [BlockEventType](./block-event-type) - Enumeration des types d'evenements de bloc
+- [EntityEventView](./entity-event-view) - Vue similaire pour les evenements d'entite
+- [EventNotification](./event-notification) - Donnees de notification d'evenement
+- [EventView](./event-view) - Classe de base pour les vues d'evenements
 
 ## Evenements de bloc lies
 
-- [BreakBlockEvent](../block/break-block-event.md) - Evenement de plugin pour la destruction de bloc
-- [DamageBlockEvent](../block/damage-block-event.md) - Evenement de plugin pour les degats de bloc
-- [UseBlockEvent](../block/use-block-event.md) - Evenement de plugin pour les interactions de bloc
+- [BreakBlockEvent](../block/break-block-event) - Evenement de plugin pour la destruction de bloc
+- [DamageBlockEvent](../block/damage-block-event) - Evenement de plugin pour les degats de bloc
+- [UseBlockEvent](../block/use-block-event) - Evenement de plugin pour les interactions de bloc
 
 ## Reference source
 

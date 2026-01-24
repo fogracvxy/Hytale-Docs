@@ -112,9 +112,9 @@ The typical world lifecycle events follow this order:
 
 ## Related Events
 
-- [AddWorldEvent](./add-world-event.md) - Fired before the world is added (cancellable)
-- [RemoveWorldEvent](./remove-world-event.md) - Fired when a world is being removed
-- [AllWorldsLoadedEvent](./all-worlds-loaded-event.md) - Fired when all configured worlds have been loaded
+- [AddWorldEvent](./add-world-event) - Fired before the world is added (cancellable)
+- [RemoveWorldEvent](./remove-world-event) - Fired when a world is being removed
+- [AllWorldsLoadedEvent](./all-worlds-loaded-event) - Fired when all configured worlds have been loaded
 
 ## Common Use Cases
 

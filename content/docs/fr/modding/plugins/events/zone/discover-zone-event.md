@@ -146,9 +146,9 @@ eventBus.register(DiscoverZoneEvent.Display.class, event -> {
 
 ## Evenements lies
 
-- [DiscoverInstanceEvent](../instance/discover-instance-event.md) - Declenche lorsqu'un joueur decouvre une nouvelle instance
-- [AddPlayerToWorldEvent](../player/add-player-to-world-event.md) - Declenche lorsqu'un joueur est ajoute a un monde
-- [StartWorldEvent](../world/start-world-event.md) - Declenche lorsqu'un monde demarre
+- [DiscoverInstanceEvent](../instance/discover-instance-event) - Declenche lorsqu'un joueur decouvre une nouvelle instance
+- [AddPlayerToWorldEvent](../player/add-player-to-world-event) - Declenche lorsqu'un joueur est ajoute a un monde
+- [StartWorldEvent](../world/start-world-event) - Declenche lorsqu'un monde demarre
 
 ## Reference source
 

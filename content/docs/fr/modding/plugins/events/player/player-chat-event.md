@@ -107,8 +107,8 @@ eventBus.registerGlobal(PlayerChatEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerConnectEvent](./player-connect-event.md) - Déclenché quand un joueur se connecte
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Déclenché quand un joueur se deconnecte
+- [PlayerConnectEvent](./player-connect-event) - Déclenché quand un joueur se connecte
+- [PlayerDisconnectEvent](./player-disconnect-event) - Déclenché quand un joueur se deconnecte
 
 ## Notes
 

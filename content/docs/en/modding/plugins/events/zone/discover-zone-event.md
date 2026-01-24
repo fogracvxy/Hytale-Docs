@@ -146,9 +146,9 @@ eventBus.register(DiscoverZoneEvent.Display.class, event -> {
 
 ## Related Events
 
-- [DiscoverInstanceEvent](../instance/discover-instance-event.md) - Fired when a player discovers a new instance
-- [AddPlayerToWorldEvent](../player/add-player-to-world-event.md) - Fired when a player is added to a world
-- [StartWorldEvent](../world/start-world-event.md) - Fired when a world starts
+- [DiscoverInstanceEvent](../instance/discover-instance-event) - Fired when a player discovers a new instance
+- [AddPlayerToWorldEvent](../player/add-player-to-world-event) - Fired when a player is added to a world
+- [StartWorldEvent](../world/start-world-event) - Fired when a world starts
 
 ## Source Reference
 

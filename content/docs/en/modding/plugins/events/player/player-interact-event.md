@@ -7,7 +7,7 @@ sidebar_label: PlayerInteractEvent
 # PlayerInteractEvent
 
 :::danger Non-Functional Event
-**This event is deprecated AND never fired by the server.** The event class exists but nothing in the server code creates or dispatches it. All interaction handling has been moved to [PlayerMouseButtonEvent](./player-mouse-button-event.md).
+**This event is deprecated AND never fired by the server.** The event class exists but nothing in the server code creates or dispatches it. All interaction handling has been moved to [PlayerMouseButtonEvent](./player-mouse-button-event).
 
 Do not use this event in new plugins - it will never trigger.
 :::
@@ -112,16 +112,16 @@ eventBus.register(PlayerInteractEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerMouseButtonEvent](./player-mouse-button-event.md) - Modern replacement for mouse-based interactions
-- [PlayerMouseMotionEvent](./player-mouse-motion-event.md) - For tracking mouse movement
-- [BreakBlockEvent](../ecs/break-block-event.md) - Specifically for block breaking
-- [PlaceBlockEvent](../ecs/place-block-event.md) - Specifically for block placement
-- [UseBlockEvent](../ecs/use-block-event.md) - For block usage interactions
+- [PlayerMouseButtonEvent](./player-mouse-button-event) - Modern replacement for mouse-based interactions
+- [PlayerMouseMotionEvent](./player-mouse-motion-event) - For tracking mouse movement
+- [BreakBlockEvent](../ecs/break-block-event) - Specifically for block breaking
+- [PlaceBlockEvent](../ecs/place-block-event) - Specifically for block placement
+- [UseBlockEvent](../ecs/use-block-event) - For block usage interactions
 
 ## Migration Notice
 
 :::tip Required Migration
-This event is **non-functional** - you must migrate to [PlayerMouseButtonEvent](./player-mouse-button-event.md) immediately. The `PlayerMouseButtonEvent` is created in `InteractionModule.java:872` and provides mouse button information including button type, state, and click count.
+This event is **non-functional** - you must migrate to [PlayerMouseButtonEvent](./player-mouse-button-event) immediately. The `PlayerMouseButtonEvent` is created in `InteractionModule.java:872` and provides mouse button information including button type, state, and click count.
 :::
 
 ## Testing Results

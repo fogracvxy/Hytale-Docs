@@ -198,8 +198,8 @@ eventBus.register(KillFeedEvent.Display.class, event -> {
 
 ## Related Events
 
-- [EntityRemoveEvent](../entity/entity-remove-event.md) - Fired when an entity is removed from the world
-- [PlayerDisconnectEvent](../player/player-disconnect-event.md) - Fired when a player disconnects
+- [EntityRemoveEvent](../entity/entity-remove-event) - Fired when an entity is removed from the world
+- [PlayerDisconnectEvent](../player/player-disconnect-event) - Fired when a player disconnects
 
 ## Source Reference
 

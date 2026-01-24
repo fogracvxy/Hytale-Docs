@@ -138,9 +138,9 @@ eventBus.register(EventPriority.LATE, DrainPlayerFromWorldEvent.class, event -> 
 
 ## Related Events
 
-- [AddPlayerToWorldEvent](./add-player-to-world-event.md) - Fired when player is added to a world
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Fired when player disconnects
-- [RemoveWorldEvent](../world/remove-world-event.md) - Fired when a world is removed
+- [AddPlayerToWorldEvent](./add-player-to-world-event) - Fired when player is added to a world
+- [PlayerDisconnectEvent](./player-disconnect-event) - Fired when player disconnects
+- [RemoveWorldEvent](../world/remove-world-event) - Fired when a world is removed
 
 ## When This Event is Triggered
 

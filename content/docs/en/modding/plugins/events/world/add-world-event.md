@@ -143,9 +143,9 @@ When the event is cancelled:
 
 ## Related Events
 
-- [RemoveWorldEvent](./remove-world-event.md) - Fired when a world is being removed
-- [StartWorldEvent](./start-world-event.md) - Fired when a world starts after being added
-- [AllWorldsLoadedEvent](./all-worlds-loaded-event.md) - Fired when all configured worlds have been loaded
+- [RemoveWorldEvent](./remove-world-event) - Fired when a world is being removed
+- [StartWorldEvent](./start-world-event) - Fired when a world starts after being added
+- [AllWorldsLoadedEvent](./all-worlds-loaded-event) - Fired when all configured worlds have been loaded
 
 ## Internal Details
 

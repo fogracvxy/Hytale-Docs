@@ -111,9 +111,9 @@ eventBus.register(AssetStoreMonitorEvent.class, event -> {
 
 ## Evenements lies
 
-- [RegisterAssetStoreEvent](./register-asset-store-event.md) - Declenche lorsqu'un magasin d'assets est enregistre
-- [LoadedAssetsEvent](./loaded-assets-event.md) - Declenche lorsque des assets sont charges
-- [RemovedAssetsEvent](./removed-assets-event.md) - Declenche lorsque des assets sont supprimes
+- [RegisterAssetStoreEvent](./register-asset-store-event) - Declenche lorsqu'un magasin d'assets est enregistre
+- [LoadedAssetsEvent](./loaded-assets-event) - Declenche lorsque des assets sont charges
+- [RemovedAssetsEvent](./removed-assets-event) - Declenche lorsque des assets sont supprimes
 
 ## Reference source
 

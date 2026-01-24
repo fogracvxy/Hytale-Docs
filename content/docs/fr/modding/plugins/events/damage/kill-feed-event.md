@@ -198,8 +198,8 @@ eventBus.register(KillFeedEvent.Display.class, event -> {
 
 ## Evenements lies
 
-- [EntityRemoveEvent](../entity/entity-remove-event.md) - Declenche lorsqu'une entite est supprimee du monde
-- [PlayerDisconnectEvent](../player/player-disconnect-event.md) - Declenche lorsqu'un joueur se deconnecte
+- [EntityRemoveEvent](../entity/entity-remove-event) - Declenche lorsqu'une entite est supprimee du monde
+- [PlayerDisconnectEvent](../player/player-disconnect-event) - Declenche lorsqu'un joueur se deconnecte
 
 ## Reference source
 

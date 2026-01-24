@@ -327,8 +327,8 @@ Player initiates craft
 
 ## Related Events
 
-- **[DropItemEvent](./drop-item-event.md)** - Fires when items are dropped
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Fires when items are picked up
+- **[DropItemEvent](./drop-item-event)** - Fires when items are dropped
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Fires when items are picked up
 - **LivingEntityInventoryChangeEvent** - Fires when inventory changes occur
 - **PlayerCraftEvent** - Deprecated legacy crafting event
 

@@ -123,8 +123,8 @@ eventBus.register(PlayerMouseMotionEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerMouseButtonEvent](./player-mouse-button-event.md) - For mouse click events
-- [PlayerInteractEvent](./player-interact-event.md) - Deprecated interaction event
+- [PlayerMouseButtonEvent](./player-mouse-button-event) - For mouse click events
+- [PlayerInteractEvent](./player-interact-event) - Deprecated interaction event
 
 ## Notes
 

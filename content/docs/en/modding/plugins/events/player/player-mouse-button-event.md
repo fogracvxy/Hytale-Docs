@@ -136,10 +136,10 @@ eventBus.register(PlayerMouseButtonEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerMouseMotionEvent](./player-mouse-motion-event.md) - For tracking mouse movement
-- [PlayerInteractEvent](./player-interact-event.md) - Deprecated interaction event
-- [BreakBlockEvent](../ecs/break-block-event.md) - Specifically for block breaking
-- [PlaceBlockEvent](../ecs/place-block-event.md) - Specifically for block placement
+- [PlayerMouseMotionEvent](./player-mouse-motion-event) - For tracking mouse movement
+- [PlayerInteractEvent](./player-interact-event) - Deprecated interaction event
+- [BreakBlockEvent](../ecs/break-block-event) - Specifically for block breaking
+- [PlaceBlockEvent](../ecs/place-block-event) - Specifically for block placement
 
 ## Notes
 
@@ -178,10 +178,10 @@ getEventRegistry().registerGlobal(PlayerMouseButtonEvent.class, event -> {
 ## Related Events
 
 For more specific use cases, you may also want to consider:
-- **[DamageBlockEvent](../block/damage-block-event.md)** - Fires when holding left-click on a block
-- **[BreakBlockEvent](../block/break-block-event.md)** - Fires when a block is broken
-- **[PlaceBlockEvent](../block/place-block-event.md)** - Fires when placing a block
-- **[UseBlockPreEvent / UseBlockPostEvent](../block/use-block-pre-event.md)** - For block interactions (right-click)
+- **[DamageBlockEvent](../block/damage-block-event)** - Fires when holding left-click on a block
+- **[BreakBlockEvent](../block/break-block-event)** - Fires when a block is broken
+- **[PlaceBlockEvent](../block/place-block-event)** - Fires when placing a block
+- **[UseBlockPreEvent / UseBlockPostEvent](../block/use-block-pre-event)** - For block interactions (right-click)
 
 ## Internal Details
 

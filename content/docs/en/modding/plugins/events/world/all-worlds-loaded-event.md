@@ -113,9 +113,9 @@ The typical server startup lifecycle involving world events:
 
 ## Related Events
 
-- [AddWorldEvent](./add-world-event.md) - Fired for each world being added
-- [StartWorldEvent](./start-world-event.md) - Fired when each world starts
-- [RemoveWorldEvent](./remove-world-event.md) - Fired when a world is being removed
+- [AddWorldEvent](./add-world-event) - Fired for each world being added
+- [StartWorldEvent](./start-world-event) - Fired when each world starts
+- [RemoveWorldEvent](./remove-world-event) - Fired when a world is being removed
 - [BootEvent](/docs/modding/plugins/events/server/boot-event) - Fired when the server starts booting
 
 ## Common Use Cases

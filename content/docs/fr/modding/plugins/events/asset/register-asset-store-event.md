@@ -74,9 +74,9 @@ eventBus.register(RegisterAssetStoreEvent.class, event -> {
 
 ## Evenements lies
 
-- [RemoveAssetStoreEvent](./remove-asset-store-event.md) - Declenche lorsqu'un magasin d'assets est supprime
-- [LoadedAssetsEvent](./loaded-assets-event.md) - Declenche lorsque des assets sont charges dans un magasin
-- [GenerateAssetsEvent](./generate-assets-event.md) - Declenche pour generer des assets derives
+- [RemoveAssetStoreEvent](./remove-asset-store-event) - Declenche lorsqu'un magasin d'assets est supprime
+- [LoadedAssetsEvent](./loaded-assets-event) - Declenche lorsque des assets sont charges dans un magasin
+- [GenerateAssetsEvent](./generate-assets-event) - Declenche pour generer des assets derives
 
 ## Reference source
 

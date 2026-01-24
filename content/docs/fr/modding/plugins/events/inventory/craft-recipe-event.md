@@ -327,8 +327,8 @@ Le joueur initie la fabrication
 
 ## Événements lies
 
-- **[DropItemEvent](./drop-item-event.md)** - Déclenché lorsque des objets sont lâchés
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Déclenché lorsque des objets sont ramassés
+- **[DropItemEvent](./drop-item-event)** - Déclenché lorsque des objets sont lâchés
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Déclenché lorsque des objets sont ramassés
 - **LivingEntityInventoryChangeEvent** - Déclenché lors de changements d'inventaire
 - **PlayerCraftEvent** - Événement de fabrication legacy déprécié
 

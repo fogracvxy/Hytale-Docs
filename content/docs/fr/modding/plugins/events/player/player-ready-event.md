@@ -98,9 +98,9 @@ eventBus.registerGlobal(PlayerReadyEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerConnectEvent](./player-connect-event.md) - Déclenché plus tot quand le joueur se connecte
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Déclenché quand le joueur se deconnecte
-- [AddPlayerToWorldEvent](./add-player-to-world-event.md) - Déclenché quand le joueur est ajoute a un monde
+- [PlayerConnectEvent](./player-connect-event) - Déclenché plus tot quand le joueur se connecte
+- [PlayerDisconnectEvent](./player-disconnect-event) - Déclenché quand le joueur se deconnecte
+- [AddPlayerToWorldEvent](./add-player-to-world-event) - Déclenché quand le joueur est ajoute a un monde
 
 ## Ordre des evenements
 

@@ -102,10 +102,10 @@ eventBus.registerGlobal(AddPlayerToWorldEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerConnectEvent](./player-connect-event.md) - Fired when player first connects to server
-- [DrainPlayerFromWorldEvent](./drain-player-from-world-event.md) - Fired when player is removed from a world
-- [PlayerReadyEvent](./player-ready-event.md) - Fired when player client is fully ready
-- [StartWorldEvent](../world/start-world-event.md) - Fired when a world starts
+- [PlayerConnectEvent](./player-connect-event) - Fired when player first connects to server
+- [DrainPlayerFromWorldEvent](./drain-player-from-world-event) - Fired when player is removed from a world
+- [PlayerReadyEvent](./player-ready-event) - Fired when player client is fully ready
+- [StartWorldEvent](../world/start-world-event) - Fired when a world starts
 
 ## Event Order
 

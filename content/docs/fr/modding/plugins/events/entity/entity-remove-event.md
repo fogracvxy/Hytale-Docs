@@ -293,7 +293,7 @@ L'événement est déclenché :
 
 | Evenement | Description |
 |-----------|-------------|
-| [LivingEntityInventoryChangeEvent](./living-entity-inventory-change-event.md) | Déclenché lorsque l'inventaire d'une entite vivante change |
+| [LivingEntityInventoryChangeEvent](./living-entity-inventory-change-event) | Déclenché lorsque l'inventaire d'une entite vivante change |
 | [AddPlayerToWorldEvent](/docs/fr/modding/plugins/events/player/add-player-to-world-event) | Déclenché lorsqu'un joueur est ajoute a un monde |
 | [DrainPlayerFromWorldEvent](/docs/fr/modding/plugins/events/player/drain-player-from-world-event) | Déclenché lorsqu'un joueur est retire d'un monde |
 

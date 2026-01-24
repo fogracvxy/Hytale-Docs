@@ -116,9 +116,9 @@ public class EntityEventView extends EventView<...> {
 
 ## Types lies
 
-- [BlockEventType](./block-event-type.md) - Enumeration similaire pour les evenements lies aux blocs
-- [EntityEventView](./entity-event-view.md) - Vue qui traite les evenements d'entite
-- [EventNotification](./event-notification.md) - Classe de donnees pour les notifications d'evenements
+- [BlockEventType](./block-event-type) - Enumeration similaire pour les evenements lies aux blocs
+- [EntityEventView](./entity-event-view) - Vue qui traite les evenements d'entite
+- [EventNotification](./event-notification) - Classe de donnees pour les notifications d'evenements
 
 ## Reference source
 

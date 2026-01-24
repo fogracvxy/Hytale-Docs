@@ -95,10 +95,10 @@ eventBus.register(EventPriority.FIRST, PlayerConnectEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerSetupConnectEvent](./player-setup-connect-event.md) - Déclenché plus tot pendant la configuration de connexion, avant cet événement
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Déclenché quand un joueur se deconnecte
-- [PlayerReadyEvent](./player-ready-event.md) - Déclenché quand le client du joueur est entierement pret
-- [AddPlayerToWorldEvent](./add-player-to-world-event.md) - Déclenché quand le joueur est ajoute a un monde
+- [PlayerSetupConnectEvent](./player-setup-connect-event) - Déclenché plus tot pendant la configuration de connexion, avant cet événement
+- [PlayerDisconnectEvent](./player-disconnect-event) - Déclenché quand un joueur se deconnecte
+- [PlayerReadyEvent](./player-ready-event) - Déclenché quand le client du joueur est entierement pret
+- [AddPlayerToWorldEvent](./add-player-to-world-event) - Déclenché quand le joueur est ajoute a un monde
 
 ## Référence source
 

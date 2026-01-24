@@ -95,10 +95,10 @@ eventBus.register(EventPriority.FIRST, PlayerConnectEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerSetupConnectEvent](./player-setup-connect-event.md) - Fired earlier during connection setup, before this event
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Fired when a player disconnects
-- [PlayerReadyEvent](./player-ready-event.md) - Fired when the player client is fully ready
-- [AddPlayerToWorldEvent](./add-player-to-world-event.md) - Fired when the player is added to a world
+- [PlayerSetupConnectEvent](./player-setup-connect-event) - Fired earlier during connection setup, before this event
+- [PlayerDisconnectEvent](./player-disconnect-event) - Fired when a player disconnects
+- [PlayerReadyEvent](./player-ready-event) - Fired when the player client is fully ready
+- [AddPlayerToWorldEvent](./add-player-to-world-event) - Fired when the player is added to a world
 
 ## Source Reference
 

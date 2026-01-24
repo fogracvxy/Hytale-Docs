@@ -217,9 +217,9 @@ Since `ChunkPreLoadProcessEvent` implements `IProcessedEvent`:
 
 ## Related Events
 
-- [ChunkSaveEvent](./chunk-save-event.md) - Fired when a chunk is being saved
-- [ChunkUnloadEvent](./chunk-unload-event.md) - Fired when a chunk is being unloaded
-- [MoonPhaseChangeEvent](./moon-phase-change-event.md) - Fired when the moon phase changes
+- [ChunkSaveEvent](./chunk-save-event) - Fired when a chunk is being saved
+- [ChunkUnloadEvent](./chunk-unload-event) - Fired when a chunk is being unloaded
+- [MoonPhaseChangeEvent](./moon-phase-change-event) - Fired when the moon phase changes
 
 ## Common Use Cases
 

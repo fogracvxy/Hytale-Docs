@@ -147,9 +147,9 @@ eventBus.register(EventPriority.EARLY, PlayerSetupConnectEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerConnectEvent](./player-connect-event.md) - Déclenché apres une configuration reussie, quand le joueur est complètement connecte
-- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event.md) - Déclenché si la connexion en phase de configuration echoue
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Déclenché quand un joueur connecte se deconnecte
+- [PlayerConnectEvent](./player-connect-event) - Déclenché apres une configuration reussie, quand le joueur est complètement connecte
+- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event) - Déclenché si la connexion en phase de configuration echoue
+- [PlayerDisconnectEvent](./player-disconnect-event) - Déclenché quand un joueur connecte se deconnecte
 
 ## Notes
 

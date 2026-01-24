@@ -96,9 +96,9 @@ eventBus.register(PrefabPasteEvent.class, event -> {
 
 ## Related Events
 
-- [PrefabPlaceEntityEvent](./prefab-place-entity-event.md) - Fired when an entity is placed as part of a prefab
-- [PlaceBlockEvent](../block/place-block-event.md) - Fired when individual blocks are placed
-- [BreakBlockEvent](../block/break-block-event.md) - Fired when blocks are broken
+- [PrefabPlaceEntityEvent](./prefab-place-entity-event) - Fired when an entity is placed as part of a prefab
+- [PlaceBlockEvent](../block/place-block-event) - Fired when individual blocks are placed
+- [BreakBlockEvent](../block/break-block-event) - Fired when blocks are broken
 
 ## Source Reference
 

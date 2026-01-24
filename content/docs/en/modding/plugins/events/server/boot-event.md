@@ -97,8 +97,8 @@ This makes it ideal for:
 
 | Event | Description |
 |-------|-------------|
-| [ShutdownEvent](./shutdown-event.md) | Fired when the server begins shutting down |
-| [PluginSetupEvent](./plugin-setup-event.md) | Fired when an individual plugin is being set up |
+| [ShutdownEvent](./shutdown-event) | Fired when the server begins shutting down |
+| [PluginSetupEvent](./plugin-setup-event) | Fired when an individual plugin is being set up |
 | [AllWorldsLoadedEvent](/docs/en/modding/plugins/events/world/all-worlds-loaded-event) | Fired after all worlds have finished loading |
 
 ## Source Reference

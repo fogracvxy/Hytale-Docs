@@ -107,8 +107,8 @@ eventBus.registerGlobal(PlayerChatEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerConnectEvent](./player-connect-event.md) - Fired when a player connects
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Fired when a player disconnects
+- [PlayerConnectEvent](./player-connect-event) - Fired when a player connects
+- [PlayerDisconnectEvent](./player-disconnect-event) - Fired when a player disconnects
 
 ## Notes
 

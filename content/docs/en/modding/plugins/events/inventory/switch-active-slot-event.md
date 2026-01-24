@@ -195,8 +195,8 @@ getServer().getEventBus().register(
 
 ## Related Events
 
-- **[DropItemEvent](./drop-item-event.md)** - Fires when an item is dropped from inventory
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Fires when picking up items
+- **[DropItemEvent](./drop-item-event)** - Fires when an item is dropped from inventory
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Fires when picking up items
 - **LivingEntityInventoryChangeEvent** - Fires on any inventory change
 - **PlayerMouseButtonEvent** - Fires when using items from the active slot
 

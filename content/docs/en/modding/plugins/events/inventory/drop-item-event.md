@@ -249,9 +249,9 @@ getServer().getEventBus().register(
 
 ## Related Events
 
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Fires when a player picks up an item from the world
-- **[SwitchActiveSlotEvent](./switch-active-slot-event.md)** - Fires when switching the active hotbar slot
-- **[CraftRecipeEvent](./craft-recipe-event.md)** - Fires when crafting items
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Fires when a player picks up an item from the world
+- **[SwitchActiveSlotEvent](./switch-active-slot-event)** - Fires when switching the active hotbar slot
+- **[CraftRecipeEvent](./craft-recipe-event)** - Fires when crafting items
 - **LivingEntityInventoryChangeEvent** - Fires when any inventory change occurs
 
 ## Source Reference

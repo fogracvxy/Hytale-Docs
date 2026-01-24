@@ -218,9 +218,9 @@ Puisque `ChunkPreLoadProcessEvent` implemente `IProcessedEvent` :
 
 ## Événements associes
 
-- [ChunkSaveEvent](./chunk-save-event.md) - Déclenché lorsqu'un chunk est en cours de sauvegarde
-- [ChunkUnloadEvent](./chunk-unload-event.md) - Déclenché lorsqu'un chunk est en cours de dechargement
-- [MoonPhaseChangeEvent](./moon-phase-change-event.md) - Déclenché lorsque la phase lunaire change
+- [ChunkSaveEvent](./chunk-save-event) - Déclenché lorsqu'un chunk est en cours de sauvegarde
+- [ChunkUnloadEvent](./chunk-unload-event) - Déclenché lorsqu'un chunk est en cours de dechargement
+- [MoonPhaseChangeEvent](./moon-phase-change-event) - Déclenché lorsque la phase lunaire change
 
 ## Cas d'utilisation courants
 

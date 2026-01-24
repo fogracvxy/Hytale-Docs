@@ -112,9 +112,9 @@ eventBus.register(RemovedAssetsEvent.class, event -> {
 
 ## Related Events
 
-- [LoadedAssetsEvent](./loaded-assets-event.md) - Fired when assets are loaded into a store
-- [RemoveAssetStoreEvent](./remove-asset-store-event.md) - Fired when an entire asset store is removed
-- [GenerateAssetsEvent](./generate-assets-event.md) - Fired to generate derived assets
+- [LoadedAssetsEvent](./loaded-assets-event) - Fired when assets are loaded into a store
+- [RemoveAssetStoreEvent](./remove-asset-store-event) - Fired when an entire asset store is removed
+- [GenerateAssetsEvent](./generate-assets-event) - Fired to generate derived assets
 
 ## Source Reference
 

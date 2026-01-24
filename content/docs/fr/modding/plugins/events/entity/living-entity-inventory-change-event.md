@@ -324,7 +324,7 @@ L'événement est déclenché :
 
 | Evenement | Description |
 |-----------|-------------|
-| [EntityRemoveEvent](./entity-remove-event.md) | Déclenché lorsqu'une entite est supprimee du monde |
+| [EntityRemoveEvent](./entity-remove-event) | Déclenché lorsqu'une entite est supprimee du monde |
 | [SwitchActiveSlotEvent](/docs/fr/modding/plugins/events/inventory/switch-active-slot-event) | Déclenché lorsque l'emplacement actif de la barre d'action change |
 | [DropItemEvent](/docs/fr/modding/plugins/events/inventory/drop-item-event) | Déclenché lorsqu'un objet est depose |
 | [InteractivelyPickupItemEvent](/docs/fr/modding/plugins/events/inventory/interactively-pickup-item-event) | Déclenché lorsqu'un objet est ramasse de maniere interactive |

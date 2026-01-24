@@ -96,9 +96,9 @@ eventBus.register(PrefabPasteEvent.class, event -> {
 
 ## Evenements lies
 
-- [PrefabPlaceEntityEvent](./prefab-place-entity-event.md) - Declenche lorsqu'une entite est placee dans le cadre d'un prefab
-- [PlaceBlockEvent](../block/place-block-event.md) - Declenche lorsque des blocs individuels sont places
-- [BreakBlockEvent](../block/break-block-event.md) - Declenche lorsque des blocs sont casses
+- [PrefabPlaceEntityEvent](./prefab-place-entity-event) - Declenche lorsqu'une entite est placee dans le cadre d'un prefab
+- [PlaceBlockEvent](../block/place-block-event) - Declenche lorsque des blocs individuels sont places
+- [BreakBlockEvent](../block/break-block-event) - Declenche lorsque des blocs sont casses
 
 ## Reference source
 

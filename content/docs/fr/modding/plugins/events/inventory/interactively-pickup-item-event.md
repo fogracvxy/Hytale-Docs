@@ -241,10 +241,10 @@ getServer().getEventBus().register(
 
 ## Événements lies
 
-- **[DropItemEvent](./drop-item-event.md)** - Déclenché lorsqu'un objet est lache (action opposee)
-- **[SwitchActiveSlotEvent](./switch-active-slot-event.md)** - Déclenché lors du changement d'emplacement de la barre d'action
+- **[DropItemEvent](./drop-item-event)** - Déclenché lorsqu'un objet est lache (action opposee)
+- **[SwitchActiveSlotEvent](./switch-active-slot-event)** - Déclenché lors du changement d'emplacement de la barre d'action
 - **LivingEntityInventoryChangeEvent** - Déclenché lors de tout changement d'inventaire
-- **[CraftRecipeEvent](./craft-recipe-event.md)** - Déclenché lorsque des objets sont crees via la fabrication
+- **[CraftRecipeEvent](./craft-recipe-event)** - Déclenché lorsque des objets sont crees via la fabrication
 
 ## Référence source
 

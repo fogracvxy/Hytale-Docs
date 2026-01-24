@@ -293,7 +293,7 @@ The event fires:
 
 | Event | Description |
 |-------|-------------|
-| [LivingEntityInventoryChangeEvent](./living-entity-inventory-change-event.md) | Fired when a living entity's inventory changes |
+| [LivingEntityInventoryChangeEvent](./living-entity-inventory-change-event) | Fired when a living entity's inventory changes |
 | [AddPlayerToWorldEvent](/docs/en/modding/plugins/events/player/add-player-to-world-event) | Fired when a player is added to a world |
 | [DrainPlayerFromWorldEvent](/docs/en/modding/plugins/events/player/drain-player-from-world-event) | Fired when a player is removed from a world |
 

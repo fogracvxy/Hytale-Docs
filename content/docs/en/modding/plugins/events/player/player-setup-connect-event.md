@@ -147,9 +147,9 @@ eventBus.register(EventPriority.EARLY, PlayerSetupConnectEvent.class, event -> {
 
 ## Related Events
 
-- [PlayerConnectEvent](./player-connect-event.md) - Fired after successful setup, when player fully connects
-- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event.md) - Fired if setup phase connection fails
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Fired when a connected player disconnects
+- [PlayerConnectEvent](./player-connect-event) - Fired after successful setup, when player fully connects
+- [PlayerSetupDisconnectEvent](./player-setup-disconnect-event) - Fired if setup phase connection fails
+- [PlayerDisconnectEvent](./player-disconnect-event) - Fired when a connected player disconnects
 
 ## Notes
 

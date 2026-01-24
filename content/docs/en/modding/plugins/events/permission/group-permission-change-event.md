@@ -478,8 +478,8 @@ IEvent<Void>
 
 | Event | Description |
 |-------|-------------|
-| [PlayerPermissionChangeEvent](./player-permission-change-event.md) | Fired when individual player permissions change |
-| [PlayerGroupEvent](./player-group-event.md) | Fired when a player's group membership changes |
+| [PlayerPermissionChangeEvent](./player-permission-change-event) | Fired when individual player permissions change |
+| [PlayerGroupEvent](./player-group-event) | Fired when a player's group membership changes |
 
 ## Source Reference
 

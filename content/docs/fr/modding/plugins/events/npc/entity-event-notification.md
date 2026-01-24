@@ -153,9 +153,9 @@ Lorsqu'un membre de la meute detecte quelque chose, le groupe enquete ensemble.
 
 ## Types lies
 
-- [EventNotification](./event-notification.md) - Classe de notification de base
-- [EntityEventView](./entity-event-view.md) - Vue qui cree ces notifications
-- [EntityEventType](./entity-event-type.md) - Types d'evenements d'entite
+- [EventNotification](./event-notification) - Classe de notification de base
+- [EntityEventView](./entity-event-view) - Vue qui cree ces notifications
+- [EntityEventType](./entity-event-type) - Types d'evenements d'entite
 
 ## Reference source
 

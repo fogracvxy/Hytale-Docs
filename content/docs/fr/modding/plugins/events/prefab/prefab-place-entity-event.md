@@ -82,8 +82,8 @@ eventBus.register(EventPriority.NORMAL, PrefabPlaceEntityEvent.class, event -> {
 
 ## Evenements lies
 
-- [PrefabPasteEvent](./prefab-paste-event.md) - Declenche lorsqu'une structure prefab est collee dans le monde
-- [EntityRemoveEvent](../entity/entity-remove-event.md) - Declenche lorsqu'une entite est supprimee du monde
+- [PrefabPasteEvent](./prefab-paste-event) - Declenche lorsqu'une structure prefab est collee dans le monde
+- [EntityRemoveEvent](../entity/entity-remove-event) - Declenche lorsqu'une entite est supprimee du monde
 
 ## Reference source
 

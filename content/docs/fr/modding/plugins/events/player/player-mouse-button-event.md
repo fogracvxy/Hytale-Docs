@@ -136,10 +136,10 @@ eventBus.register(PlayerMouseButtonEvent.class, event -> {
 
 ## Événements lies
 
-- [PlayerMouseMotionEvent](./player-mouse-motion-event.md) - Pour suivre le mouvement de la souris
-- [PlayerInteractEvent](./player-interact-event.md) - Evenement d'interaction obsolete
-- [BreakBlockEvent](../ecs/break-block-event.md) - Spécifiquement pour la destruction de blocs
-- [PlaceBlockEvent](../ecs/place-block-event.md) - Spécifiquement pour le placement de blocs
+- [PlayerMouseMotionEvent](./player-mouse-motion-event) - Pour suivre le mouvement de la souris
+- [PlayerInteractEvent](./player-interact-event) - Evenement d'interaction obsolete
+- [BreakBlockEvent](../ecs/break-block-event) - Spécifiquement pour la destruction de blocs
+- [PlaceBlockEvent](../ecs/place-block-event) - Spécifiquement pour le placement de blocs
 
 ## Notes
 
@@ -178,10 +178,10 @@ getEventRegistry().registerGlobal(PlayerMouseButtonEvent.class, event -> {
 ## Événements associés
 
 Pour des cas d'utilisation plus spécifiques, vous pouvez également considérer :
-- **[DamageBlockEvent](../block/damage-block-event.md)** - Se déclenche en maintenant le clic gauche sur un bloc
-- **[BreakBlockEvent](../block/break-block-event.md)** - Se déclenche quand un bloc est cassé
-- **[PlaceBlockEvent](../block/place-block-event.md)** - Se déclenche lors du placement d'un bloc
-- **[UseBlockPreEvent / UseBlockPostEvent](../block/use-block-pre-event.md)** - Pour les interactions avec les blocs (clic droit)
+- **[DamageBlockEvent](../block/damage-block-event)** - Se déclenche en maintenant le clic gauche sur un bloc
+- **[BreakBlockEvent](../block/break-block-event)** - Se déclenche quand un bloc est cassé
+- **[PlaceBlockEvent](../block/place-block-event)** - Se déclenche lors du placement d'un bloc
+- **[UseBlockPreEvent / UseBlockPostEvent](../block/use-block-pre-event)** - Pour les interactions avec les blocs (clic droit)
 
 ## Détails internes
 

@@ -138,9 +138,9 @@ eventBus.register(EventPriority.LATE, DrainPlayerFromWorldEvent.class, event -> 
 
 ## Événements lies
 
-- [AddPlayerToWorldEvent](./add-player-to-world-event.md) - Déclenché quand le joueur est ajoute a un monde
-- [PlayerDisconnectEvent](./player-disconnect-event.md) - Déclenché quand le joueur se deconnecte
-- [RemoveWorldEvent](../world/remove-world-event.md) - Déclenché quand un monde est supprime
+- [AddPlayerToWorldEvent](./add-player-to-world-event) - Déclenché quand le joueur est ajoute a un monde
+- [PlayerDisconnectEvent](./player-disconnect-event) - Déclenché quand le joueur se deconnecte
+- [RemoveWorldEvent](../world/remove-world-event) - Déclenché quand un monde est supprime
 
 ## Quand cet événement est déclenché
 

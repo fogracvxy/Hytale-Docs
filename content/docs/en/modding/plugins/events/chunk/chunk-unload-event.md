@@ -220,9 +220,9 @@ This is useful for:
 
 ## Related Events
 
-- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event.md) - Fired when a chunk is being loaded
-- [ChunkSaveEvent](./chunk-save-event.md) - Fired when a chunk is being saved
-- [MoonPhaseChangeEvent](./moon-phase-change-event.md) - Fired when the moon phase changes
+- [ChunkPreLoadProcessEvent](./chunk-pre-load-process-event) - Fired when a chunk is being loaded
+- [ChunkSaveEvent](./chunk-save-event) - Fired when a chunk is being saved
+- [MoonPhaseChangeEvent](./moon-phase-change-event) - Fired when the moon phase changes
 
 ## Common Use Cases
 

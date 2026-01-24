@@ -218,8 +218,8 @@ La sequence d'arret suit cet ordre :
 
 | Événement | Description |
 |-----------|-------------|
-| [BootEvent](./boot-event.md) | Déclenché lorsque le serveur commence a demarrer |
-| [PluginSetupEvent](./plugin-setup-event.md) | Déclenché lors de la configuration d'un plugin individuel |
+| [BootEvent](./boot-event) | Déclenché lorsque le serveur commence a demarrer |
+| [PluginSetupEvent](./plugin-setup-event) | Déclenché lors de la configuration d'un plugin individuel |
 | [RemoveWorldEvent](/docs/fr/modding/plugins/events/world/remove-world-event) | Déclenché lorsque des mondes individuels sont supprimes |
 
 ## Référence source

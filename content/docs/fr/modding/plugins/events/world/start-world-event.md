@@ -113,9 +113,9 @@ Les événements typiques du cycle de vie d'un monde suivent cet ordre :
 
 ## Événements associes
 
-- [AddWorldEvent](./add-world-event.md) - Déclenché avant que le monde soit ajoute (annulable)
-- [RemoveWorldEvent](./remove-world-event.md) - Déclenché lorsqu'un monde est en cours de suppression
-- [AllWorldsLoadedEvent](./all-worlds-loaded-event.md) - Déclenché lorsque tous les mondes configures ont ete charges
+- [AddWorldEvent](./add-world-event) - Déclenché avant que le monde soit ajoute (annulable)
+- [RemoveWorldEvent](./remove-world-event) - Déclenché lorsqu'un monde est en cours de suppression
+- [AllWorldsLoadedEvent](./all-worlds-loaded-event) - Déclenché lorsque tous les mondes configures ont ete charges
 
 ## Cas d'utilisation courants
 

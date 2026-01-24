@@ -7,7 +7,7 @@ sidebar_label: PlayerCraftEvent
 # PlayerCraftEvent
 
 :::warning Deprecated
-This event is deprecated and marked for removal. Consider using [CraftRecipeEvent](../ecs/craft-recipe-event.md) in the ECS event system instead.
+This event is deprecated and marked for removal. Consider using [CraftRecipeEvent](../ecs/craft-recipe-event) in the ECS event system instead.
 :::
 
 Fired when a player crafts an item. This event provides information about the recipe being crafted and the quantity of items produced.
@@ -124,8 +124,8 @@ eventBus.register(PlayerCraftEvent.class, event -> {
 
 ## Related Events
 
-- [CraftRecipeEvent](../ecs/craft-recipe-event.md) - The replacement ECS-based crafting event
-- [LivingEntityInventoryChangeEvent](../entity/living-entity-inventory-change-event.md) - For tracking inventory changes
+- [CraftRecipeEvent](../ecs/craft-recipe-event) - The replacement ECS-based crafting event
+- [LivingEntityInventoryChangeEvent](../entity/living-entity-inventory-change-event) - For tracking inventory changes
 
 ## Notes
 

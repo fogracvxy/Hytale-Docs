@@ -324,7 +324,7 @@ The event fires:
 
 | Event | Description |
 |-------|-------------|
-| [EntityRemoveEvent](./entity-remove-event.md) | Fired when an entity is removed from the world |
+| [EntityRemoveEvent](./entity-remove-event) | Fired when an entity is removed from the world |
 | [SwitchActiveSlotEvent](/docs/en/modding/plugins/events/inventory/switch-active-slot-event) | Fired when active hotbar slot changes |
 | [DropItemEvent](/docs/en/modding/plugins/events/inventory/drop-item-event) | Fired when an item is dropped |
 | [InteractivelyPickupItemEvent](/docs/en/modding/plugins/events/inventory/interactively-pickup-item-event) | Fired when an item is picked up interactively |

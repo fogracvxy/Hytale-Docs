@@ -131,10 +131,10 @@ Cela permet des comportements de meute/troupeau ou un groupe entier peut repondr
 
 ## Types lies
 
-- [EntityEventNotification](./entity-event-notification.md) - Notification etendue pour les evenements d'entite
-- [EntityEventView](./entity-event-view.md) - Vue qui traite les evenements d'entite
-- [BlockEventView](./block-event-view.md) - Vue qui traite les evenements de bloc
-- [EventView](./event-view.md) - Classe de base qui gere les notifications
+- [EntityEventNotification](./entity-event-notification) - Notification etendue pour les evenements d'entite
+- [EntityEventView](./entity-event-view) - Vue qui traite les evenements d'entite
+- [BlockEventView](./block-event-view) - Vue qui traite les evenements de bloc
+- [EventView](./event-view) - Classe de base qui gere les notifications
 
 ## Reference source
 

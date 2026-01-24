@@ -424,8 +424,8 @@ IEvent<Void>
 
 | Evenement | Description |
 |-----------|-------------|
-| [GroupPermissionChangeEvent](./group-permission-change-event.md) | Déclenché lorsque les permissions d'un groupe changent |
-| [PlayerGroupEvent](./player-group-event.md) | Evenement alternatif pour les changements d'appartenance aux groupes |
+| [GroupPermissionChangeEvent](./group-permission-change-event) | Déclenché lorsque les permissions d'un groupe changent |
+| [PlayerGroupEvent](./player-group-event) | Evenement alternatif pour les changements d'appartenance aux groupes |
 | [PlayerConnectEvent](/docs/fr/modding/plugins/events/player/player-connect-event) | Utile pour charger les permissions du joueur a la connexion |
 
 ## Référence source

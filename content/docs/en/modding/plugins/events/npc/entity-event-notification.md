@@ -165,9 +165,9 @@ When a pack member detects something, the group investigates together.
 
 ## Related Types
 
-- [EventNotification](./event-notification.md) - Base notification class
-- [EntityEventView](./entity-event-view.md) - View that creates these notifications
-- [EntityEventType](./entity-event-type.md) - Types of entity events
+- [EventNotification](./event-notification) - Base notification class
+- [EntityEventView](./entity-event-view) - View that creates these notifications
+- [EntityEventType](./entity-event-type) - Types of entity events
 
 ## Source Reference
 

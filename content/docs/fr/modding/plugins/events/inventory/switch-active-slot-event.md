@@ -195,8 +195,8 @@ getServer().getEventBus().register(
 
 ## Événements lies
 
-- **[DropItemEvent](./drop-item-event.md)** - Déclenché lorsqu'un objet est lache de l'inventaire
-- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event.md)** - Déclenché lors du ramassage d'objets
+- **[DropItemEvent](./drop-item-event)** - Déclenché lorsqu'un objet est lache de l'inventaire
+- **[InteractivelyPickupItemEvent](./interactively-pickup-item-event)** - Déclenché lors du ramassage d'objets
 - **LivingEntityInventoryChangeEvent** - Déclenché lors de tout changement d'inventaire
 - **PlayerMouseButtonEvent** - Déclenché lors de l'utilisation d'objets depuis l'emplacement actif
 
